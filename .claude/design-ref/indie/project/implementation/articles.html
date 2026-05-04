@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IndieRadar — Signals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><g transform='translate(90 90)'><circle r='42' fill='none' stroke='%23E8E6E1' stroke-width='6' stroke-opacity='0.5'/><circle r='22' fill='none' stroke='%23D4A24A' stroke-width='6'/><line x1='-6' y1='-22' x2='-6' y2='22' stroke='%23D4A24A' stroke-width='6'/><line x1='6' y1='-22' x2='6' y2='22' stroke='%23D4A24A' stroke-width='6'/><circle r='6' fill='%23D4A24A'/></g></svg>">
+</head>
+<body>
+
+<!-- ─── TOP BAR ─── -->
+<header class="topbar" role="banner">
+  <a class="topbar__brand" href="/" aria-label="IndieRadar home">
+    <svg width="22" height="22" viewBox="0 0 180 180" aria-hidden="true">
+      <g transform="translate(90 90)">
+        <g stroke="currentColor" stroke-opacity="0.4" stroke-width="6">
+          <line x1="0" y1="-46" x2="0" y2="-58"/>
+          <line x1="0" y1="-46" x2="0" y2="-58" transform="rotate(60)"/>
+          <line x1="0" y1="-46" x2="0" y2="-58" transform="rotate(120)"/>
+          <line x1="0" y1="-46" x2="0" y2="-58" transform="rotate(180)"/>
+          <line x1="0" y1="-46" x2="0" y2="-58" transform="rotate(240)"/>
+          <line x1="0" y1="-46" x2="0" y2="-58" transform="rotate(300)"/>
+        </g>
+        <circle r="42" fill="none" stroke="currentColor" stroke-width="6" stroke-opacity="0.6"/>
+        <circle r="22" fill="none" stroke="#D4A24A" stroke-width="6"/>
+        <line x1="-6" y1="-22" x2="-6" y2="22" stroke="#D4A24A" stroke-width="6"/>
+        <line x1="6"  y1="-22" x2="6"  y2="22" stroke="#D4A24A" stroke-width="6"/>
+        <circle r="6" fill="#D4A24A"/>
+      </g>
+    </svg>
+    <span class="topbar__wordmark">IndieRadar</span>
+  </a>
+  <nav class="topbar__nav" aria-label="Primary">
+    <a href="/articles" class="active">SIGNALS</a>
+    <a href="/sources">SOURCES</a>
+    <a href="/operators">OPERATORS</a>
+    <a href="/library">LIBRARY</a>
+    <a href="/notes">FIELD NOTES</a>
+  </nav>
+  <div class="topbar__right">
+    <span class="live-pill" aria-live="polite">
+      <span class="live-dot" aria-hidden="true"></span>
+      <span style="color:var(--signal-live);letter-spacing:0.18em">LIVE</span>
+    </span>
+    <label class="lang-switch">
+      <span>LANG</span> JP <span style="color:var(--ink-4)">·</span> 9
+    </label>
+    <a href="/signin" class="signin">SIGN IN</a>
+  </div>
+</header>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero__grid" aria-hidden="true"></div>
+  <svg class="hero__radar" viewBox="0 0 600 600" aria-hidden="true">
+    <circle cx="300" cy="300" r="120" fill="none" stroke="#D4A24A" stroke-width="0.8" stroke-opacity="0.38"/>
+    <circle cx="300" cy="300" r="200" fill="none" stroke="#D4A24A" stroke-width="0.8" stroke-opacity="0.30"/>
+    <circle cx="300" cy="300" r="280" fill="none" stroke="#D4A24A" stroke-width="0.8" stroke-opacity="0.22"/>
+    <circle cx="300" cy="300" r="360" fill="none" stroke="#D4A24A" stroke-width="0.8" stroke-opacity="0.14"/>
+    <line x1="300" y1="300" x2="540" y2="120" stroke="#D4A24A" stroke-width="0.8"/>
+  </svg>
+  <div class="hero__layout">
+    <div>
+      <div class="hero__status">
+        <span><span class="live">●</span> SCANNING — HN · PH · REDDIT · X · INDIEHACKERS · USER</span>
+        <span class="sep">—</span>
+        <span>LAST SWEEP 00:04:12</span>
+        <span class="sep">—</span>
+        <span>LANG_EXPAND JA→9</span>
+      </div>
+      <h1>
+        Today's <em>monetization signal</em>,<br>
+        translated into your<br>operating language.
+      </h1>
+      <p class="hero__lede">
+        247 cases scanned this week. 38 cleared the revenue threshold. Re-broadcast across nine languages, with operator notes for builders who plan to <em>act</em>, not just read.
+      </p>
+    </div>
+    <aside class="digest" aria-label="Weekly signal digest">
+      <div class="digest__head">
+        <span>WEEKLY SIGNAL DIGEST</span>
+        <span class="active">● ACTIVE</span>
+      </div>
+      <div class="digest__grid">
+        <div class="digest__cell"><div class="digest__k">SCANNED</div><div class="digest__v">247</div></div>
+        <div class="digest__cell"><div class="digest__k">CLEARED</div><div class="digest__v">38</div></div>
+        <div class="digest__cell"><div class="digest__k">MRR_TOTAL</div><div class="digest__v gold">$1.84M</div></div>
+        <div class="digest__cell"><div class="digest__k">LANGS</div><div class="digest__v">9 / 9</div></div>
+      </div>
+      <div class="digest__foot">
+        <span>NEXT_SWEEP — <span id="sweep-counter">03:48</span></span>
+        <a href="/subscribe">SUBSCRIBE →</a>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ─── FILTER BAR ─── -->
+<div class="filterbar" role="region" aria-label="Filters">
+  <span class="filterbar__legend">SOURCE_</span>
+  <div class="tab-row" role="tablist">
+    <button class="tab active" data-src="all" role="tab" aria-selected="true">ALL <span class="count">247</span></button>
+    <button class="tab" data-src="hn" role="tab" aria-selected="false">HN <span class="count">89</span></button>
+    <button class="tab" data-src="ph" role="tab" aria-selected="false">PH <span class="count">54</span></button>
+    <button class="tab" data-src="reddit" role="tab" aria-selected="false">REDDIT <span class="count">41</span></button>
+    <button class="tab" data-src="x" role="tab" aria-selected="false">X <span class="count">33</span></button>
+    <button class="tab" data-src="ih" role="tab" aria-selected="false">IH <span class="count">22</span></button>
+    <button class="tab" data-src="user" role="tab" aria-selected="false">USER <span class="count">8</span></button>
+  </div>
+  <span class="filterbar__spacer"></span>
+  <span class="filterbar__ctrl">SORT_ HEAT ⌄</span>
+  <span style="color:var(--ink-3)">·</span>
+  <span class="filterbar__ctrl">WINDOW_ 7D ⌄</span>
+  <span style="color:var(--ink-3)">·</span>
+  <span class="filterbar__ctrl add">+ ADD FILTER</span>
+</div>
+
+<!-- ─── LIST HEADER ─── -->
+<div class="list-header" aria-hidden="true">
+  <span>#</span><span>SRC</span><span>SIGNAL · EXTRACTION</span>
+  <span>MRR · Δ7D</span><span>HEAT</span><span>LANG</span><span></span>
+</div>
+
+<!-- ─── SIGNAL ROWS (rendered by JS) ─── -->
+<main id="feed" role="main"></main>
+
+<!-- ─── INFO BAND ─── -->
+<section class="infoband">
+  <div>
+    <div class="infoband__sym">◇</div>
+    <div class="infoband__h">OPERATOR ROUTE</div>
+    <p class="infoband__b">Each signal includes 3-line extraction notes — wedge / channel / pricing — written for builders, not readers.</p>
+  </div>
+  <div>
+    <div class="infoband__sym">◎</div>
+    <div class="infoband__h">MULTILINGUAL CORE</div>
+    <p class="infoband__b">Cases re-broadcast in 9 languages. AI-translated, human-reviewed. Switch language without losing context.</p>
+  </div>
+  <div>
+    <div class="infoband__sym">◐</div>
+    <div class="infoband__h">USER FIELD NOTES</div>
+    <p class="infoband__b">Submit your own case. Reviewed within 48h. Verified MRR earns the green source-mark.</p>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer class="footer" role="contentinfo">
+  <div class="footer__brand">
+    <div style="display:flex;align-items:center;gap:10px">
+      <svg width="22" height="22" viewBox="0 0 180 180" aria-hidden="true" style="color:var(--paper-3)">
+        <g transform="translate(90 90)">
+          <circle r="42" fill="none" stroke="currentColor" stroke-width="6" stroke-opacity="0.6"/>
+          <circle r="22" fill="none" stroke="#D4A24A" stroke-width="6"/>
+          <line x1="-6" y1="-22" x2="-6" y2="22" stroke="#D4A24A" stroke-width="6"/>
+          <line x1="6" y1="-22" x2="6" y2="22" stroke="#D4A24A" stroke-width="6"/>
+          <circle r="6" fill="#D4A24A"/>
+        </g>
+      </svg>
+      <span class="topbar__wordmark">IndieRadar</span>
+    </div>
+    <p>A monetization intelligence terminal for indie operators. Scanning HN · PH · Reddit · X · Indie Hackers · User submissions, re-broadcast in 9 languages.</p>
+  </div>
+  <div class="footer__col">
+    <h4>PRODUCT</h4>
+    <ul><li><a>Signals</a></li><li><a>Sources</a></li><li><a>Operators</a></li><li><a>Library</a></li><li><a>Field Notes</a></li><li><a>API</a></li></ul>
+  </div>
+  <div class="footer__col">
+    <h4>LANGUAGES</h4>
+    <ul><li>日本語</li><li>English</li><li>한국어</li><li>中文</li><li>Español</li><li>Português</li><li>Deutsch</li><li>Français</li><li>العربية</li></ul>
+  </div>
+  <div class="footer__col">
+    <h4>COMPANY</h4>
+    <ul><li><a>Manifesto</a></li><li><a>Submit a case</a></li><li><a>Pricing</a></li><li><a>Changelog</a></li><li><a>Contact</a></li><li><a>RSS</a></li></ul>
+  </div>
+</footer>
+<div class="footer__status">
+  <span>© 2026 INDIERADAR · DISCOVERY ENGINE V0.4</span>
+  <span><span class="live">●</span> ALL SYSTEMS NOMINAL · NEXT SWEEP <span id="sweep-counter-2">03:48</span></span>
+</div>
+
+<script>
+// ─── DATA ────────────────────────────────────
+const FEED = [
+  { i:1, source:'HN',     title:"Solo founder hits $42K MRR with a single-prompt SEO tool", desc:"19-month build log: pricing rewrites, churn cuts, and the one Reddit post that 3×'d signups overnight. Operator: Maya R., Lisbon → SF.", mrr:"$42K", delta:"+38%", tag:"AI · SEO", age:"6h", heat:5, lang:["JP","EN","KO","ZH"], type:"CASE", isLead:true },
+  { i:2, source:'PH',     title:'Niche AI scheduler crosses $18K/mo by ignoring the "AI" market', desc:'Targeted dental clinics in three EU countries. Wedge: a four-line localized prompt. No ChatGPT branding.', mrr:"$18K", delta:"+12%", tag:"Vertical SaaS", age:"14h", heat:4, lang:["JP","EN","DE"], type:"CASE" },
+  { i:3, source:'Reddit', title:"\"I sold a Notion template for two years. Here's what actually moved the needle.\"", desc:"r/SideProject thread, 2.1k upvotes. Six counterintuitive findings on TikTok demos and pricing tiers.", mrr:"$9.4K", delta:"+5%", tag:"Templates", age:"1d", heat:4, lang:["JP","EN","ES","PT"], type:"THREAD" },
+  { i:4, source:'X',      title:"A two-person studio in Lisbon built a $300K/yr macOS utility", desc:"Quiet launch, no Product Hunt. Distribution: three Mac power-user newsletters and one Setapp deal.", mrr:"$25K", delta:"+8%", tag:"macOS", age:"2d", heat:4, lang:["JP","EN","PT"], type:"CASE" },
+  { i:5, source:'IH',     title:"From $0 to $7K MRR in 90 days — a chrome extension for B2B sales", desc:"Indie Hackers milestone post. Acquisition was 100% cold-email + a single Loom demo on Twitter.", mrr:"$7K", delta:"+42%", tag:"Sales · Extension", age:"2d", heat:3, lang:["JP","EN"], type:"CASE" },
+  { i:6, source:'HN',     title:"Why I shut down my $11K/mo product (and what I'd build instead)", desc:"Founder writes a clear-eyed teardown. 4 specific lessons on positioning and contractor cost structure.", mrr:"$11K", delta:"−ENDED", tag:"Postmortem", age:"3d", heat:3, lang:["JP","EN","KO"], type:"POST" },
+  { i:7, source:'User',   title:"Field note · Self-hosted analytics for solo SaaS — what worked", desc:"Submitted by @kenta. Plausible vs. Umami vs. own-rolled, with 6-month traffic data.", mrr:"—", delta:"NEW", tag:"Field Note", age:"4d", heat:2, lang:["JP","EN"], type:"USER" },
+];
+
+const SRC_KEY = { HN:'hn', PH:'ph', Reddit:'reddit', X:'x', IH:'ih', User:'user' };
+
+// ─── RENDER ─────────────────────────────────
+function renderRow(a) {
+  const heat = Array.from({length:5}, (_,n) => {
+    const lvl = n+1;
+    return `<div class="row__heat-bar ${lvl<=a.heat?`on l${lvl}`:''}"></div>`;
+  }).join('');
+
+  const langChips = a.lang.slice(0,4).map(l=>`<span class="chip">${l}</span>`).join('');
+  const more = a.lang.length>4 ? `<span class="more">+${a.lang.length-4}</span>` : '';
+  const remaining = 9 - a.lang.length;
+  const moreLabel = remaining>0 ? `<span class="more">+${remaining}</span>` : '';
+
+  const deltaClass = a.delta.startsWith('−') ? 'warn' : '';
+
+  const leadMark = a.isLead ? `<div class="row__lead-mark">★ LEAD SIGNAL · CLEARED 38× THRESHOLD</div>` : '';
+
+  return `<a class="row ${a.isLead?'lead':''}" href="/articles/${a.i}" aria-label="${a.title.replace(/"/g,'&quot;')}">
+    <div class="row__num">${String(a.i).padStart(3,'0')}</div>
+    <div><span class="src-badge src-${SRC_KEY[a.source]}">${a.source}</span></div>
+    <div>
+      ${leadMark}
+      <h3 class="row__title">${a.title}</h3>
+      <p class="row__desc">${a.desc}</p>
+      <div class="row__meta">
+        <span class="tag">◇ ${a.tag.toUpperCase()}</span>
+        <span class="sep">—</span>
+        <span class="row__lang">
+          <span class="key">TR →</span>
+          ${a.lang.map(l=>`<span class="chip">${l}</span>`).join('')}
+          ${moreLabel}
+        </span>
+        <span class="sep">—</span>
+        <span>${a.age.toUpperCase()} AGO · ${a.type}</span>
+      </div>
+    </div>
+    <div class="row__mrr">
+      <div class="row__mrr-amount">${a.mrr}</div>
+      <div class="row__mrr-delta ${deltaClass}">MRR · ${a.delta}</div>
+    </div>
+    <div class="row__heat" role="meter" aria-valuemin="0" aria-valuemax="5" aria-valuenow="${a.heat}" aria-label="Heat ${a.heat} of 5">${heat}</div>
+    <div class="row__lang-count">${a.lang.length}/9</div>
+    <div class="row__arrow" aria-hidden="true">→</div>
+  </a>`;
+}
+
+const feedEl = document.getElementById('feed');
+feedEl.innerHTML = FEED.map(renderRow).join('');
+
+// ─── TAB SWAP ───────────────────────────────
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => { x.classList.remove('active'); x.setAttribute('aria-selected','false'); });
+    t.classList.add('active'); t.setAttribute('aria-selected','true');
+    const src = t.dataset.src;
+    const filtered = src === 'all' ? FEED : FEED.filter(a => SRC_KEY[a.source] === src);
+    if (filtered.length) {
+      feedEl.style.opacity = 0;
+      setTimeout(() => {
+        feedEl.innerHTML = filtered.map(renderRow).join('');
+        feedEl.style.opacity = 1;
+      }, 120);
+    } else {
+      feedEl.style.opacity = 0;
+      setTimeout(() => {
+        feedEl.innerHTML = `<div style="padding:80px 40px;text-align:center;color:var(--ink-5);font-family:var(--font-mono);font-size:11px;letter-spacing:0.2em">NO SIGNALS IN THIS SOURCE THIS WINDOW · TRY EXPANDING WINDOW_</div>`;
+        feedEl.style.opacity = 1;
+      }, 120);
+    }
+  });
+});
+feedEl.style.transition = 'opacity 180ms var(--ease,cubic-bezier(.2,.7,.3,1)))';
+
+// ─── COUNTDOWN ──────────────────────────────
+let total = 3*60 + 48;
+function tick() {
+  total = total > 0 ? total - 1 : 4*60;
+  const m = String(Math.floor(total/60)).padStart(2,'0');
+  const s = String(total%60).padStart(2,'0');
+  const txt = `${m}:${s}`;
+  const a = document.getElementById('sweep-counter');
+  const b = document.getElementById('sweep-counter-2');
+  if (a) a.textContent = txt;
+  if (b) b.textContent = txt;
+}
+setInterval(tick, 1000);
+</script>
+
+</body>
+</html>

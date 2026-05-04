@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>IndieRadar — Brand & UI Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: #f0eee9; }
+  * { box-sizing: border-box; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="components/brand.jsx"></script>
+<script type="text/babel" src="components/directions.jsx"></script>
+<script type="text/babel" src="components/deepdive.jsx"></script>
+<script type="text/babel">
+const App = () => (
+  <DesignCanvas>
+    <DCSection id="brief" title="01 · Brand brief & diagnosis" subtitle="Why the current UI doesn't feel like IndieRadar — and what it needs to become.">
+      <DCArtboard id="intro" label="Brand brief" width={920} height={780}>
+        <BrandIntro />
+      </DCArtboard>
+    </DCSection>
+
+    <DCSection id="logos" title="02 · Logo concepts" subtitle="Three minimal SVG marks. Faint chosen for the recommended direction.">
+      <DCArtboard id="logo-sweep" label="LOGO-01 · Sweep" width={360} height={460}>
+        <LogoCard code="LOGO-01" name="Sweep" jp="スイープ / 機会の探知"
+          desc="同心円のレーダー波と右上に立ち上がる金色のシグナルドット。探知から上昇への運動を最小要素で表現。Faviconでもドット+弧が成立。">
+          <Logo1 />
+        </LogoCard>
+      </DCArtboard>
+      <DCArtboard id="logo-aperture" label="LOGO-02 · Aperture ★ SELECTED" width={360} height={460}>
+        <LogoCard code="LOGO-02" name="Aperture" jp="アパチャー / 精密走査"
+          desc="計測機器のレチクル。「精密に見極めるツール」としての硬派な方向。データベース文脈と相性◎。">
+          <Logo2 />
+        </LogoCard>
+      </DCArtboard>
+      <DCArtboard id="logo-mesh" label="LOGO-03 · Mesh" width={360} height={460}>
+        <LogoCard code="LOGO-03" name="Mesh" jp="メッシュ / 多言語ブロードキャスト"
+          desc="地球メッシュ + 立ち上がる信号点。多言語/多文化を横断するtranslation intelligence の哲学を最も忠実に表現。">
+          <Logo3 />
+        </LogoCard>
+      </DCArtboard>
+    </DCSection>
+
+    <DCSection id="dirs" title="03 · Three art direction options" subtitle="Each option below is a working article-list mock under that direction.">
+      <DCArtboard id="dir-a-summary" label="DIR-01 · Signal Terminal · summary ★" width={600} height={920}>
+        <Direction_A />
+      </DCArtboard>
+      <DCArtboard id="dir-a-mock" label="DIR-01 · article list mock" width={1180} height={1000}>
+        <OptionA />
+      </DCArtboard>
+      <DCArtboard id="dir-b-summary" label="DIR-02 · Editorial Journal · summary" width={600} height={920}>
+        <Direction_B />
+      </DCArtboard>
+      <DCArtboard id="dir-b-mock" label="DIR-02 · article list mock" width={1180} height={1000}>
+        <OptionB />
+      </DCArtboard>
+      <DCArtboard id="dir-c-summary" label="DIR-03 · Intel Dashboard · summary" width={600} height={920}>
+        <Direction_C />
+      </DCArtboard>
+      <DCArtboard id="dir-c-mock" label="DIR-03 · article list mock" width={1180} height={1000}>
+        <OptionC />
+      </DCArtboard>
+    </DCSection>
+
+    <DCSection id="deepdive" title="04 · Deep dive — DIR-01 · Signal Terminal" subtitle="The recommended direction, fleshed out into a production-ready article-list page.">
+      <DCArtboard id="full" label="Article list — full redesign" width={1440} height={1700}>
+        <FullArticleList />
+      </DCArtboard>
+      <DCArtboard id="empty" label="Empty state · scanning" width={1180} height={540}>
+        <EmptyStateView />
+      </DCArtboard>
+    </DCSection>
+
+    <DCSection id="system" title="05 · Design system" subtitle="Color, type, spacing, components, motion. Implementation-ready tokens.">
+      <DCArtboard id="sys" label="The Terminal System · v0.1" width={1180} height={2200}>
+        <SystemSheet />
+      </DCArtboard>
+    </DCSection>
+
+    <DCSection id="handoff" title="06 · Handoff to Claude Code" subtitle="One-page implementation brief. Component map, tokens, states, a11y, priority.">
+      <DCArtboard id="ho" label="Implementation brief" width={1180} height={2400}>
+        <HandoffSheet />
+      </DCArtboard>
+    </DCSection>
+  </DesignCanvas>
+);
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

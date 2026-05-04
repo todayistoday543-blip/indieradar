@@ -1,26 +1,191 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* INK / canvas */
+  --ink-0: #0B0B0C;
+  --ink-1: #141416;
+  --ink-2: #1F1F22;
+  --ink-3: #2A2A2D;
+  --ink-4: #5C5852;
+  --ink-5: #8A857D;
+
+  /* PAPER / type */
+  --paper-1: #A8A39B;
+  --paper-2: #C8C3BA;
+  --paper-3: #E8E6E1;
+
+  /* SIGNAL */
+  --signal-gold: #D4A24A;
+  --signal-live: #7BA88F;
+  --signal-warn: #C9695C;
+
+  /* SOURCES */
+  --src-hn:     #FF6600;
+  --src-ph:     #DA552F;
+  --src-reddit: #FF4500;
+  --src-x:      #FFFFFF;
+  --src-ih:     #A78BFA;
+  --src-user:   #7BA88F;
+
+  /* TYPE */
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, monospace;
+
+  /* MOTION */
+  --ease:     cubic-bezier(.2, .7, .3, 1);
+  --dur-fast: 120ms;
+  --dur-std:  180ms;
+  --dur-slow: 320ms;
+
+  /* GEOMETRY */
+  --radius:      0;
+  --radius-pill: 9999px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ink-0: var(--ink-0);
+  --color-ink-1: var(--ink-1);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-4: var(--ink-4);
+  --color-ink-5: var(--ink-5);
+  --color-paper-1: var(--paper-1);
+  --color-paper-2: var(--paper-2);
+  --color-paper-3: var(--paper-3);
+  --color-signal-gold: var(--signal-gold);
+  --color-signal-live: var(--signal-live);
+  --color-signal-warn: var(--signal-warn);
+  --color-src-hn: var(--src-hn);
+  --color-src-ph: var(--src-ph);
+  --color-src-reddit: var(--src-reddit);
+  --color-src-x: var(--src-x);
+  --color-src-ih: var(--src-ih);
+  --color-src-user: var(--src-user);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono);
+  --font-display: var(--font-display);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--ink-0);
+  color: var(--paper-3);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: -0.005em;
+  margin: 0;
+  padding: 0;
+}
+
+::selection {
+  background: rgba(212, 162, 74, 0.25);
+  color: var(--paper-3);
+}
+
+/* Focus */
+*:focus-visible {
+  outline: 1px solid var(--signal-gold);
+  outline-offset: 2px;
+}
+
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in {
+  animation: fade-in 220ms var(--ease) both;
+}
+
+.stagger-1 { animation-delay: 30ms; }
+.stagger-2 { animation-delay: 60ms; }
+.stagger-3 { animation-delay: 90ms; }
+.stagger-4 { animation-delay: 120ms; }
+.stagger-5 { animation-delay: 150ms; }
+.stagger-6 { animation-delay: 180ms; }
+.stagger-7 { animation-delay: 210ms; }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--ink-1) 25%, var(--ink-2) 50%, var(--ink-1) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--ink-3); }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-4); }
+
+/* Source badges */
+.src-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 4px 8px;
+  display: inline-block;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: transparent;
+}
+.src-badge-hn     { border: 1px solid var(--src-hn);     color: var(--src-hn); }
+.src-badge-ph     { border: 1px solid var(--src-ph);     color: var(--src-ph); }
+.src-badge-reddit { border: 1px solid var(--src-reddit); color: var(--src-reddit); }
+.src-badge-x      { border: 1px solid var(--src-x);      color: var(--src-x); }
+.src-badge-ih     { border: 1px solid var(--src-ih);     color: var(--src-ih); }
+.src-badge-user   { border: 1px solid var(--src-user);   color: var(--src-user); }
+
+/* Heat meter */
+.heat-bar {
+  width: 14px;
+  height: 24px;
+  background: var(--ink-2);
+}
+.heat-bar.on { background: var(--signal-gold); }
+.heat-bar.l1 { opacity: 0.4; }
+.heat-bar.l2 { opacity: 0.55; }
+.heat-bar.l3 { opacity: 0.7; }
+.heat-bar.l4 { opacity: 0.85; }
+.heat-bar.l5 { opacity: 1; }
+
+/* Live dot */
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--signal-live);
+  box-shadow: 0 0 8px var(--signal-live);
+  animation: pulse 1.6s infinite;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
