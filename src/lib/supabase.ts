@@ -1,17 +1,23 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Use fallback values so module evaluation never throws during build.
-// Actual DB calls will fail at runtime until real env vars are configured.
-const supabaseUrl =
-  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseAnonKey =
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key';
+// Anon client — 実行時に毎回 env を読む（モジュールロード時固定を避ける）
+export const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL    || 'https://placeholder.supabase.co',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key'
+);
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
+// Service role client — 実行時に毎回 env を読む
 export function createServiceClient() {
-  return createClient(
-    supabaseUrl,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key'
-  );
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !serviceKey) {
+    throw new Error(
+      'Supabase env vars are not configured: ' +
+      (!url ? 'NEXT_PUBLIC_SUPABASE_URL ' : '') +
+      (!serviceKey ? 'SUPABASE_SERVICE_ROLE_KEY' : '')
+    );
+  }
+
+  return createClient(url, serviceKey);
 }
