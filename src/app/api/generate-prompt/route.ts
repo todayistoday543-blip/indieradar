@@ -54,8 +54,8 @@ export async function POST(req: NextRequest) {
 
   const model =
     plan.features.ai_prompt_model === 'sonnet'
-      ? 'claude-sonnet-4-5-20241022'
-      : 'claude-haiku-4-5-20241022';
+      ? 'claude-sonnet-4-5'
+      : 'claude-haiku-4-5';
 
   const systemPrompt =
     plan.features.ai_prompt_model === 'sonnet'

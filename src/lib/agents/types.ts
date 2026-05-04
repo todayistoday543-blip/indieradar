@@ -25,5 +25,5 @@ export interface AgentDefinition {
   description: string;
   system_prompt: string;
   capabilities: string[];
-  model: 'claude-haiku-4-5-20241022' | 'claude-sonnet-4-5-20241022';
+  model: 'claude-haiku-4-5' | 'claude-sonnet-4-5';
 }

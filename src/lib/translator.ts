@@ -19,7 +19,7 @@ export async function translateAndEnrich(article: {
   source: string;
 }): Promise<TranslationResult> {
   const message = await getClient().messages.create({
-    model: 'claude-haiku-4-5-20241022',
+    model: 'claude-haiku-4-5',
     max_tokens: 2048,
     messages: [
       {

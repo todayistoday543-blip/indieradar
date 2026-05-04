@@ -14,7 +14,7 @@ export const AGENTS: Record<string, AgentDefinition> = {
       'priority_decision',
       'cross_department_coordination',
     ],
-    model: 'claude-sonnet-4-5-20241022',
+    model: 'claude-sonnet-4-5',
   },
 
   content: {
@@ -32,7 +32,7 @@ export const AGENTS: Record<string, AgentDefinition> = {
       'summarization',
       'insight_generation',
     ],
-    model: 'claude-haiku-4-5-20241022',
+    model: 'claude-haiku-4-5',
   },
 
   moderation: {
@@ -50,7 +50,7 @@ export const AGENTS: Record<string, AgentDefinition> = {
       'spam_detection',
       'policy_enforcement',
     ],
-    model: 'claude-haiku-4-5-20241022',
+    model: 'claude-haiku-4-5',
   },
 
   analytics: {
@@ -68,7 +68,7 @@ export const AGENTS: Record<string, AgentDefinition> = {
       'revenue_reporting',
       'ab_testing',
     ],
-    model: 'claude-haiku-4-5-20241022',
+    model: 'claude-haiku-4-5',
   },
 
   engineering: {
@@ -85,7 +85,7 @@ export const AGENTS: Record<string, AgentDefinition> = {
       'system_monitoring',
       'api_development',
     ],
-    model: 'claude-sonnet-4-5-20241022',
+    model: 'claude-sonnet-4-5',
   },
 
   growth: {
@@ -102,7 +102,7 @@ export const AGENTS: Record<string, AgentDefinition> = {
       'conversion_optimization',
       'campaign_management',
     ],
-    model: 'claude-haiku-4-5-20241022',
+    model: 'claude-haiku-4-5',
   },
 
   i18n: {
@@ -120,7 +120,7 @@ export const AGENTS: Record<string, AgentDefinition> = {
       'regional_optimization',
       'language_detection',
     ],
-    model: 'claude-haiku-4-5-20241022',
+    model: 'claude-haiku-4-5',
   },
 
   finance: {
@@ -138,6 +138,6 @@ export const AGENTS: Record<string, AgentDefinition> = {
       'payout_calculation',
       'financial_reporting',
     ],
-    model: 'claude-haiku-4-5-20241022',
+    model: 'claude-haiku-4-5',
   },
 };
