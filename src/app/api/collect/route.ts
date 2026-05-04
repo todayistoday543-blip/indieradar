@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
-import { fetchHNStories, fetchRedditPosts, fetchXPosts } from '@/lib/collectors';
+import { fetchHNStories, fetchRedditPosts, fetchPHPosts, fetchIHPosts } from '@/lib/collectors';
 import { translateAndEnrich } from '@/lib/translator';
 import type { CollectedArticle } from '@/lib/collectors';
 
 export const dynamic = 'force-dynamic';
 
 const MAX_CONTENT_LENGTH = 5000;
-const FREE_ARTICLE_LIMIT = 5;
+
+// TODO: 将来対応 — 日本語ソース（note、Zenn）からの収集
+// TODO: 将来対応 — 韓国語ソース（Velog等）からの収集
+// TODO: 将来対応 — ヨーロッパ圏ソースからの収集
+// TODO: 将来対応 — AI画像生成（記事サムネイル）
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
@@ -28,11 +32,12 @@ export async function GET(request: NextRequest) {
 
   const results: string[] = [];
 
-  // --- 記事収集 ---
+  // --- 記事収集（4ソース） ---
   const collectors = [
-    { name: 'HN',     fn: () => fetchHNStories() },
-    { name: 'Reddit', fn: () => fetchRedditPosts('indiehackers') },
-    { name: 'X',      fn: () => fetchXPosts() },
+    { name: 'HN',            fn: () => fetchHNStories() },
+    { name: 'Reddit',        fn: () => fetchRedditPosts() },
+    { name: 'ProductHunt',   fn: () => fetchPHPosts() },
+    { name: 'IndieHackers',  fn: () => fetchIHPosts() },
   ];
 
   const settled = await Promise.allSettled(collectors.map((c) => c.fn()));
@@ -51,7 +56,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, results: [...results, 'No articles collected'] });
   }
 
-  // --- 重複チェック ---
+  // --- 重複チェック（original_url で判定） ---
   const urls = allArticles.map((a) => a.original_url);
   const { data: existingRows, error: fetchError } = await supabase
     .from('articles')
@@ -68,13 +73,21 @@ export async function GET(request: NextRequest) {
   const existingUrls = new Set((existingRows ?? []).map((r) => r.original_url));
   const newArticles = allArticles.filter((a) => !existingUrls.has(a.original_url));
 
+  // 収益キーワードが含まれる投稿を優先（先頭に来るよう並べ替え）
+  const revenueKeywords = /mrr|arr|revenue|月収|年収|\$[0-9]|income|profit/i;
+  newArticles.sort((a, b) => {
+    const aHas = revenueKeywords.test(a.original_title + ' ' + a.original_content) ? 1 : 0;
+    const bHas = revenueKeywords.test(b.original_title + ' ' + b.original_content) ? 1 : 0;
+    return bHas - aHas; // revenue-related first
+  });
+
   results.push(`New: ${newArticles.length} / Duplicates skipped: ${existingUrls.size}`);
 
   // --- 翻訳 & 保存 ---
   let processed = 0;
 
   for (const article of newArticles) {
-    // 1. 翻訳・エンリッチ
+    // 1. 翻訳・エンリッチ（claude-sonnet-4-5）
     let enriched: Awaited<ReturnType<typeof translateAndEnrich>>;
     try {
       enriched = await translateAndEnrich(article);
@@ -82,32 +95,34 @@ export async function GET(request: NextRequest) {
       results.push(
         `[TRANSLATE ERROR] "${article.original_title.slice(0, 60)}": ${e instanceof Error ? e.message : e}`
       );
-      continue; // 翻訳失敗は次の記事へ
+      continue;
     }
 
     // 2. Supabase に保存 — エラーを必ず確認する
     const { error: insertError } = await supabase.from('articles').insert({
-      source:           article.source,
-      source_type:      'crawler',
-      original_url:     article.original_url,
-      original_title:   article.original_title,
-      original_content: article.original_content.slice(0, MAX_CONTENT_LENGTH),
-      ja_title:         enriched.ja_title,
-      ja_summary:       enriched.ja_summary,
-      ja_insight:       enriched.ja_insight,
-      ja_difficulty:    enriched.ja_difficulty,
-      mrr_mentioned:    enriched.mrr_mentioned,
-      upvotes:          article.upvotes,
-      is_premium:       processed >= FREE_ARTICLE_LIMIT,
-      status:           'published',           // ← 明示的に指定（追加）
-      published_at:     article.published_at,
+      source:              article.source,
+      source_type:         'crawler',
+      original_url:        article.original_url,
+      original_title:      article.original_title,
+      original_content:    article.original_content.slice(0, MAX_CONTENT_LENGTH),
+      author_profile_url:  article.author_profile_url || null,
+      ja_title:            enriched.ja_title,
+      ja_summary:          enriched.ja_summary,
+      ja_insight:          enriched.ja_insight,
+      ja_difficulty:       enriched.ja_difficulty,
+      business_model:      enriched.business_model || null,
+      mrr_mentioned:       enriched.mrr_mentioned,
+      upvotes:             article.upvotes,
+      is_premium:          false,    // 一時開放中 — 全記事を無料公開
+      status:              'published',
+      published_at:        article.published_at,
     });
 
     if (insertError) {
       results.push(
         `[INSERT ERROR] "${article.original_title.slice(0, 60)}": ${insertError.message}`
       );
-      continue; // insert失敗は次の記事へ（processed は増やさない）
+      continue;
     }
 
     processed++;

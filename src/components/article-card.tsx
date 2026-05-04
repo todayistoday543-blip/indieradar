@@ -11,21 +11,69 @@ interface Article {
   ja_summary: string;
   ja_insight: string;
   ja_difficulty: string;
+  business_model?: string | null;
   mrr_mentioned: number | null;
   upvotes: number;
   is_premium: boolean;
   original_url: string;
+  author_profile_url?: string | null;
   created_at: string;
 }
 
-/* ── Source badge config ─────────────────────────────────────── */
+/* ── Source icon SVGs (self-made, copyright-safe) ──────────── */
 
-const sourceBadge: Record<string, { label: string; cls: string }> = {
-  hackernews:   { label: 'HN',     cls: 'src-badge src-badge-hn' },
-  producthunt:  { label: 'PH',     cls: 'src-badge src-badge-ph' },
-  reddit:       { label: 'REDDIT', cls: 'src-badge src-badge-reddit' },
-  x:            { label: 'X',      cls: 'src-badge src-badge-x' },
-  user:         { label: 'USER',   cls: 'src-badge src-badge-user' },
+function HNIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0">
+      <rect width="24" height="24" rx="4" fill="#FF6600" />
+      <text x="12" y="17" textAnchor="middle" fontFamily="Arial,sans-serif" fontSize="15" fontWeight="bold" fill="white">Y</text>
+    </svg>
+  );
+}
+
+function RedditIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0">
+      <circle cx="12" cy="12" r="12" fill="#FF4500" />
+      <circle cx="12" cy="13" r="5" fill="white" />
+      <circle cx="9.5" cy="12" r="1.2" fill="#FF4500" />
+      <circle cx="14.5" cy="12" r="1.2" fill="#FF4500" />
+      <path d="M9 15c0 0 1.5 1.5 3 1.5s3-1.5 3-1.5" stroke="#FF4500" strokeWidth="0.8" fill="none" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function PHIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0">
+      <circle cx="12" cy="12" r="12" fill="#DA552F" />
+      <path d="M10 7h3.5a3.5 3.5 0 010 7H10V7z" fill="white" />
+      <rect x="8" y="7" width="2" height="10" rx="0.5" fill="white" />
+    </svg>
+  );
+}
+
+function IHIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="shrink-0">
+      <rect width="24" height="24" rx="4" fill="#4F46E5" />
+      <text x="12" y="17" textAnchor="middle" fontFamily="Arial,sans-serif" fontSize="12" fontWeight="bold" fill="white">IH</text>
+    </svg>
+  );
+}
+
+const sourceIcon: Record<string, () => React.ReactNode> = {
+  hackernews: HNIcon,
+  reddit: RedditIcon,
+  producthunt: PHIcon,
+  indiehackers: IHIcon,
+};
+
+const sourceLabel: Record<string, string> = {
+  hackernews: 'HN',
+  reddit: 'Reddit',
+  producthunt: 'PH',
+  indiehackers: 'IH',
 };
 
 /* ── Heat calculation ────────────────────────────────────────── */
@@ -50,43 +98,19 @@ function formatMrr(mrr: number): string {
 
 /* ── Component ───────────────────────────────────────────────── */
 
-export function ArticleCard({
-  article,
-  index,
-}: {
-  article: Article;
-  index: number;
-}) {
+export function ArticleCard({ article }: { article: Article }) {
   const { t } = useI18n();
 
   const heat = getHeat(article.upvotes);
-  const badge = sourceBadge[article.source] ?? {
-    label: article.source.toUpperCase(),
-    cls: 'src-badge src-badge-user',
-  };
+  const Icon = sourceIcon[article.source];
+  const srcLabel = sourceLabel[article.source] || article.source.toUpperCase();
 
-  const hasMrr =
-    article.mrr_mentioned != null && article.mrr_mentioned > 0;
+  const hasMrr = article.mrr_mentioned != null && article.mrr_mentioned > 0;
+  const descText = article.ja_summary ? article.ja_summary.slice(0, 120) : '';
 
-  const descText = article.ja_summary
-    ? article.ja_summary.slice(0, 120)
-    : '';
-
-  /* tags / meta line pieces */
   const tags: string[] = [];
   if (article.ja_difficulty) tags.push(article.ja_difficulty);
-
-  const sourceType = article.source === 'user'
-    ? t.articles.user_post
-    : badge.label;
-
-  /* number padded to 3 digits */
-  const num = String(index).padStart(3, '0');
-
-  /* language count — fixed at 9 for now (all supported locales) */
-  const langTotal = 9;
-  /* approximate translated count — for now show full set */
-  const langDone = article.ja_title ? langTotal : 0;
+  if (article.business_model) tags.push(article.business_model);
 
   return (
     <Link
@@ -98,28 +122,19 @@ export function ArticleCard({
         'hover:bg-[rgba(212,162,74,0.05)] hover:border-l-[var(--signal-gold)]',
       ].join(' ')}
     >
-      {/* ─── DESKTOP ≥1280 ────────────────────────────────── */}
+      {/* ─── DESKTOP ≥1024 ──────────────────────────────────── */}
       <div
-        className="hidden xl:grid items-center gap-0 py-3 px-2"
-        style={{
-          gridTemplateColumns: '60px 80px 1fr 130px 120px 80px 40px',
-        }}
+        className="hidden lg:grid items-center gap-0 py-3 px-2"
+        style={{ gridTemplateColumns: '40px 1fr 130px 120px 40px' }}
       >
-        {/* 1 — Number */}
-        <span className="font-mono text-[13px] text-[var(--ink-4)] text-center select-none">
-          {num}
-        </span>
-
-        {/* 2 — Source badge */}
+        {/* 1 — Source icon */}
         <span className="flex justify-center">
-          <span className={badge.cls}>{badge.label}</span>
+          {Icon ? <Icon /> : <span className="text-[10px] text-[var(--ink-5)] font-mono">{srcLabel}</span>}
         </span>
 
-        {/* 3 — Content area */}
+        {/* 2 — Content area */}
         <div className="min-w-0 pr-4">
-          <h3
-            className="font-display text-[19px] leading-tight text-[var(--paper-3)] truncate"
-          >
+          <h3 className="font-display text-[19px] leading-tight text-[var(--paper-3)] truncate">
             {article.ja_title || 'Untitled'}
           </h3>
           {descText && (
@@ -134,15 +149,13 @@ export function ArticleCard({
                 <span>{' — '}</span>
               </>
             )}
-            <span>TR → JP EN</span>
-            <span>{' — '}</span>
             <span>{timeAgo(article.created_at)}</span>
             <span>{' · '}</span>
-            <span className="uppercase">{sourceType}</span>
+            <span className="uppercase">{srcLabel}</span>
           </p>
         </div>
 
-        {/* 4 — MRR amount */}
+        {/* 3 — MRR amount */}
         <div className="text-right pr-3">
           {hasMrr ? (
             <>
@@ -150,7 +163,7 @@ export function ArticleCard({
                 {formatMrr(article.mrr_mentioned!)}
               </span>
               <span className="block font-mono text-[10px] text-[var(--signal-live)] mt-0.5">
-                {article.source === 'user' ? 'NEW' : `+${Math.min(article.upvotes, 99)}%`}
+                +{Math.min(article.upvotes, 99)}%
               </span>
             </>
           ) : (
@@ -160,48 +173,30 @@ export function ArticleCard({
           )}
         </div>
 
-        {/* 5 — Heat meter */}
+        {/* 4 — Heat meter */}
         <div className="flex items-center justify-center gap-[3px]">
           {[1, 2, 3, 4, 5].map((level) => (
             <div
               key={level}
-              className={[
-                'heat-bar',
-                level <= heat ? `on l${level}` : '',
-              ].join(' ')}
+              className={['heat-bar', level <= heat ? `on l${level}` : ''].join(' ')}
             />
           ))}
         </div>
 
-        {/* 6 — Lang count */}
-        <span className="font-mono text-[10px] text-[var(--ink-5)] text-center">
-          {langDone}/{langTotal}
-        </span>
-
-        {/* 7 — Arrow */}
+        {/* 5 — Arrow */}
         <span className="font-mono text-[16px] text-[var(--ink-4)] text-center transition-colors duration-[var(--dur-std)] group-hover:text-[var(--signal-gold)]">
           →
         </span>
       </div>
 
-      {/* ─── TABLET 768–1279 ──────────────────────────────── */}
+      {/* ─── TABLET 768–1023 ────────────────────────────────── */}
       <div
-        className="hidden md:grid xl:hidden items-center gap-0 py-3 px-2"
-        style={{
-          gridTemplateColumns: '50px 70px 1fr 100px 100px',
-        }}
+        className="hidden md:grid lg:hidden items-center gap-0 py-3 px-2"
+        style={{ gridTemplateColumns: '36px 1fr 100px 100px' }}
       >
-        {/* Number */}
-        <span className="font-mono text-[12px] text-[var(--ink-4)] text-center select-none">
-          {num}
-        </span>
-
-        {/* Source badge */}
         <span className="flex justify-center">
-          <span className={badge.cls}>{badge.label}</span>
+          {Icon ? <Icon /> : <span className="text-[10px] text-[var(--ink-5)] font-mono">{srcLabel}</span>}
         </span>
-
-        {/* Content area */}
         <div className="min-w-0 pr-3">
           <h3 className="font-display text-[17px] leading-tight text-[var(--paper-3)] truncate">
             {article.ja_title || 'Untitled'}
@@ -209,7 +204,7 @@ export function ArticleCard({
           <p className="font-mono text-[10px] text-[var(--ink-5)] mt-0.5 truncate">
             {timeAgo(article.created_at)}
             <span>{' · '}</span>
-            <span className="uppercase">{sourceType}</span>
+            <span className="uppercase">{srcLabel}</span>
             {tags.length > 0 && (
               <>
                 <span>{' · '}</span>
@@ -218,29 +213,20 @@ export function ArticleCard({
             )}
           </p>
         </div>
-
-        {/* MRR amount */}
         <div className="text-right pr-2">
           {hasMrr ? (
             <span className="font-display text-[22px] leading-none text-[var(--signal-gold)]">
               {formatMrr(article.mrr_mentioned!)}
             </span>
           ) : (
-            <span className="font-display text-[22px] leading-none text-[var(--ink-4)]">
-              —
-            </span>
+            <span className="font-display text-[22px] leading-none text-[var(--ink-4)]">—</span>
           )}
         </div>
-
-        {/* Heat meter */}
         <div className="flex items-center justify-center gap-[2px]">
           {[1, 2, 3, 4, 5].map((level) => (
             <div
               key={level}
-              className={[
-                'heat-bar',
-                level <= heat ? `on l${level}` : '',
-              ].join(' ')}
+              className={['heat-bar', level <= heat ? `on l${level}` : ''].join(' ')}
             />
           ))}
         </div>
@@ -249,7 +235,7 @@ export function ArticleCard({
       {/* ─── MOBILE <768 ──────────────────────────────────── */}
       <div className="md:hidden py-3 px-3">
         <div className="flex items-center gap-2 mb-2">
-          <span className={badge.cls}>{badge.label}</span>
+          {Icon ? <Icon /> : <span className="text-[10px] text-[var(--ink-5)] font-mono">{srcLabel}</span>}
           {hasMrr && (
             <span className="font-display text-[18px] text-[var(--signal-gold)] ml-auto">
               {formatMrr(article.mrr_mentioned!)}
@@ -267,7 +253,7 @@ export function ArticleCard({
         <p className="font-mono text-[10px] text-[var(--ink-5)]">
           {timeAgo(article.created_at)}
           <span>{' · '}</span>
-          <span className="uppercase">{sourceType}</span>
+          <span className="uppercase">{srcLabel}</span>
           {tags.length > 0 && (
             <>
               <span>{' · '}</span>

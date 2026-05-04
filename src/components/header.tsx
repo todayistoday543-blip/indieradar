@@ -83,7 +83,6 @@ export function Header() {
 
   const navItems: NavItem[] = [
     { href: '/articles', label: t.common.articles.toUpperCase() },
-    { href: '/submit', label: t.common.submit.toUpperCase() },
     { href: '/pricing', label: t.common.pricing.toUpperCase() },
   ];
 

@@ -5,11 +5,12 @@ function getClient() {
   return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY || 'placeholder' });
 }
 
-interface TranslationResult {
+export interface TranslationResult {
   ja_title: string;
   ja_summary: string;
   ja_insight: string;
-  ja_difficulty: '初級' | '中級' | '上級';
+  ja_difficulty: 'Easy' | 'Medium' | 'Hard';
+  business_model: string;
   mrr_mentioned: number | null;
 }
 
@@ -19,38 +20,32 @@ export async function translateAndEnrich(article: {
   source: string;
 }): Promise<TranslationResult> {
   const message = await getClient().messages.create({
-    model: 'claude-haiku-4-5',
+    model: 'claude-sonnet-4-5',
     max_tokens: 2048,
     messages: [
       {
         role: 'user',
-        content: `以下の海外インディーハッカーの投稿を日本語に翻訳・要約し、JSON形式で返してください。
+        content: `以下の海外インディーハッカーの投稿を分析し、JSON形式で返してください。
 
-【最重要ルール：冒頭10行で読者を惹きつける構成にすること】
-ja_summaryは以下の「フック構成」で書いてください：
-
-1行目: 衝撃的な結論・数字から始める（例：「月収300万円を個人開発で達成した」）
-2-3行目: 読者が「自分にもできるかも」と思えるストーリーの入口
-4-6行目: 具体的な手法・戦略の概要（数字を交えて）
-7-10行目: さらに深い分析・ターニングポイント
-11行目以降: 詳細な実践方法・具体的ステップ・技術的な解説
-
-※最初の10行（約300文字）だけ読んでも価値がある記事にすること
-※数字・金額・期間は具体的に含めること
-※改行で段落を分け、読みやすくすること
+【分析ルール】
+1. 日本語要約（300文字）: 冒頭で数字・結論を出し、読者を惹きつける構成にする
+2. 事業モデルの説明: SaaS / マーケットプレイス / コンテンツ / ツール / コミュニティ等を特定
+3. 収益額の抽出: MRR / 月収 / ARR / 年収の数値を探してUSD整数に変換（なければnull）
+4. 実行難易度: Easy（個人で1週間以内）/ Medium（1-3ヶ月）/ Hard（チーム必要 or 高資本）
 
 【元記事】
 タイトル: ${article.original_title}
 ソース: ${article.source}
-内容: ${article.original_content.slice(0, 3000)}
+内容: ${article.original_content.slice(0, 4000)}
 
 【返答形式】必ずこのJSONのみを返してください:
 {
-  "ja_title": "日本語タイトル（50字以内、数字や金額を含めてキャッチーに）",
-  "ja_summary": "フック構成の日本語要約（500〜800字）。冒頭10行で惹きつけ、後半で詳細を展開。段落は改行で区切る",
-  "ja_insight": "日本での活用ポイント（150字）。具体的なアクションを1つ提示。数字目標を含める",
-  "ja_difficulty": "初級 or 中級 or 上級",
-  "mrr_mentioned": MRR金額をドルの整数で（言及がなければnull）
+  "ja_title": "日本語タイトル（50字以内、数字を含めてキャッチーに）",
+  "ja_summary": "日本語要約（300文字以内）。冒頭で数字・結論→具体的手法→実践ポイント",
+  "ja_insight": "日本での活用ポイント（100字以内）。具体的なアクションを1つ提示",
+  "ja_difficulty": "Easy or Medium or Hard",
+  "business_model": "事業モデル名（例: SaaS, マーケットプレイス, Chrome拡張, API）",
+  "mrr_mentioned": MRR金額をUSDの整数で（記事中に収益言及がなければnull）
 }`,
       },
     ],
