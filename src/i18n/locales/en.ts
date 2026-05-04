@@ -132,17 +132,19 @@ export default {
     rule_3: '70% of ad revenue from published articles goes to the author',
   },
   detail: {
-    prompt_heading: 'AI Implementation Prompt',
-    prompt_free_desc: 'AI auto-generates implementation prompts for reproducing this case.',
-    prompt_free_button: 'Available on Pro plan',
-    prompt_pro_button: 'Generate with Claude Sonnet',
-    prompt_generating: 'Generating...',
-    insight_heading: 'Action Points',
-    paywall_title: 'Read the full article with a paid plan',
-    paywall_desc: 'Get full translations + AI insights with a subscription',
-    paywall_button: 'View plans',
+    guide_heading: 'AI Realization Guide',
+    guide_desc:
+      'Auto-generate a 4-phase action plan + copyable AI prompt to reproduce this case.',
+    guide_login_desc:
+      'Log in to generate an AI Realization Guide.',
+    guide_login_button: 'Log in to use',
+    guide_button: 'Generate AI Guide',
+    guide_generating: 'Generating...',
+    insight_heading: 'Global Action Points',
+    country_context_heading: 'Applicability in Your Country',
+    country_context_desc:
+      'Set your country in your profile to get market-specific advice in the AI Realization Guide.',
     author_label: 'Author:',
-    author_revenue_note: '70% of ad revenue from this post goes to the author',
   },
   auth: {
     login_title: 'Log in',

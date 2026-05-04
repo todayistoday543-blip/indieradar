@@ -134,18 +134,19 @@ export default {
     rule_3: '公開された記事の広告収益の70%が投稿者に還元されます',
   },
   detail: {
-    prompt_heading: 'AI実装プロンプト生成',
-    prompt_free_desc:
-      'この事例を再現するための実装プロンプトをAIが自動生成します。',
-    prompt_free_button: 'Proプランで利用可能',
-    prompt_pro_button: 'Claude Sonnetで詳細プロンプトを生成',
-    prompt_generating: '生成中...',
-    insight_heading: '活用ポイント',
-    paywall_title: '続きは有料プランで読めます',
-    paywall_desc: '翻訳全文＋AIインサイトを含む完全版をお読みいただけます',
-    paywall_button: 'プランを見る',
+    guide_heading: 'AI実現ガイド',
+    guide_desc:
+      'この事例を再現するための4フェーズ実行計画 + コピー可能なAIプロンプトを自動生成します。',
+    guide_login_desc:
+      'ログインするとAI実現ガイドを生成できます。',
+    guide_login_button: 'ログインして利用する',
+    guide_button: 'AI実現ガイドを生成',
+    guide_generating: '生成中...',
+    insight_heading: 'グローバル活用ポイント',
+    country_context_heading: 'あなたの国での応用可能性',
+    country_context_desc:
+      'プロフィールに国を設定すると、AI実現ガイドがあなたの市場に合わせたアドバイスを含むようになります。',
     author_label: '投稿者:',
-    author_revenue_note: 'この投稿の広告収益の70%が投稿者に還元されます',
   },
   auth: {
     login_title: 'ログイン',
