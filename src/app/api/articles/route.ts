@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+
 const ARTICLE_COLUMNS = 'id,source,ja_title,ja_summary,ja_insight,ja_difficulty,mrr_mentioned,upvotes,is_premium,original_url,created_at';
 const VALID_SOURCES = ['hackernews', 'producthunt', 'reddit', 'x', 'user'];
 

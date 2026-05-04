@@ -4,6 +4,8 @@ import { fetchHNStories, fetchRedditPosts, fetchXPosts } from '@/lib/collectors'
 import { translateAndEnrich } from '@/lib/translator';
 import type { CollectedArticle } from '@/lib/collectors';
 
+export const dynamic = 'force-dynamic';
+
 const MAX_CONTENT_LENGTH = 5000;
 const FREE_ARTICLE_LIMIT = 5;
 

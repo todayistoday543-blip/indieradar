@@ -1,6 +1,9 @@
 import Anthropic from '@anthropic-ai/sdk';
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+// Lazy-init: never throws at module evaluation time during build.
+function getClient() {
+  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY || 'placeholder' });
+}
 
 interface TranslationResult {
   ja_title: string;
@@ -15,7 +18,7 @@ export async function translateAndEnrich(article: {
   original_content: string;
   source: string;
 }): Promise<TranslationResult> {
-  const message = await client.messages.create({
+  const message = await getClient().messages.create({
     model: 'claude-haiku-4-5-20241022',
     max_tokens: 2048,
     messages: [

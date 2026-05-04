@@ -3,6 +3,8 @@ import { stripe } from '@/lib/stripe';
 import { createServiceClient } from '@/lib/supabase';
 import Stripe from 'stripe';
 
+export const dynamic = 'force-dynamic';
+
 function resolvePlan(priceId: string | undefined): string {
   if (!priceId) return 'basic';
   if (priceId === process.env.STRIPE_PRICE_ID_PRO) return 'pro';

@@ -4,7 +4,12 @@ import { createServiceClient } from '@/lib/supabase';
 import { PLANS } from '@/lib/plans';
 import type { PlanKey } from '@/lib/plans';
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+export const dynamic = 'force-dynamic';
+
+// Lazy-init so the module never throws during build-time evaluation.
+function getAnthropic() {
+  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY || 'placeholder' });
+}
 
 export async function POST(req: NextRequest) {
   const { article_id, user_id } = await req.json();
@@ -59,7 +64,7 @@ export async function POST(req: NextRequest) {
 
   const maxTokens = plan.features.ai_prompt_model === 'sonnet' ? 2048 : 1024;
 
-  const message = await anthropic.messages.create({
+  const message = await getAnthropic().messages.create({
     model,
     max_tokens: maxTokens,
     system: systemPrompt,
