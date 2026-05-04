@@ -163,6 +163,17 @@ export default {
     confirm_email_title: 'E-mail de confirmação enviado',
     confirm_email_desc: 'Enviamos um e-mail de confirmação. Clique no link para concluir o cadastro.',
   },
+  settings: {
+    heading: 'Configurações',
+    email_label: 'E-mail',
+    country_label: 'País',
+    country_placeholder: 'Selecione seu país',
+    country_hint: 'Usado para gerar conselhos específicos do mercado no guia de IA.',
+    save_button: 'Salvar',
+    saving: 'Salvando...',
+    saved: 'Salvo com sucesso',
+    login_required: 'Faça login para alterar as configurações',
+  },
   footer: {
     tagline: 'IndieRadar — Estudos de caso diários de monetização de indie hackers',
     sources: 'Coleta automática do Hacker News / Product Hunt / Reddit / X com tradução por IA',

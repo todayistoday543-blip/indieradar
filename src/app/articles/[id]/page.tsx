@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useI18n } from '@/i18n/context';
@@ -21,6 +21,8 @@ interface Article {
   business_model: string | null;
   mrr_mentioned: number | null;
   upvotes: number;
+  upvote_count: number;
+  view_count: number;
   is_premium: boolean;
   created_at: string;
 }
@@ -42,19 +44,25 @@ const sourceConfig: Record<string, { name: string; color: string; bg: string }> 
 function SectionIcon({ type }: { type: string }) {
   const cls = 'w-5 h-5 text-[var(--signal-gold)] flex-shrink-0';
   switch (type) {
-    case 'overview':
+    case 'point':
       return (
         <svg className={cls} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
         </svg>
       );
-    case 'business':
+    case 'product':
+      return (
+        <svg className={cls} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+        </svg>
+      );
+    case 'revenue':
       return (
         <svg className={cls} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       );
-    case 'journey':
+    case 'story':
       return (
         <svg className={cls} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
@@ -66,8 +74,24 @@ function SectionIcon({ type }: { type: string }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
         </svg>
       );
+    case 'local':
+      return (
+        <svg className={cls} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+        </svg>
+      );
+    case 'ideas':
+      return (
+        <svg className={cls} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+        </svg>
+      );
     default:
-      return null;
+      return (
+        <svg className={cls} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
+        </svg>
+      );
   }
 }
 
@@ -84,12 +108,11 @@ function parseSections(summary: string): ContentSection[] {
   const parts: ContentSection[] = [];
   let lastIndex = 0;
   let lastHeading = '';
-  let lastType = 'overview';
+  let lastType = 'point';
   const matches = [...summary.matchAll(sectionRegex)];
 
   if (matches.length === 0) {
-    // Not structured — return as a single section
-    return [{ heading: '', body: summary.trim(), type: 'overview' }];
+    return [{ heading: '', body: summary.trim(), type: 'point' }];
   }
 
   for (const match of matches) {
@@ -98,14 +121,13 @@ function parseSections(summary: string): ContentSection[] {
       if (body) parts.push({ heading: lastHeading, body, type: lastType });
     } else if (match.index && match.index > 0) {
       const preamble = summary.slice(0, match.index).trim();
-      if (preamble) parts.push({ heading: '', body: preamble, type: 'overview' });
+      if (preamble) parts.push({ heading: '', body: preamble, type: 'point' });
     }
     lastHeading = match[1].trim();
     lastType = guessType(lastHeading);
     lastIndex = (match.index ?? 0) + match[0].length;
   }
 
-  // Last section
   const tail = summary.slice(lastIndex).trim();
   if (tail) parts.push({ heading: lastHeading, body: tail, type: lastType });
 
@@ -113,11 +135,26 @@ function parseSections(summary: string): ContentSection[] {
 }
 
 function guessType(heading: string): string {
-  if (/概要|overview|summary/i.test(heading)) return 'overview';
-  if (/事業|ビジネス|business|model|収益/i.test(heading)) return 'business';
-  if (/経緯|journey|story|成功|timeline|歴史/i.test(heading)) return 'journey';
+  if (/ポイント|point|overview|概要/i.test(heading)) return 'point';
+  if (/何を作った|product|作った|プロダクト/i.test(heading)) return 'product';
+  if (/稼い|revenue|収益|どうやって/i.test(heading)) return 'revenue';
+  if (/ストーリー|story|成功|経緯|journey/i.test(heading)) return 'story';
   if (/技術|tech|stack|ツール|tool/i.test(heading)) return 'tech';
-  return 'overview';
+  if (/地域|応用|local|country|あなた/i.test(heading)) return 'local';
+  if (/アイデア|ideas|ヒント|hint/i.test(heading)) return 'ideas';
+  return 'point';
+}
+
+/* ── Session ID for view tracking ──────────────────────────── */
+
+function getSessionId(): string {
+  if (typeof window === 'undefined') return '';
+  let sid = sessionStorage.getItem('ir-session-id');
+  if (!sid) {
+    sid = crypto.randomUUID();
+    sessionStorage.setItem('ir-session-id', sid);
+  }
+  return sid;
 }
 
 /* ── Component ─────────────────────────────────────────────── */
@@ -131,6 +168,9 @@ export default function ArticleDetailPage() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [prompt, setPrompt] = useState<string | null>(null);
   const [promptLoading, setPromptLoading] = useState(false);
+  const [hasVoted, setHasVoted] = useState(false);
+  const [localUpvotes, setLocalUpvotes] = useState(0);
+  const viewTracked = useRef(false);
 
   // Fetch auth + profile
   useEffect(() => {
@@ -156,10 +196,49 @@ export default function ArticleDetailPage() {
         .eq('id', params.id)
         .single();
       setArticle(data);
+      setLocalUpvotes(data?.upvote_count || 0);
       setLoading(false);
     }
     if (params.id) load();
   }, [params.id]);
+
+  // Track view
+  useEffect(() => {
+    if (!article?.id || viewTracked.current) return;
+    viewTracked.current = true;
+    const sid = getSessionId();
+    fetch(`/api/articles/${article.id}/view`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: sid }),
+    }).catch(() => {});
+  }, [article?.id]);
+
+  // Check vote status
+  useEffect(() => {
+    if (!userId || !article?.id) return;
+    fetch(`/api/articles/${article.id}/vote?user_id=${userId}`)
+      .then((r) => r.json())
+      .then((d) => setHasVoted(d.voted))
+      .catch(() => {});
+  }, [userId, article?.id]);
+
+  const handleVote = useCallback(async () => {
+    if (!userId || !article) return;
+    const res = await fetch(`/api/articles/${article.id}/vote`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId }),
+    });
+    const data = await res.json();
+    if (data.action === 'added') {
+      setHasVoted(true);
+      setLocalUpvotes((v) => v + 1);
+    } else {
+      setHasVoted(false);
+      setLocalUpvotes((v) => Math.max(0, v - 1));
+    }
+  }, [userId, article]);
 
   const handleGenerateGuide = useCallback(async () => {
     if (!userId || !article) return;
@@ -176,18 +255,14 @@ export default function ArticleDetailPage() {
         }),
       });
       const data = await res.json();
-      if (res.ok) {
-        setPrompt(data.prompt);
-      } else {
-        alert(data.error);
-      }
+      if (res.ok) setPrompt(data.prompt);
+      else alert(data.error);
     } catch {
       alert('Error generating guide');
     }
     setPromptLoading(false);
   }, [userId, article, userProfile]);
 
-  /* ── Loading skeleton ────────────────────────────────────── */
   if (loading) {
     return (
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-10">
@@ -199,7 +274,6 @@ export default function ArticleDetailPage() {
     );
   }
 
-  /* ── Not found ───────────────────────────────────────────── */
   if (!article) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center px-4 animate-fade-in">
@@ -218,8 +292,6 @@ export default function ArticleDetailPage() {
   const sourceDomain = (() => {
     try { return new URL(sourceUrl).hostname; } catch { return sourceUrl; }
   })();
-
-  // Parse structured content sections
   const sections = parseSections(article.ja_summary || '');
 
   return (
@@ -247,7 +319,7 @@ export default function ArticleDetailPage() {
         <p className="text-xs text-[var(--ink-5)] mt-1.5 sm:mt-0 hidden sm:block">{t.articles.ai_disclaimer}</p>
       </div>
 
-      {/* ── Tags ─────────────────────────────────────────────── */}
+      {/* ── Tags + Stats ─────────────────────────────────────── */}
       <div className="flex items-center gap-2 mb-5 flex-wrap">
         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${src.bg} ${src.color}`}>
           {src.name}
@@ -271,12 +343,35 @@ export default function ArticleDetailPage() {
             ${article.mrr_mentioned.toLocaleString()}/mo
           </span>
         )}
-        <span className="text-xs text-[var(--ink-5)] ml-auto flex items-center gap-1">
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
-          </svg>
-          {article.upvotes}
-        </span>
+
+        {/* Stats */}
+        <div className="ml-auto flex items-center gap-3">
+          {/* Views */}
+          <span className="text-xs text-[var(--ink-5)] flex items-center gap-1" title="Views">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            {article.view_count || 0}
+          </span>
+
+          {/* Upvote button */}
+          <button
+            onClick={handleVote}
+            disabled={!userId}
+            title={userId ? (hasVoted ? 'Remove vote' : 'Upvote') : 'Login to vote'}
+            className={`flex items-center gap-1 text-xs px-2 py-1 rounded-md border transition-all ${
+              hasVoted
+                ? 'border-[var(--signal-gold)] text-[var(--signal-gold)] bg-[rgba(212,162,74,0.1)]'
+                : 'border-[var(--ink-3)] text-[var(--ink-5)] hover:border-[var(--ink-4)] hover:text-[var(--paper-2)]'
+            } ${!userId ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+          >
+            <svg className="w-3.5 h-3.5" fill={hasVoted ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+            </svg>
+            {localUpvotes}
+          </button>
+        </div>
       </div>
 
       {/* ── Title ────────────────────────────────────────────── */}
@@ -309,12 +404,7 @@ export default function ArticleDetailPage() {
           <svg className="w-4 h-4 text-[var(--ink-5)] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
           </svg>
-          <a
-            href={article.author_profile_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[var(--signal-gold)] hover:opacity-80 transition truncate"
-          >
+          <a href={article.author_profile_url} target="_blank" rel="noopener noreferrer" className="text-[var(--signal-gold)] hover:opacity-80 transition truncate">
             {t.detail.author_label} →
           </a>
         </div>
@@ -325,7 +415,7 @@ export default function ArticleDetailPage() {
         <div className="bg-gradient-to-r from-[rgba(212,162,74,0.08)] to-transparent rounded-2xl p-5 mb-6 border border-[rgba(212,162,74,0.2)]">
           <p className="text-sm font-bold text-[var(--signal-gold)] mb-1.5 flex items-center gap-1.5">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582" />
             </svg>
             {t.detail.insight_heading}
           </p>
@@ -343,9 +433,7 @@ export default function ArticleDetailPage() {
             </svg>
             {t.detail.country_context_heading}
           </p>
-          <p className="text-sm text-[var(--paper-1)] leading-relaxed">
-            {t.detail.country_context_desc}
-          </p>
+          <p className="text-sm text-[var(--paper-1)] leading-relaxed">{t.detail.country_context_desc}</p>
         </div>
       )}
 
@@ -361,10 +449,7 @@ export default function ArticleDetailPage() {
         {!userId ? (
           <div>
             <p className="text-sm text-[var(--ink-5)] mb-4">{t.detail.guide_login_desc}</p>
-            <Link
-              href="/auth/login"
-              className="inline-flex items-center gap-2 rounded-xl bg-[var(--signal-gold)] px-6 py-2.5 text-[var(--ink-0)] text-sm font-medium hover:opacity-90 transition"
-            >
+            <Link href="/auth/login" className="inline-flex items-center gap-2 rounded-xl bg-[var(--signal-gold)] px-6 py-2.5 text-[var(--ink-0)] text-sm font-medium hover:opacity-90 transition">
               {t.detail.guide_login_button}
             </Link>
           </div>

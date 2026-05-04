@@ -163,6 +163,17 @@ export default {
     confirm_email_title: '확인 이메일이 발송되었습니다',
     confirm_email_desc: '확인 이메일을 보냈습니다. 링크를 클릭하여 가입을 완료하세요.',
   },
+  settings: {
+    heading: '설정',
+    email_label: '이메일',
+    country_label: '거주 국가',
+    country_placeholder: '국가를 선택하세요',
+    country_hint: 'AI 실현 가이드에서 시장별 조언을 생성하는 데 사용됩니다.',
+    save_button: '저장',
+    saving: '저장 중...',
+    saved: '저장되었습니다',
+    login_required: '설정을 변경하려면 로그인이 필요합니다',
+  },
   footer: {
     tagline: 'IndieRadar — 매일 인디 해커 수익화 사례 연구',
     sources: 'Hacker News / Product Hunt / Reddit / X에서 자동 수집 후 AI 번역',

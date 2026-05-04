@@ -163,6 +163,17 @@ export default {
     confirm_email_title: 'पुष्टि ईमेल भेजा गया',
     confirm_email_desc: 'हमने एक पुष्टि ईमेल भेजा है। रजिस्ट्रेशन पूरा करने के लिए लिंक पर क्लिक करें।',
   },
+  settings: {
+    heading: 'सेटिंग्स',
+    email_label: 'ईमेल',
+    country_label: 'देश',
+    country_placeholder: 'अपना देश चुनें',
+    country_hint: 'AI गाइड में आपके बाज़ार के अनुसार सलाह देने के लिए उपयोग किया जाता है।',
+    save_button: 'सहेजें',
+    saving: 'सहेजा जा रहा है...',
+    saved: 'सफलतापूर्वक सहेजा गया',
+    login_required: 'सेटिंग्स बदलने के लिए लॉग इन आवश्यक है',
+  },
   footer: {
     tagline: 'IndieRadar — दैनिक इंडी हैकर मॉनेटाइज़ेशन केस स्टडीज़',
     sources: 'Hacker News / Product Hunt / Reddit / X से स्वचालित संग्रह, AI अनुवाद के साथ',

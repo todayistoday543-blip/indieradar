@@ -10,20 +10,22 @@ export interface CollectedArticle {
 
 /**
  * Hacker News — "Show HN" posts + revenue / MRR / launched keywords.
- * Uses the free Algolia HN Search API.
+ * Uses the free Algolia HN Search API with expanded queries.
  */
 export async function fetchHNStories(): Promise<CollectedArticle[]> {
   const queries = [
     'Show HN',
     'MRR side project launched',
     'revenue indie maker',
+    'ARR profit startup',
+    'launched my SaaS',
   ];
 
   const all: CollectedArticle[] = [];
 
   for (const q of queries) {
     try {
-      const url = `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(q)}&tags=story&hitsPerPage=20&numericFilters=points>30`;
+      const url = `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(q)}&tags=story&hitsPerPage=25&numericFilters=points>20`;
       const res = await fetch(url);
       if (!res.ok) continue;
       const data = await res.json();
@@ -45,6 +47,35 @@ export async function fetchHNStories(): Promise<CollectedArticle[]> {
       }
     } catch {
       // skip failed query, try next
+    }
+  }
+
+  // Also search for revenue-related keywords specifically
+  const revenueQueries = ['MRR', 'revenue', 'profit', 'income'];
+  for (const q of revenueQueries) {
+    try {
+      const url = `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(q)}&tags=show_hn&hitsPerPage=15&numericFilters=points>10`;
+      const res = await fetch(url);
+      if (!res.ok) continue;
+      const data = await res.json();
+
+      for (const hit of data.hits ?? []) {
+        all.push({
+          source: 'hackernews',
+          original_url:
+            (hit.url as string) ||
+            `https://news.ycombinator.com/item?id=${hit.objectID}`,
+          original_title: hit.title as string,
+          original_content: (hit.story_text as string) || '',
+          upvotes: hit.points as number,
+          published_at: hit.created_at as string,
+          author_profile_url: hit.author
+            ? `https://news.ycombinator.com/user?id=${hit.author}`
+            : undefined,
+        });
+      }
+    } catch {
+      // skip
     }
   }
 

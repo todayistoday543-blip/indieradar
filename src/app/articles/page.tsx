@@ -76,18 +76,26 @@ const SOURCE_TABS = [
 // Columns: ICON | SIGNAL · EXTRACTION | MRR | HEAT | →
 const LIST_COLUMNS = '40px 1fr 130px 120px 40px';
 
+const SORT_OPTIONS = [
+  { value: 'new', label: 'NEW' },
+  { value: 'heat', label: 'HEAT' },
+  { value: 'upvotes', label: 'UPVOTES' },
+  { value: 'views', label: 'VIEWS' },
+];
+
 export default function ArticlesPage() {
   const { t } = useI18n();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [source, setSource] = useState<string>('');
+  const [sort, setSort] = useState<string>('new');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     async function load() {
       setLoading(true);
-      const params = new URLSearchParams({ page: String(page) });
+      const params = new URLSearchParams({ page: String(page), sort });
       if (source) params.set('source', source);
 
       const res = await fetch(`/api/articles?${params}`);
@@ -97,7 +105,7 @@ export default function ArticlesPage() {
       setLoading(false);
     }
     load();
-  }, [page, source]);
+  }, [page, source, sort]);
 
   return (
     <div className="min-h-screen">
@@ -144,19 +152,29 @@ export default function ArticlesPage() {
 
           <div className="flex-1" />
 
-          <div className="flex items-center gap-5 shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
             <span
-              className="text-[11px] tracking-[0.1em] text-[var(--ink-5)] cursor-pointer hover:text-[var(--paper-2)] transition-colors"
+              className="text-[11px] tracking-[0.2em] text-[var(--ink-4)] shrink-0 uppercase"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
-              SORT_ HEAT ⌄
+              SORT_
             </span>
-            <span
-              className="text-[11px] tracking-[0.1em] text-[var(--ink-5)] cursor-pointer hover:text-[var(--paper-2)] transition-colors"
-              style={{ fontFamily: 'var(--font-mono)' }}
-            >
-              WINDOW_ 7D ⌄
-            </span>
+            <div className="flex items-center gap-1.5">
+              {SORT_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => { setSort(opt.value); setPage(1); }}
+                  className={`px-2.5 py-1 text-[11px] tracking-[0.06em] transition-all ${
+                    sort === opt.value
+                      ? 'bg-[var(--paper-3)] text-[var(--ink-0)] border border-[var(--paper-3)] font-semibold'
+                      : 'bg-transparent text-[var(--paper-1)] border border-[var(--ink-3)] hover:border-[var(--ink-4)] hover:text-[var(--paper-3)]'
+                  }`}
+                  style={{ fontFamily: 'var(--font-mono)' }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

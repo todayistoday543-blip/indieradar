@@ -166,6 +166,17 @@ export default {
     confirm_email_title: 'Confirmation email sent',
     confirm_email_desc: 'We sent a confirmation email to . Click the link to complete registration.',
   },
+  settings: {
+    heading: 'Settings',
+    email_label: 'Email',
+    country_label: 'Country',
+    country_placeholder: 'Select your country',
+    country_hint: 'Used to generate market-specific advice in the AI Realization Guide.',
+    save_button: 'Save',
+    saving: 'Saving...',
+    saved: 'Saved successfully',
+    login_required: 'Login required to change settings',
+  },
   footer: {
     tagline: 'IndieRadar — Daily indie hacker monetization case studies',
     sources: 'Auto-collected from Hacker News / Product Hunt / Reddit / X with AI translation',

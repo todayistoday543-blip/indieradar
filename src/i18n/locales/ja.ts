@@ -168,6 +168,17 @@ export default {
     confirm_email_title: '確認メールを送信しました',
     confirm_email_desc: 'に確認メールを送りました。メール内のリンクをクリックして登録を完了してください。',
   },
+  settings: {
+    heading: '設定',
+    email_label: 'メールアドレス',
+    country_label: '居住国',
+    country_placeholder: '国を選択してください',
+    country_hint: 'AI実現ガイドがあなたの市場に合わせたアドバイスを生成するために使用されます。',
+    save_button: '保存',
+    saving: '保存中...',
+    saved: '保存しました',
+    login_required: '設定を変更するにはログインが必要です',
+  },
   footer: {
     tagline: 'IndieRadar JP - 海外インディーハッカーのマネタイズ事例を毎日お届け',
     sources: 'Hacker News / Product Hunt / Reddit / X から自動収集・AI翻訳',

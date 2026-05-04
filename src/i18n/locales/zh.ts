@@ -163,6 +163,17 @@ export default {
     confirm_email_title: '确认邮件已发送',
     confirm_email_desc: '我们已向您发送确认邮件。点击链接完成注册。',
   },
+  settings: {
+    heading: '设置',
+    email_label: '邮箱',
+    country_label: '所在国家',
+    country_placeholder: '请选择国家',
+    country_hint: '用于在 AI 实现指南中生成针对您所在市场的建议。',
+    save_button: '保存',
+    saving: '保存中...',
+    saved: '保存成功',
+    login_required: '需要登录才能更改设置',
+  },
   footer: {
     tagline: 'IndieRadar — 每日独立开发者盈利案例研究',
     sources: '从 Hacker News / Product Hunt / Reddit / X 自动采集并经 AI 翻译',

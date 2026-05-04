@@ -1,20 +1,18 @@
 import type { CollectedArticle } from './hackernews';
 
 /**
- * Product Hunt — scrapes the public homepage API (no auth token needed).
- * Falls back to a simpler HTML-free approach using the public feed.
+ * Product Hunt — uses GraphQL API with token (preferred),
+ * or falls back to public web scraping.
+ * ENV: PRODUCTHUNT_API_TOKEN
  */
 export async function fetchPHPosts(): Promise<CollectedArticle[]> {
-  // Product Hunt's public /posts endpoint returns recent top posts.
-  // If the official GraphQL API token is available, use that; otherwise
-  // scrape the public REST-like endpoint.
-  const token = process.env.PH_ACCESS_TOKEN;
+  const token = process.env.PRODUCTHUNT_API_TOKEN || process.env.PH_ACCESS_TOKEN;
 
   if (token) {
     return fetchViaPHGraphQL(token);
   }
 
-  // Public RSS-like approach via the website's JSON feed
+  // Public fallback
   return fetchViaPHWeb();
 }
 
@@ -22,7 +20,7 @@ export async function fetchPHPosts(): Promise<CollectedArticle[]> {
 
 async function fetchViaPHGraphQL(token: string): Promise<CollectedArticle[]> {
   const query = `{
-    posts(first: 20, order: VOTES) {
+    posts(first: 30, order: VOTES) {
       edges {
         node {
           id
@@ -51,8 +49,11 @@ async function fetchViaPHGraphQL(token: string): Promise<CollectedArticle[]> {
   if (!res.ok) throw new Error(`PH GraphQL API error: ${res.status}`);
   const data = await res.json();
 
-  return (data.data?.posts?.edges ?? []).map(
-    ({ node }: { node: Record<string, unknown> }) => {
+  return (data.data?.posts?.edges ?? [])
+    .filter(({ node }: { node: Record<string, unknown> }) =>
+      (node.votesCount as number) >= 50
+    )
+    .map(({ node }: { node: Record<string, unknown> }) => {
       const makers = node.makers as Array<{ username: string }> | undefined;
       return {
         source: 'producthunt' as const,
@@ -65,15 +66,13 @@ async function fetchViaPHGraphQL(token: string): Promise<CollectedArticle[]> {
           ? `https://www.producthunt.com/@${makers[0].username}`
           : undefined,
       };
-    }
-  );
+    });
 }
 
 /* ── Public web scrape fallback (no token) ──────────────────── */
 
 async function fetchViaPHWeb(): Promise<CollectedArticle[]> {
   try {
-    // The PH front-page JSON (unofficial but stable endpoint)
     const res = await fetch(
       'https://www.producthunt.com/frontend/graphql',
       {
@@ -83,7 +82,7 @@ async function fetchViaPHWeb(): Promise<CollectedArticle[]> {
           operationName: 'HomePage',
           variables: {},
           query: `query HomePage {
-            homefeed(first: 20) {
+            homefeed(first: 30) {
               edges {
                 node {
                   ... on Post {

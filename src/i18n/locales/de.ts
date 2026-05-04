@@ -163,6 +163,17 @@ export default {
     confirm_email_title: 'Bestätigungs-E-Mail gesendet',
     confirm_email_desc: 'Wir haben Ihnen eine Bestätigungs-E-Mail gesendet. Klicken Sie auf den Link, um die Registrierung abzuschließen.',
   },
+  settings: {
+    heading: 'Einstellungen',
+    email_label: 'E-Mail',
+    country_label: 'Land',
+    country_placeholder: 'Land auswählen',
+    country_hint: 'Wird verwendet, um marktspezifische Empfehlungen im KI-Leitfaden zu generieren.',
+    save_button: 'Speichern',
+    saving: 'Wird gespeichert...',
+    saved: 'Erfolgreich gespeichert',
+    login_required: 'Zum Ändern der Einstellungen ist eine Anmeldung erforderlich',
+  },
   footer: {
     tagline: 'IndieRadar — Tägliche Indie-Hacker-Monetarisierungs-Fallstudien',
     sources: 'Automatisch gesammelt von Hacker News / Product Hunt / Reddit / X mit KI-Übersetzung',

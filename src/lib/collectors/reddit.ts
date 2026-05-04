@@ -1,11 +1,20 @@
 import type { CollectedArticle } from './hackernews';
 
 /**
- * Reddit — r/indiehackers, r/entrepreneur, r/SideProject
+ * Reddit — 8 subreddits covering indie hacking, SaaS, entrepreneurship.
  * Uses the public JSON endpoint (no auth required).
  */
 
-const SUBREDDITS = ['indiehackers', 'entrepreneur', 'SideProject'];
+const SUBREDDITS = [
+  'indiehackers',
+  'entrepreneur',
+  'SideProject',
+  'SaaS',
+  'microsaas',
+  'startups',
+  'buildinpublic',
+  'nocodesaas',
+];
 
 export async function fetchRedditPosts(): Promise<CollectedArticle[]> {
   const all: CollectedArticle[] = [];
@@ -21,7 +30,7 @@ export async function fetchRedditPosts(): Promise<CollectedArticle[]> {
 
       for (const p of data.data?.children ?? []) {
         const d = p.data as Record<string, unknown>;
-        if ((d.score as number) < 20) continue;
+        if ((d.score as number) < 10) continue;
 
         all.push({
           source: 'reddit',
