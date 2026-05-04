@@ -19,7 +19,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid source' }, { status: 400 });
   }
 
-  const supabase = createServiceClient();
+  let supabase: ReturnType<typeof createServiceClient>;
+  try {
+    supabase = createServiceClient();
+  } catch (e) {
+    return NextResponse.json(
+      { error: `Supabase config: ${e instanceof Error ? e.message : String(e)}` },
+      { status: 500 }
+    );
+  }
 
   // Determine sort column and direction
   let orderColumn = 'created_at';
@@ -55,7 +63,10 @@ export async function GET(request: NextRequest) {
   const { data, error, count } = await query;
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message, code: error.code, hint: error.hint },
+      { status: 500 }
+    );
   }
 
   const res = NextResponse.json({
