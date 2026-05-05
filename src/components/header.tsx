@@ -84,6 +84,8 @@ export function Header() {
 
   const navItems: NavItem[] = [
     { href: '/articles', label: t.common.articles.toUpperCase() },
+    { href: '/weekly', label: t.common.weekly.toUpperCase() },
+    { href: '/dashboard', label: 'MRR' },
     { href: '/pricing', label: t.common.pricing.toUpperCase() },
   ];
 
@@ -155,6 +157,15 @@ export function Header() {
           {/* Auth */}
           {user ? (
             <div className="flex items-center gap-2">
+              <Link
+                href="/bookmarks"
+                className="text-[var(--ink-5)] hover:text-[var(--paper-2)] p-1.5 rounded-md hover:bg-[var(--ink-2)] transition-colors"
+                title={t.bookmarks?.heading || 'Bookmarks'}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+                </svg>
+              </Link>
               <Link
                 href="/settings"
                 className="text-[var(--ink-5)] hover:text-[var(--paper-2)] p-1.5 rounded-md hover:bg-[var(--ink-2)] transition-colors"
