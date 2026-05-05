@@ -74,6 +74,9 @@ export const viewport: Viewport = {
   themeColor: '#0B0B0C',
 };
 
+// Inline script to prevent flash of wrong theme on load
+const themeScript = `(function(){try{var t=localStorage.getItem('ir-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light')}else if(!t&&window.matchMedia('(prefers-color-scheme:light)').matches){document.documentElement.setAttribute('data-theme','light')}}catch(e){}})()`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -84,6 +87,9 @@ export default function RootLayout({
       lang="ja"
       className={`${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="min-h-full flex flex-col">
         <ClientLayout>{children}</ClientLayout>
       </body>

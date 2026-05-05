@@ -45,7 +45,7 @@ export async function translateAndEnrich(article: {
   const industryHints = buildIndustryHints();
 
   const message = await getClient().messages.create({
-    model: 'claude-sonnet-4-5',
+    model: 'claude-sonnet-4-5-20250929',
     max_tokens: 6000,
     system: `あなたはPerplexity AIレベルの市場分析能力を持つビジネスアナリストです。
 海外のインディーハッカー事例を分析し、グローバル市場での応用可能性を深く掘り下げてください。

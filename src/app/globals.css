@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
-:root {
+:root,
+[data-theme="dark"] {
   /* INK / canvas */
   --ink-0: #0B0B0C;
   --ink-1: #141416;
@@ -41,6 +42,34 @@
   /* GEOMETRY */
   --radius:      0;
   --radius-pill: 9999px;
+}
+
+[data-theme="light"] {
+  /* INK / canvas — inverted for light mode */
+  --ink-0: #FFFFFF;
+  --ink-1: #F7F7F5;
+  --ink-2: #EAEAE7;
+  --ink-3: #DDDDD9;
+  --ink-4: #B0ADA6;
+  --ink-5: #7A776F;
+
+  /* PAPER / type — dark text on light bg */
+  --paper-1: #6B6860;
+  --paper-2: #3D3B37;
+  --paper-3: #1A1918;
+
+  /* SIGNAL — slightly deeper for contrast on white */
+  --signal-gold: #B8882E;
+  --signal-live: #4D8A65;
+  --signal-warn: #C04D3E;
+
+  /* SOURCES — slightly adjusted for light bg contrast */
+  --src-hn:     #E85500;
+  --src-ph:     #C04424;
+  --src-reddit: #E83D00;
+  --src-x:      #1A1918;
+  --src-ih:     #7C5FCF;
+  --src-user:   #4D8A65;
 }
 
 @theme inline {
@@ -133,6 +162,7 @@ body {
   background: linear-gradient(90deg, var(--ink-1) 25%, var(--ink-2) 50%, var(--ink-1) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
+  border-radius: 4px;
 }
 
 /* Scrollbar */
@@ -140,6 +170,17 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--ink-3); }
 ::-webkit-scrollbar-thumb:hover { background: var(--ink-4); }
+
+/* Light mode header blur */
+[data-theme="light"] header {
+  background: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Light mode selection */
+[data-theme="light"] ::selection {
+  background: rgba(184, 136, 46, 0.2);
+  color: var(--paper-3);
+}
 
 /* Source badges */
 .src-badge {

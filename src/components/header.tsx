@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useI18n } from '@/i18n/context';
 import { LanguageSelector } from './language-selector';
+import { ThemeToggle } from './theme-toggle';
 import type { User } from '@supabase/supabase-js';
 
 /* ------------------------------------------------------------------ */
@@ -88,11 +89,7 @@ export function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-50 h-[60px] flex items-center border-b border-[var(--ink-2)] transition-all duration-300 ${
-        scrolled
-          ? 'bg-[rgba(11,11,12,0.85)] backdrop-blur-[12px]'
-          : 'bg-[rgba(11,11,12,0.85)] backdrop-blur-[12px]'
-      }`}
+      className="sticky top-0 z-50 h-[60px] flex items-center border-b border-[var(--ink-2)] transition-all duration-300 bg-[var(--ink-0)]/85 backdrop-blur-[12px]"
     >
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 flex items-center justify-between">
         {/* ---- Logo ------------------------------------------------ */}
@@ -148,6 +145,9 @@ export function Header() {
               LIVE
             </span>
           </div>
+
+          {/* Theme toggle */}
+          <ThemeToggle />
 
           {/* Language selector */}
           <LanguageSelector />
@@ -210,7 +210,7 @@ export function Header() {
 
       {/* ---- Mobile menu ------------------------------------------- */}
       {menuOpen && (
-        <div className="md:hidden absolute top-[60px] left-0 right-0 border-t border-[var(--ink-2)] bg-[var(--ink-1)]/95 backdrop-blur-[12px] animate-fade-in z-40">
+        <div className="md:hidden absolute top-[60px] left-0 right-0 border-t border-[var(--ink-2)] bg-[var(--ink-0)]/95 backdrop-blur-[12px] animate-fade-in z-40">
           <div className="px-4 py-4 space-y-1">
             {navItems.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -245,7 +245,8 @@ export function Header() {
               </span>
             </div>
 
-            <div className="pt-2 pb-1 px-3">
+            <div className="pt-2 pb-1 px-3 flex items-center gap-3">
+              <ThemeToggle />
               <LanguageSelector />
             </div>
 

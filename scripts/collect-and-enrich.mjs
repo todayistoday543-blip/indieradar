@@ -17,6 +17,8 @@
  *   node scripts/collect-and-enrich.mjs --limit 10  (process max 10 articles)
  *   node scripts/collect-and-enrich.mjs --source hn (only HN)
  *   node scripts/collect-and-enrich.mjs --source reddit (only Reddit)
+ *   node scripts/collect-and-enrich.mjs --source producthunt (only PH)
+ *   node scripts/collect-and-enrich.mjs --source indiehackers (only IH)
  */
 
 import { readFileSync } from 'fs';
@@ -52,6 +54,7 @@ loadEnv();
 // Parse args
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes('--dry-run');
+const SKIP_AI = args.includes('--skip-ai');
 const LIMIT = (() => {
   const idx = args.indexOf('--limit');
   return idx !== -1 ? parseInt(args[idx + 1]) || 20 : 20;
@@ -76,8 +79,8 @@ function validateConfig() {
   if (!SUPABASE_KEY || SUPABASE_KEY.includes('your-') || SUPABASE_KEY === 'placeholder') {
     issues.push('SUPABASE_SERVICE_ROLE_KEY is not set (has placeholder value)');
   }
-  if (!ANTHROPIC_KEY || ANTHROPIC_KEY.includes('your-key') || ANTHROPIC_KEY === 'placeholder') {
-    issues.push('ANTHROPIC_API_KEY is not set (has placeholder value)');
+  if (!SKIP_AI && (!ANTHROPIC_KEY || ANTHROPIC_KEY.includes('your-key') || ANTHROPIC_KEY === 'placeholder')) {
+    issues.push('ANTHROPIC_API_KEY is not set (has placeholder value). Use --skip-ai to skip AI enrichment.');
   }
   return issues;
 }
@@ -93,10 +96,18 @@ const REVENUE_KEYWORDS = [
   'launched', 'making money', 'first sale'
 ];
 
+// High-value: explicit dollar amounts in title
+const DOLLAR_PATTERN = /\$[\d,.]+[kK]?(?:\/mo|\/month| MRR| ARR| revenue)?/;
+const MRR_PATTERN = /[\d,.]+[kK]?\s*(?:MRR|ARR|\/mo|\/month|per month|a month)/i;
+
 function revenueScore(text) {
   if (!text) return 0;
   const lower = text.toLowerCase();
-  return REVENUE_KEYWORDS.filter(kw => lower.includes(kw)).length;
+  let score = REVENUE_KEYWORDS.filter(kw => lower.includes(kw)).length;
+  // Massive boost for explicit dollar amounts
+  if (DOLLAR_PATTERN.test(text)) score += 10;
+  if (MRR_PATTERN.test(text)) score += 8;
+  return score;
 }
 
 function sleep(ms) {
@@ -108,18 +119,28 @@ function sleep(ms) {
 // ─────────────────────────────────────────────
 async function fetchHN() {
   const queries = [
-    { q: 'Show HN MRR', tag: 'story', min_points: 15 },
-    { q: 'Show HN revenue', tag: 'story', min_points: 15 },
-    { q: 'MRR', tag: 'show_hn', min_points: 10 },
-    { q: 'revenue profit launched', tag: 'show_hn', min_points: 10 },
-    { q: 'bootstrapped profitable', tag: 'story', min_points: 20 },
-    { q: 'side project income', tag: 'story', min_points: 15 },
-    { q: 'indie hacker', tag: 'story', min_points: 10 },
-    { q: 'launched my SaaS', tag: 'story', min_points: 10 },
+    // Explicit revenue mentions
+    { q: 'Show HN MRR', tag: 'story', min_points: 10 },
+    { q: 'Show HN revenue', tag: 'story', min_points: 10 },
+    { q: 'MRR', tag: 'show_hn', min_points: 5 },
+    { q: '$1k MRR', tag: 'story', min_points: 5 },
+    { q: '$5k MRR', tag: 'story', min_points: 5 },
     { q: '$10k MRR', tag: 'story', min_points: 5 },
-    { q: 'making money side project', tag: 'story', min_points: 10 },
-    { q: 'quit job startup', tag: 'story', min_points: 20 },
+    { q: '$20k MRR', tag: 'story', min_points: 5 },
+    { q: '$50k MRR', tag: 'story', min_points: 5 },
+    { q: '$100k ARR', tag: 'story', min_points: 5 },
+    { q: 'revenue profit launched', tag: 'show_hn', min_points: 8 },
+    { q: 'first paying customer', tag: 'story', min_points: 5 },
+    { q: 'hit revenue milestone', tag: 'story', min_points: 5 },
+    // Growth stories
+    { q: 'bootstrapped profitable', tag: 'story', min_points: 15 },
+    { q: 'side project income', tag: 'story', min_points: 10 },
+    { q: 'making money side project', tag: 'story', min_points: 8 },
+    { q: 'passive income', tag: 'story', min_points: 10 },
     { q: 'ramen profitable', tag: 'story', min_points: 5 },
+    { q: 'quit job startup revenue', tag: 'story', min_points: 15 },
+    { q: 'SaaS launched customers', tag: 'story', min_points: 8 },
+    { q: 'indie hacker revenue', tag: 'story', min_points: 5 },
   ];
 
   const all = [];
@@ -160,18 +181,38 @@ async function fetchHN() {
 // ─────────────────────────────────────────────
 async function fetchReddit() {
   const subreddits = [
+    // Revenue-focused communities
     { name: 'indiehackers', sort: 'hot' },
     { name: 'indiehackers', sort: 'top', t: 'week' },
-    { name: 'entrepreneur', sort: 'hot' },
-    { name: 'SideProject', sort: 'hot' },
+    { name: 'indiehackers', sort: 'top', t: 'month' },
     { name: 'SaaS', sort: 'hot' },
     { name: 'SaaS', sort: 'top', t: 'week' },
+    { name: 'SaaS', sort: 'top', t: 'month' },
     { name: 'microsaas', sort: 'hot' },
     { name: 'microsaas', sort: 'top', t: 'month' },
-    { name: 'startups', sort: 'hot' },
-    { name: 'buildinpublic', sort: 'hot' },
-    { name: 'nocodesaas', sort: 'hot' },
+    { name: 'microsaas', sort: 'top', t: 'year' },
     { name: 'EntrepreneurRideAlong', sort: 'hot' },
+    { name: 'EntrepreneurRideAlong', sort: 'top', t: 'month' },
+    { name: 'buildinpublic', sort: 'hot' },
+    { name: 'buildinpublic', sort: 'top', t: 'month' },
+    // Broader but revenue-rich communities
+    { name: 'entrepreneur', sort: 'hot' },
+    { name: 'entrepreneur', sort: 'top', t: 'week' },
+    { name: 'SideProject', sort: 'hot' },
+    { name: 'SideProject', sort: 'top', t: 'month' },
+    { name: 'startups', sort: 'hot' },
+    { name: 'startups', sort: 'top', t: 'month' },
+    { name: 'nocodesaas', sort: 'hot' },
+    { name: 'nocodesaas', sort: 'top', t: 'month' },
+    // Additional revenue-evidence communities
+    { name: 'juststart', sort: 'top', t: 'month' },
+    { name: 'passive_income', sort: 'hot' },
+    { name: 'passive_income', sort: 'top', t: 'month' },
+    { name: 'sweatystartup', sort: 'hot' },
+    { name: 'sweatystartup', sort: 'top', t: 'month' },
+    { name: 'Affiliatemarketing', sort: 'top', t: 'month' },
+    { name: 'ecommerce', sort: 'top', t: 'month' },
+    { name: 'digitalnomad', sort: 'top', t: 'month' },
   ];
 
   const all = [];
@@ -217,7 +258,328 @@ async function fetchReddit() {
 }
 
 // ─────────────────────────────────────────────
-// 3. AI Enrichment via Claude API
+// 3. Product Hunt Collector
+// ─────────────────────────────────────────────
+async function fetchProductHunt() {
+  const all = [];
+  const seen = new Set();
+
+  // Source 1: PH Atom RSS feed (public, reliable)
+  console.log('    [PH] Fetching Atom feed...');
+  try {
+    const res = await fetch('https://www.producthunt.com/feed', {
+      headers: { 'User-Agent': 'IndieRadarJP/2.0 (research)' },
+    });
+    if (res.ok) {
+      const xml = await res.text();
+      // Parse Atom entries with regex (no XML parser needed)
+      const entries = xml.match(/<entry>[\s\S]*?<\/entry>/g) || [];
+      for (const entry of entries) {
+        const titleMatch = entry.match(/<title>([\s\S]*?)<\/title>/);
+        const linkMatch = entry.match(/<link[^>]*href="([^"]+)"/);
+        const publishedMatch = entry.match(/<published>([\s\S]*?)<\/published>/);
+        const authorMatch = entry.match(/<name>([\s\S]*?)<\/name>/);
+        const contentMatch = entry.match(/<content[^>]*>([\s\S]*?)<\/content>/);
+
+        const title = titleMatch ? titleMatch[1].trim() : '';
+        const phUrl = linkMatch ? linkMatch[1] : '';
+        if (!title || !phUrl || seen.has(phUrl)) continue;
+        seen.add(phUrl);
+
+        // Extract tagline from content HTML
+        const tagline = contentMatch
+          ? contentMatch[1].replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+              .replace(/<[^>]+>/g, '').trim().split('\n')[0]?.trim() || ''
+          : '';
+
+        // Extract the actual product link from content
+        const productLinkMatch = contentMatch?.[1]?.match(/href="(https:\/\/www\.producthunt\.com\/r\/[^"]+)"/);
+        const productLink = productLinkMatch ? productLinkMatch[1].replace(/&amp;/g, '&') : '';
+
+        all.push({
+          source: 'producthunt',
+          original_url: productLink || phUrl,
+          original_title: tagline ? `${title} — ${tagline}` : title,
+          original_content: tagline,
+          upvotes: 0, // RSS doesn't include vote counts
+          published_at: publishedMatch ? publishedMatch[1] : new Date().toISOString(),
+          author_profile_url: authorMatch
+            ? `https://www.producthunt.com/@${authorMatch[1].trim().toLowerCase().replace(/\s+/g, '')}`
+            : null,
+        });
+      }
+      console.log(`    [PH] Feed: ${all.length} products`);
+    }
+  } catch (err) {
+    console.log(`    [PH] Feed error: ${err.message.slice(0, 60)}`);
+  }
+
+  // Source 2: HN posts about Product Hunt launches
+  console.log('    [PH] Fetching HN cross-references...');
+  const hnQueries = [
+    'Product Hunt launch',
+    'launched Product Hunt',
+    'Show HN product hunt',
+    'product hunt top',
+  ];
+  for (const q of hnQueries) {
+    try {
+      const url = `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(q)}&tags=story&hitsPerPage=30&numericFilters=points>15`;
+      const res = await fetch(url);
+      if (!res.ok) continue;
+      const data = await res.json();
+      for (const hit of data.hits || []) {
+        const articleUrl = hit.url || `https://news.ycombinator.com/item?id=${hit.objectID}`;
+        if (seen.has(articleUrl)) continue;
+        seen.add(articleUrl);
+        all.push({
+          source: 'producthunt',
+          original_url: articleUrl,
+          original_title: hit.title,
+          original_content: hit.story_text || '',
+          upvotes: hit.points,
+          published_at: hit.created_at,
+          author_profile_url: hit.author ? `https://news.ycombinator.com/user?id=${hit.author}` : null,
+        });
+      }
+    } catch (err) {
+      console.log(`    [PH] HN query "${q}" error: ${err.message.slice(0, 60)}`);
+    }
+    await sleep(400);
+  }
+  console.log(`    [PH] After HN: ${all.length} total`);
+
+  // Source 3: Reddit posts about Product Hunt
+  console.log('    [PH] Fetching Reddit cross-references...');
+  const redditQueries = [
+    '"product hunt" launched revenue',
+    '"product hunt" MRR saas',
+    '"producthunt.com" launched',
+    'product hunt launch strategy',
+  ];
+  for (const q of redditQueries) {
+    try {
+      const url = `https://www.reddit.com/search.json?q=${encodeURIComponent(q)}&sort=top&t=year&limit=25`;
+      const res = await fetch(url, {
+        headers: { 'User-Agent': 'IndieRadarJP/2.0 (research)' },
+      });
+      if (!res.ok) continue;
+      const data = await res.json();
+      for (const p of data?.data?.children || []) {
+        const d = p.data;
+        if ((d.score || 0) < 5) continue;
+        const postUrl = d.url || `https://reddit.com${d.permalink}`;
+        if (seen.has(postUrl)) continue;
+        seen.add(postUrl);
+        all.push({
+          source: 'producthunt',
+          original_url: postUrl,
+          original_title: d.title,
+          original_content: (d.selftext || '').slice(0, 5000),
+          upvotes: d.score,
+          published_at: new Date(d.created_utc * 1000).toISOString(),
+          author_profile_url: d.author ? `https://reddit.com/u/${d.author}` : null,
+        });
+      }
+    } catch (err) {
+      console.log(`    [PH] Reddit query error: ${err.message.slice(0, 60)}`);
+    }
+    await sleep(1200);
+  }
+  console.log(`    [PH] After Reddit: ${all.length} total`);
+
+  return all;
+}
+
+// ─────────────────────────────────────────────
+// 4. IndieHackers Collector
+// ─────────────────────────────────────────────
+async function fetchIndieHackers() {
+  const all = [];
+  const seen = new Set();
+
+  // IndieHackers has revenue-tagged posts and milestones
+  // Try their website endpoints
+  const endpoints = [
+    // Top posts
+    { url: 'https://www.indiehackers.com/posts?sort=top', label: 'top posts' },
+    { url: 'https://www.indiehackers.com/posts?sort=top&timeframe=week', label: 'top week' },
+    { url: 'https://www.indiehackers.com/posts?sort=top&timeframe=month', label: 'top month' },
+  ];
+
+  // Try IH's API endpoints
+  const ihApiEndpoints = [
+    'https://www.indiehackers.com/api/posts?sort=top&page=1',
+    'https://www.indiehackers.com/api/posts?sort=top&page=2',
+    'https://www.indiehackers.com/api/posts?sort=hot&page=1',
+    'https://www.indiehackers.com/api/milestones?sort=recent&page=1',
+    'https://www.indiehackers.com/api/milestones?sort=recent&page=2',
+  ];
+
+  for (const endpoint of ihApiEndpoints) {
+    try {
+      const res = await fetch(endpoint, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; IndieRadarJP/2.0)',
+          'Accept': 'application/json',
+        },
+      });
+      if (!res.ok) {
+        console.log(`    [IH] ${endpoint.split('?')[1]} → ${res.status}`);
+        continue;
+      }
+      const data = await res.json();
+      const posts = data?.posts || data?.milestones || data?.data || [];
+
+      for (const post of (Array.isArray(posts) ? posts : [])) {
+        const ihUrl = post.url
+          ? (post.url.startsWith('http') ? post.url : `https://www.indiehackers.com${post.url}`)
+          : `https://www.indiehackers.com/post/${post.id || post._id}`;
+        if (seen.has(ihUrl)) continue;
+        seen.add(ihUrl);
+
+        const title = post.title || post.body?.slice(0, 100) || '';
+        const content = post.body || post.description || post.text || '';
+        const votes = post.votesCount || post.score || post.upvotes || 0;
+
+        if (title.length < 5 && content.length < 20) continue;
+
+        all.push({
+          source: 'indiehackers',
+          original_url: ihUrl,
+          original_title: title,
+          original_content: content.slice(0, 5000),
+          upvotes: votes,
+          published_at: post.createdAt || post.created_at || new Date().toISOString(),
+          author_profile_url: post.user?.username
+            ? `https://www.indiehackers.com/${post.user.username}`
+            : (post.author?.username
+              ? `https://www.indiehackers.com/${post.author.username}`
+              : null),
+        });
+      }
+      console.log(`    [IH] ${endpoint.split('/api/')[1]?.split('?')[0]}: found ${posts.length || 0}`);
+    } catch (err) {
+      console.log(`    [IH] API error: ${err.message.slice(0, 60)}`);
+    }
+    await sleep(1500);
+  }
+
+  // Fallback: scrape the HTML pages for __NEXT_DATA__ or embedded JSON
+  if (all.length === 0) {
+    console.log('    [IH] API failed, trying HTML scraping...');
+    for (const { url, label } of endpoints) {
+      try {
+        const res = await fetch(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'text/html',
+          },
+        });
+        if (!res.ok) continue;
+        const html = await res.text();
+
+        // Try __NEXT_DATA__
+        const nextMatch = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
+        if (nextMatch) {
+          try {
+            const nd = JSON.parse(nextMatch[1]);
+            const posts = nd?.props?.pageProps?.posts || [];
+            for (const post of posts) {
+              const ihUrl = `https://www.indiehackers.com/post/${post.id || post.slug}`;
+              if (seen.has(ihUrl)) continue;
+              seen.add(ihUrl);
+              all.push({
+                source: 'indiehackers',
+                original_url: ihUrl,
+                original_title: post.title || '',
+                original_content: (post.body || '').slice(0, 5000),
+                upvotes: post.votesCount || 0,
+                published_at: post.createdAt || new Date().toISOString(),
+                author_profile_url: post.user?.username
+                  ? `https://www.indiehackers.com/${post.user.username}`
+                  : null,
+              });
+            }
+          } catch { /* parse error */ }
+        }
+
+        // Try window.__DATA__ pattern
+        const dataMatch = html.match(/window\.__DATA__\s*=\s*(\{[\s\S]*?\});\s*<\/script>/);
+        if (dataMatch) {
+          try {
+            const wd = JSON.parse(dataMatch[1]);
+            const posts = wd?.posts || [];
+            for (const post of posts) {
+              const ihUrl = `https://www.indiehackers.com/post/${post.id}`;
+              if (seen.has(ihUrl)) continue;
+              seen.add(ihUrl);
+              all.push({
+                source: 'indiehackers',
+                original_url: ihUrl,
+                original_title: post.title || '',
+                original_content: (post.body || '').slice(0, 5000),
+                upvotes: post.votesCount || 0,
+                published_at: post.createdAt || new Date().toISOString(),
+                author_profile_url: null,
+              });
+            }
+          } catch { /* parse error */ }
+        }
+
+        console.log(`    [IH] ${label}: scraped ${all.length} so far`);
+      } catch (err) {
+        console.log(`    [IH] Scrape ${label} error: ${err.message.slice(0, 60)}`);
+      }
+      await sleep(2000);
+    }
+  }
+
+  // Final fallback: fetch from r/indiehackers on Reddit (which mirrors IH content)
+  if (all.length === 0) {
+    console.log('    [IH] No direct data, fetching from Reddit r/indiehackers with IH tag...');
+    try {
+      const searchQueries = [
+        'site:indiehackers.com revenue',
+        'site:indiehackers.com MRR',
+        'site:indiehackers.com milestone',
+        'indiehackers revenue milestone MRR',
+      ];
+      for (const q of searchQueries) {
+        const url = `https://www.reddit.com/search.json?q=${encodeURIComponent(q)}&sort=top&t=month&limit=25`;
+        const res = await fetch(url, {
+          headers: { 'User-Agent': 'IndieRadarJP/2.0 (research)' },
+        });
+        if (!res.ok) continue;
+        const data = await res.json();
+        for (const p of data?.data?.children || []) {
+          const d = p.data;
+          if ((d.score || 0) < 3) continue;
+          const postUrl = d.url || `https://reddit.com${d.permalink}`;
+          if (seen.has(postUrl)) continue;
+          seen.add(postUrl);
+          all.push({
+            source: 'indiehackers',
+            original_url: postUrl,
+            original_title: d.title,
+            original_content: (d.selftext || '').slice(0, 5000),
+            upvotes: d.score,
+            published_at: new Date(d.created_utc * 1000).toISOString(),
+            author_profile_url: d.author ? `https://reddit.com/u/${d.author}` : null,
+          });
+        }
+        await sleep(1200);
+      }
+    } catch (err) {
+      console.log(`    [IH] Reddit fallback error: ${err.message.slice(0, 60)}`);
+    }
+  }
+
+  return all;
+}
+
+// ─────────────────────────────────────────────
+// 5. AI Enrichment via Claude API
 // ─────────────────────────────────────────────
 async function enrichArticle(article) {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -228,7 +590,7 @@ async function enrichArticle(article) {
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-5-20250514',
+      model: 'claude-sonnet-4-5-20250929',
       max_tokens: 6000,
       system: `あなたはPerplexity AIレベルの市場分析能力を持つビジネスアナリストです。
 海外のインディーハッカー事例を分析し、グローバル市場での応用可能性を深く掘り下げてください。
@@ -284,6 +646,13 @@ ja_summary は合計2500〜3500文字で、以下の7セクションを「## セ
 ソース: ${article.source}
 内容: ${(article.original_content || '').slice(0, 5000)}
 
+【mrr_mentionedの重要なルール】
+- 記事中に具体的な月間収益（MRR/月収/月商）が書かれている場合: その数値をUSD整数で記入（例: $2.5K/mo → 2500）
+- 年間収益（ARR）が書かれている場合: 12で割ってMRRに変換（例: $120K ARR → 10000）
+- 総収益のみの場合: 期間で割って月額に変換
+- 収益の数字が一切ない場合でも、記事の文脈から推定MRRを算出してください（例: "ramen profitable" → 3000, "quit my job" → 5000, "hired first employee" → 15000, "paying customers" → 1000）
+- 絶対にnullを返さないでください。最低でも推定値を入れてください。
+
 【返答形式】必ずこのJSONのみを返してください:
 {
   "ja_title": "日本語タイトル（50字以内、数字を含めてキャッチーに）",
@@ -291,7 +660,7 @@ ja_summary は合計2500〜3500文字で、以下の7セクションを「## セ
   "ja_insight": "グローバルで応用可能な示唆（150字以内）",
   "ja_difficulty": "Easy or Medium or Hard",
   "business_model": "事業モデル名",
-  "mrr_mentioned": null
+  "mrr_mentioned": 数値（USD月額、整数のみ。推定でも必ず入れる）
 }`
       }],
     }),
@@ -308,6 +677,54 @@ ja_summary は合計2500〜3500文字で、以下の7セクションを「## セ
   const match = text.match(/\{[\s\S]*\}/);
   if (!match) throw new Error('Failed to parse Claude JSON response');
   return JSON.parse(match[0]);
+}
+
+// ─────────────────────────────────────────────
+// 3b. Basic enrichment (no AI) — fallback when API unavailable
+// ─────────────────────────────────────────────
+function basicEnrichment(article) {
+  const title = article.original_title || 'Untitled';
+  const content = article.original_content || '';
+
+  // Extract dollar amounts for MRR
+  const dollarMatch = content.match(/\$[\d,.]+[kK]?/);
+  const mrrMatch = content.match(/([\d,.]+)\s*[kK]?\s*(?:MRR|\/mo|\/month|per month)/i);
+  let mrr = 0;
+  if (mrrMatch) {
+    mrr = parseFloat(mrrMatch[1].replace(/,/g, ''));
+    if (/[kK]/.test(mrrMatch[0])) mrr *= 1000;
+  } else if (dollarMatch) {
+    const val = parseFloat(dollarMatch[0].replace(/[\$,]/g, ''));
+    mrr = /[kK]/.test(dollarMatch[0]) ? val * 1000 : val;
+  }
+  if (mrr === 0) mrr = 1000; // default estimate
+
+  // Determine difficulty from content
+  let difficulty = 'Medium';
+  const lower = content.toLowerCase();
+  if (lower.includes('easy') || lower.includes('simple') || lower.includes('no-code') || lower.includes('nocode')) {
+    difficulty = 'Easy';
+  } else if (lower.includes('complex') || lower.includes('machine learning') || lower.includes('ml model') || lower.includes('infrastructure')) {
+    difficulty = 'Hard';
+  }
+
+  // Detect business model
+  let businessModel = 'SaaS';
+  if (lower.includes('marketplace')) businessModel = 'Marketplace';
+  else if (lower.includes('newsletter') || lower.includes('subscription')) businessModel = 'Subscription';
+  else if (lower.includes('e-commerce') || lower.includes('ecommerce') || lower.includes('store')) businessModel = 'E-commerce';
+  else if (lower.includes('api')) businessModel = 'API';
+  else if (lower.includes('agency') || lower.includes('consulting')) businessModel = 'Services';
+  else if (lower.includes('course') || lower.includes('ebook') || lower.includes('template')) businessModel = 'Digital Products';
+
+  return {
+    ja_title: title, // Keep English title (users can see original + on-demand translate)
+    ja_summary: `## この事例のポイント\n${title}\n\n## 元の内容\n${content.slice(0, 1500) || '（原文を参照してください）'}`,
+    ja_insight: `Source: ${article.source}. Revenue signal detected.`,
+    ja_difficulty: difficulty,
+    business_model: businessModel,
+    mrr_mentioned: Math.round(mrr),
+  };
 }
 
 // ─────────────────────────────────────────────
@@ -383,7 +800,7 @@ async function main() {
   console.log('  IndieRadar JP — Collection & Enrichment Pipeline');
   console.log('═'.repeat(60));
   console.log();
-  console.log(`  Mode: ${DRY_RUN ? 'DRY RUN (no AI/DB)' : 'LIVE'}`);
+  console.log(`  Mode: ${DRY_RUN ? 'DRY RUN (no AI/DB)' : SKIP_AI ? 'LIVE (skip AI)' : 'LIVE'}`);
   console.log(`  Limit: ${LIMIT} articles`);
   console.log(`  Source: ${SOURCE_FILTER}`);
   console.log();
@@ -428,6 +845,20 @@ async function main() {
     const redditArticles = await fetchReddit();
     console.log(`  [Reddit] Collected ${redditArticles.length} unique articles`);
     allArticles.push(...redditArticles);
+  }
+
+  if (SOURCE_FILTER === 'all' || SOURCE_FILTER === 'producthunt' || SOURCE_FILTER === 'ph') {
+    console.log('\n  [PH] Fetching from Product Hunt...');
+    const phArticles = await fetchProductHunt();
+    console.log(`  [PH] Collected ${phArticles.length} unique products`);
+    allArticles.push(...phArticles);
+  }
+
+  if (SOURCE_FILTER === 'all' || SOURCE_FILTER === 'indiehackers' || SOURCE_FILTER === 'ih') {
+    console.log('\n  [IH] Fetching from IndieHackers...');
+    const ihArticles = await fetchIndieHackers();
+    console.log(`  [IH] Collected ${ihArticles.length} unique articles`);
+    allArticles.push(...ihArticles);
   }
 
   console.log(`\n  Total collected: ${allArticles.length}`);
@@ -509,9 +940,15 @@ async function main() {
     process.stdout.write(`  ${progress} "${article.original_title.slice(0, 50)}..." `);
 
     try {
-      // Enrich with Claude
-      const enriched = await enrichArticle(article);
-      process.stdout.write('✓AI ');
+      // Enrich with Claude (or basic fallback)
+      let enriched;
+      if (SKIP_AI) {
+        enriched = basicEnrichment(article);
+        process.stdout.write('⊘AI ');
+      } else {
+        enriched = await enrichArticle(article);
+        process.stdout.write('✓AI ');
+      }
 
       // Save to Supabase
       await supabaseInsert(article, enriched);
@@ -524,8 +961,8 @@ async function main() {
       errors++;
     }
 
-    // Rate limiting: 2 second between Claude API calls
-    if (i < toProcess.length - 1) {
+    // Rate limiting: 2 second between Claude API calls (skip when no AI)
+    if (!SKIP_AI && i < toProcess.length - 1) {
       await sleep(2000);
     }
   }

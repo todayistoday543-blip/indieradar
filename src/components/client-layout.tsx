@@ -3,6 +3,8 @@
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { I18nProvider } from '@/i18n/context';
+import { ThemeProvider } from './theme-context';
+import { UserProvider } from './user-context';
 import { Header } from './header';
 import { Footer } from './footer';
 import type { ReactNode } from 'react';
@@ -17,11 +19,15 @@ function ScrollToTop() {
 
 export function ClientLayout({ children }: { children: ReactNode }) {
   return (
-    <I18nProvider>
-      <ScrollToTop />
-      <Header />
-      <main className="flex-1">{children}</main>
-      <Footer />
-    </I18nProvider>
+    <ThemeProvider>
+      <I18nProvider>
+        <UserProvider>
+          <ScrollToTop />
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </UserProvider>
+      </I18nProvider>
+    </ThemeProvider>
   );
 }

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useI18n } from '@/i18n/context';
+import { useUser } from '@/components/user-context';
 import Link from 'next/link';
 
 interface Article {
@@ -160,32 +161,23 @@ function getSessionId(): string {
 /* ── Component ─────────────────────────────────────────────── */
 
 export default function ArticleDetailPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const { userId, plan, countryCode, countryName } = useUser();
   const params = useParams();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [prompt, setPrompt] = useState<string | null>(null);
   const [promptLoading, setPromptLoading] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
   const [localUpvotes, setLocalUpvotes] = useState(0);
+  const [translatedSummary, setTranslatedSummary] = useState<string | null>(null);
+  const [translatedInsight, setTranslatedInsight] = useState<string | null>(null);
+  const [translating, setTranslating] = useState(false);
   const viewTracked = useRef(false);
 
-  // Fetch auth + profile
-  useEffect(() => {
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (user) {
-        setUserId(user.id);
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('country_code, country_name')
-          .eq('id', user.id)
-          .single();
-        if (profile) setUserProfile(profile);
-      }
-    });
-  }, []);
+  // Access levels: free = preview only, basic = full content, pro = full + AI guide
+  const canReadFull = plan === 'basic' || plan === 'pro';
+  const canUseGuide = plan === 'pro';
 
   // Fetch article
   useEffect(() => {
@@ -214,6 +206,55 @@ export default function ArticleDetailPage() {
     }).catch(() => {});
   }, [article?.id]);
 
+  // Set dynamic document title and OG meta tags
+  useEffect(() => {
+    if (!article) return;
+
+    const title = locale === 'ja'
+      ? (article.ja_title || article.original_title || '')
+      : (article.original_title || article.ja_title || '');
+
+    if (title) {
+      document.title = `${title} | IndieRadar JP`;
+    }
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://indieradar.jp';
+    const ogImageUrl = `${appUrl}/api/og?title=${encodeURIComponent(title)}`;
+    const pageUrl = `${appUrl}/articles/${article.id}`;
+    const description = (article.ja_summary || '').slice(0, 150);
+
+    // Helper to set or create a meta tag
+    const setMeta = (property: string, content: string) => {
+      let el = document.querySelector(`meta[property="${property}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute('property', property);
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', content);
+    };
+
+    const setMetaName = (name: string, content: string) => {
+      let el = document.querySelector(`meta[name="${name}"]`);
+      if (!el) {
+        el = document.createElement('meta');
+        el.setAttribute('name', name);
+        document.head.appendChild(el);
+      }
+      el.setAttribute('content', content);
+    };
+
+    setMeta('og:title', title);
+    setMeta('og:description', description);
+    setMeta('og:image', ogImageUrl);
+    setMeta('og:url', pageUrl);
+    setMeta('og:type', 'article');
+    setMetaName('twitter:card', 'summary_large_image');
+    setMetaName('twitter:title', title);
+    setMetaName('twitter:description', description);
+    setMetaName('twitter:image', ogImageUrl);
+  }, [article, locale]);
+
   // Check vote status
   useEffect(() => {
     if (!userId || !article?.id) return;
@@ -241,7 +282,7 @@ export default function ArticleDetailPage() {
   }, [userId, article]);
 
   const handleGenerateGuide = useCallback(async () => {
-    if (!userId || !article) return;
+    if (!userId || !article || !canUseGuide) return;
     setPromptLoading(true);
     try {
       const res = await fetch('/api/generate-prompt', {
@@ -250,8 +291,9 @@ export default function ArticleDetailPage() {
         body: JSON.stringify({
           article_id: article.id,
           user_id: userId,
-          country_name: userProfile?.country_name || null,
-          country_code: userProfile?.country_code || null,
+          country_name: countryName || null,
+          country_code: countryCode || null,
+          locale: locale,
         }),
       });
       const data = await res.json();
@@ -261,7 +303,36 @@ export default function ArticleDetailPage() {
       alert('Error generating guide');
     }
     setPromptLoading(false);
-  }, [userId, article, userProfile]);
+  }, [userId, article, countryName, countryCode, locale, canUseGuide]);
+
+  // On-demand translation for non-ja locales
+  const handleTranslate = useCallback(async () => {
+    if (!article || locale === 'ja') return;
+    setTranslating(true);
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          article_id: article.id,
+          locale: locale,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        if (data.summary) setTranslatedSummary(data.summary);
+        if (data.insight) setTranslatedInsight(data.insight);
+      }
+    } catch { /* silently fail */ }
+    setTranslating(false);
+  }, [article, locale]);
+
+  // Auto-translate when locale is not Japanese
+  useEffect(() => {
+    if (article && locale !== 'ja' && !translatedSummary) {
+      handleTranslate();
+    }
+  }, [article, locale, translatedSummary, handleTranslate]);
 
   if (loading) {
     return (
@@ -292,7 +363,14 @@ export default function ArticleDetailPage() {
   const sourceDomain = (() => {
     try { return new URL(sourceUrl).hostname; } catch { return sourceUrl; }
   })();
-  const sections = parseSections(article.ja_summary || '');
+  // Locale-aware content selection
+  const displayTitle = locale === 'ja'
+    ? (article.ja_title || article.original_title || '')
+    : (article.original_title || article.ja_title || '');
+
+  const summaryContent = (locale !== 'ja' && translatedSummary) ? translatedSummary : (article.ja_summary || '');
+  const insightContent = (locale !== 'ja' && translatedInsight) ? translatedInsight : (article.ja_insight || '');
+  const sections = parseSections(summaryContent);
 
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 py-10 animate-fade-in">
@@ -376,30 +454,85 @@ export default function ArticleDetailPage() {
 
       {/* ── Title ────────────────────────────────────────────── */}
       <h1 className="text-2xl sm:text-3xl font-bold text-[var(--paper-3)] mb-6 leading-snug">
-        {article.ja_title}
+        {displayTitle}
       </h1>
+
+      {/* ── Translation indicator ────────────────────────────── */}
+      {locale !== 'ja' && translating && (
+        <div className="flex items-center gap-2 mb-4 px-3 py-2 bg-[rgba(212,162,74,0.08)] border border-[rgba(212,162,74,0.2)] rounded-lg">
+          <svg className="animate-spin h-4 w-4 text-[var(--signal-gold)]" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          <span className="text-sm text-[var(--signal-gold)]">{t.detail.translating}</span>
+        </div>
+      )}
 
       {/* ── Structured Content Sections ──────────────────────── */}
       <div className="space-y-6 mb-8">
-        {sections.map((section, i) => (
-          <div key={i}>
-            {section.heading && (
-              <div className="flex items-center gap-2 mb-2">
-                <SectionIcon type={section.type} />
-                <h2 className="text-lg font-bold text-[var(--paper-3)]" style={{ fontFamily: 'var(--font-display)' }}>
-                  {section.heading}
-                </h2>
+        {sections.map((section, i) => {
+          // Free users: show first section only, blur the rest
+          const isGated = !canReadFull && i > 0;
+          if (isGated) return null;
+          return (
+            <div key={i}>
+              {section.heading && (
+                <div className="flex items-center gap-2 mb-2">
+                  <SectionIcon type={section.type} />
+                  <h2 className="text-lg font-bold text-[var(--paper-3)]" style={{ fontFamily: 'var(--font-display)' }}>
+                    {section.heading}
+                  </h2>
+                </div>
+              )}
+              <div className="text-[var(--paper-1)] leading-relaxed text-[15px] whitespace-pre-line pl-0 sm:pl-7">
+                {section.body}
               </div>
-            )}
-            <div className="text-[var(--paper-1)] leading-relaxed text-[15px] whitespace-pre-line pl-0 sm:pl-7">
-              {section.body}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* ── Author profile link ──────────────────────────────── */}
-      {article.author_profile_url && (
+      {/* ── Paywall Gate (Free users) ────────────────────────── */}
+      {!canReadFull && sections.length > 1 && (
+        <div className="relative mb-8">
+          {/* Blurred preview hint */}
+          <div className="relative overflow-hidden rounded-2xl" style={{ maxHeight: '120px' }}>
+            <div className="text-[var(--paper-1)] leading-relaxed text-[15px] whitespace-pre-line opacity-40" style={{ filter: 'blur(4px)', userSelect: 'none' }}>
+              {sections.slice(1, 3).map(s => s.body).join('\n\n').slice(0, 300)}
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[var(--ink-0)]/60 to-[var(--ink-0)]" />
+          </div>
+
+          {/* CTA */}
+          <div className="border border-[var(--signal-gold)]/30 bg-[rgba(212,162,74,0.06)] rounded-2xl p-6 mt-3 text-center">
+            <svg className="w-8 h-8 text-[var(--signal-gold)] mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+            <h3 className="text-lg font-bold text-[var(--paper-3)] mb-2">{t.detail.paywall_title}</h3>
+            <p className="text-sm text-[var(--ink-5)] mb-5 max-w-md mx-auto">{t.detail.paywall_desc}</p>
+            <div className="flex items-center justify-center gap-3">
+              {!userId ? (
+                <Link
+                  href="/auth/login"
+                  className="bg-[var(--signal-gold)] text-[var(--ink-0)] px-6 py-2.5 text-sm font-semibold hover:opacity-90 transition rounded-xl"
+                >
+                  {t.detail.paywall_login}
+                </Link>
+              ) : (
+                <Link
+                  href="/pricing"
+                  className="bg-[var(--signal-gold)] text-[var(--ink-0)] px-6 py-2.5 text-sm font-semibold hover:opacity-90 transition rounded-xl"
+                >
+                  {t.detail.paywall_button}
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Author profile link (paid only) ──────────────────── */}
+      {canReadFull && article.author_profile_url && (
         <div className="bg-[var(--ink-1)] rounded-xl p-3 mb-6 text-sm border border-[var(--ink-2)] flex items-center gap-2">
           <svg className="w-4 h-4 text-[var(--ink-5)] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
@@ -410,8 +543,8 @@ export default function ArticleDetailPage() {
         </div>
       )}
 
-      {/* ── Global Insight ───────────────────────────────────── */}
-      {article.ja_insight && (
+      {/* ── Global Insight (paid only) ───────────────────────── */}
+      {canReadFull && (article.ja_insight || insightContent) && (
         <div className="bg-gradient-to-r from-[rgba(212,162,74,0.08)] to-transparent rounded-2xl p-5 mb-6 border border-[rgba(212,162,74,0.2)]">
           <p className="text-sm font-bold text-[var(--signal-gold)] mb-1.5 flex items-center gap-1.5">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -419,12 +552,15 @@ export default function ArticleDetailPage() {
             </svg>
             {t.detail.insight_heading}
           </p>
-          <p className="text-sm text-[var(--paper-1)] leading-relaxed">{article.ja_insight}</p>
+          <p className="text-sm text-[var(--paper-1)] leading-relaxed">{insightContent}</p>
+          {locale !== 'ja' && translating && (
+            <p className="text-xs text-[var(--ink-5)] mt-2 italic">{t.detail.translating || 'Translating...'}</p>
+          )}
         </div>
       )}
 
-      {/* ── Country-specific context ─────────────────────────── */}
-      {userProfile?.country_name && (
+      {/* ── Country-specific context (paid only) ─────────────── */}
+      {canReadFull && countryName && (
         <div className="bg-gradient-to-r from-[rgba(99,102,241,0.08)] to-transparent rounded-2xl p-5 mb-6 border border-[rgba(99,102,241,0.2)]">
           <p className="text-sm font-bold text-indigo-400 mb-1.5 flex items-center gap-1.5">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -447,17 +583,28 @@ export default function ArticleDetailPage() {
         </h2>
 
         {!userId ? (
+          /* Not logged in */
           <div>
             <p className="text-sm text-[var(--ink-5)] mb-4">{t.detail.guide_login_desc}</p>
             <Link href="/auth/login" className="inline-flex items-center gap-2 rounded-xl bg-[var(--signal-gold)] px-6 py-2.5 text-[var(--ink-0)] text-sm font-medium hover:opacity-90 transition">
               {t.detail.guide_login_button}
             </Link>
           </div>
+        ) : !canUseGuide ? (
+          /* Logged in but not Pro */
+          <div>
+            <p className="text-sm text-[var(--ink-5)] mb-2">{t.detail.upgrade_pro_desc}</p>
+            <Link href="/pricing" className="inline-flex items-center gap-2 rounded-xl border border-[var(--signal-gold)]/40 bg-[rgba(212,162,74,0.08)] px-6 py-2.5 text-[var(--signal-gold)] text-sm font-medium hover:bg-[rgba(212,162,74,0.15)] transition">
+              {t.detail.upgrade_pro_button}
+            </Link>
+          </div>
         ) : prompt ? (
+          /* Pro with generated prompt */
           <div className="bg-[var(--ink-0)] rounded-xl p-5 text-sm text-[var(--paper-1)] whitespace-pre-wrap leading-relaxed border border-[var(--ink-2)] max-h-[600px] overflow-y-auto">
             {prompt}
           </div>
         ) : (
+          /* Pro, ready to generate */
           <div>
             <p className="text-sm text-[var(--ink-5)] mb-4">{t.detail.guide_desc}</p>
             <button
@@ -488,7 +635,7 @@ export default function ArticleDetailPage() {
       {/* ── Bottom nav ───────────────────────────────────────── */}
       <div className="flex items-center justify-between pt-5 border-t border-[var(--ink-2)]">
         <span className="text-xs text-[var(--ink-5)]">
-          {new Date(article.created_at).toLocaleDateString('ja-JP')}
+          {new Date(article.created_at).toLocaleDateString(locale === 'ja' ? 'ja-JP' : locale === 'zh' ? 'zh-CN' : locale === 'ko' ? 'ko-KR' : locale === 'hi' ? 'hi-IN' : locale === 'de' ? 'de-DE' : locale === 'es' ? 'es-ES' : locale === 'fr' ? 'fr-FR' : locale === 'pt' ? 'pt-BR' : 'en-US')}
         </span>
         <Link href="/articles" className="text-sm text-[var(--signal-gold)] font-medium hover:opacity-80 transition flex items-center gap-1">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>

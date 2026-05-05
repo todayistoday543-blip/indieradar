@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { ArticleCard } from '@/components/article-card';
 import { useI18n } from '@/i18n/context';
 
 interface Article {
   id: string;
   source: string;
+  original_title?: string;
   ja_title: string;
   ja_summary: string;
   ja_insight: string;
@@ -65,6 +66,14 @@ function IHIcon({ size = 16 }: { size?: number }) {
   );
 }
 
+function ChevronDown({ className }: { className?: string }) {
+  return (
+    <svg className={className} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+    </svg>
+  );
+}
+
 const SOURCE_TABS = [
   { value: '',              label: 'All',            icon: null },
   { value: 'hackernews',    label: 'Hacker News',    icon: HNIcon },
@@ -73,30 +82,45 @@ const SOURCE_TABS = [
   { value: 'indiehackers',  label: 'Indie Hackers',  icon: IHIcon },
 ];
 
+const CATEGORY_KEYS = [
+  '', 'saas', 'marketplace', 'ecommerce', 'api', 'digital_products',
+  'services', 'content', 'community', 'opensource', 'hardware', 'subscription',
+] as const;
+
+const SORT_KEYS = ['priority', 'new', 'revenue', 'easy', 'small', 'heat', 'upvotes', 'views'] as const;
+
 // Columns: ICON | SIGNAL · EXTRACTION | MRR | HEAT | →
 const LIST_COLUMNS = '40px 1fr 130px 120px 40px';
 
-const SORT_OPTIONS = [
-  { value: 'new', label: 'NEW' },
-  { value: 'heat', label: 'HEAT' },
-  { value: 'upvotes', label: 'UPVOTES' },
-  { value: 'views', label: 'VIEWS' },
-];
-
 export default function ArticlesPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [source, setSource] = useState<string>('');
-  const [sort, setSort] = useState<string>('new');
+  const [sort, setSort] = useState<string>('priority');
+  const [category, setCategory] = useState<string>('');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const categoryRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (categoryRef.current && !categoryRef.current.contains(e.target as Node)) {
+        setCategoryOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   useEffect(() => {
     async function load() {
       setLoading(true);
       const params = new URLSearchParams({ page: String(page), sort });
       if (source) params.set('source', source);
+      if (category) params.set('category', category);
 
       const res = await fetch(`/api/articles?${params}`);
       const data = await res.json();
@@ -105,24 +129,27 @@ export default function ArticlesPage() {
       setLoading(false);
     }
     load();
-  }, [page, source, sort]);
+  }, [page, source, sort, category]);
+
+  const categoryLabel = (key: string) => {
+    if (!key) return t.articles.cat_all;
+    return t.articles[`cat_${key}` as keyof typeof t.articles] || key;
+  };
 
   return (
     <div className="min-h-screen">
       {/* ── Filter Bar ─────────────────────────────────────────── */}
-      <div
-        className="border-b border-[var(--ink-2)] overflow-x-auto"
-        style={{ padding: '20px 40px' }}
-      >
-        <div className="flex items-center gap-4 min-w-max">
+      <div className="border-b border-[var(--ink-2)]" style={{ padding: '16px 40px' }}>
+        {/* Row 1: Source + Category */}
+        <div className="flex items-center gap-4 flex-wrap mb-3">
           <span
             className="text-[11px] tracking-[0.2em] text-[var(--ink-4)] shrink-0 uppercase"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
-            SOURCE_
+            {t.articles.filter_source}
           </span>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 flex-wrap">
             {SOURCE_TABS.map((tab) => {
               const isActive = source === tab.value;
               const Icon = tab.icon;
@@ -150,31 +177,86 @@ export default function ArticlesPage() {
             })}
           </div>
 
-          <div className="flex-1" />
+          {/* Divider */}
+          <div className="w-px h-5 bg-[var(--ink-3)] hidden sm:block" />
 
-          <div className="flex items-center gap-3 shrink-0">
+          {/* Category Dropdown */}
+          <div className="flex items-center gap-2">
             <span
               className="text-[11px] tracking-[0.2em] text-[var(--ink-4)] shrink-0 uppercase"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
-              SORT_
+              {t.articles.filter_category}
             </span>
-            <div className="flex items-center gap-1.5">
-              {SORT_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => { setSort(opt.value); setPage(1); }}
-                  className={`px-2.5 py-1 text-[11px] tracking-[0.06em] transition-all ${
-                    sort === opt.value
-                      ? 'bg-[var(--paper-3)] text-[var(--ink-0)] border border-[var(--paper-3)] font-semibold'
-                      : 'bg-transparent text-[var(--paper-1)] border border-[var(--ink-3)] hover:border-[var(--ink-4)] hover:text-[var(--paper-3)]'
-                  }`}
-                  style={{ fontFamily: 'var(--font-mono)' }}
-                >
-                  {opt.label}
-                </button>
-              ))}
+            <div className="relative" ref={categoryRef}>
+              <button
+                onClick={() => setCategoryOpen(!categoryOpen)}
+                className={`
+                  flex items-center gap-2 px-3 py-1.5 text-[11px] tracking-[0.06em] transition-all min-w-[140px] justify-between
+                  ${
+                    category
+                      ? 'bg-[var(--signal-gold)]/10 text-[var(--signal-gold)] border border-[var(--signal-gold)]/40'
+                      : 'bg-transparent text-[var(--paper-1)] border border-[var(--ink-3)] hover:border-[var(--ink-4)]'
+                  }
+                `}
+                style={{ fontFamily: 'var(--font-mono)' }}
+              >
+                <span>{categoryLabel(category)}</span>
+                <ChevronDown className={`transition-transform ${categoryOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {categoryOpen && (
+                <div className="absolute top-full left-0 mt-1 w-[200px] bg-[var(--ink-0)] border border-[var(--ink-3)] shadow-lg z-50 max-h-[300px] overflow-y-auto animate-fade-in">
+                  {CATEGORY_KEYS.map((key) => (
+                    <button
+                      key={key}
+                      onClick={() => {
+                        setCategory(key);
+                        setPage(1);
+                        setCategoryOpen(false);
+                      }}
+                      className={`
+                        w-full text-left px-3 py-2 text-[12px] tracking-[0.04em] transition-colors
+                        ${
+                          category === key
+                            ? 'bg-[var(--signal-gold)]/10 text-[var(--signal-gold)]'
+                            : 'text-[var(--paper-1)] hover:bg-[var(--ink-2)] hover:text-[var(--paper-3)]'
+                        }
+                      `}
+                      style={{ fontFamily: 'var(--font-mono)' }}
+                    >
+                      {categoryLabel(key)}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
+          </div>
+        </div>
+
+        {/* Row 2: Sort options */}
+        <div className="flex items-center gap-3">
+          <span
+            className="text-[11px] tracking-[0.2em] text-[var(--ink-4)] shrink-0 uppercase"
+            style={{ fontFamily: 'var(--font-mono)' }}
+          >
+            {t.articles.filter_sort}
+          </span>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {SORT_KEYS.map((key) => (
+              <button
+                key={key}
+                onClick={() => { setSort(key); setPage(1); }}
+                className={`px-2.5 py-1 text-[11px] tracking-[0.06em] transition-all ${
+                  sort === key
+                    ? 'bg-[var(--paper-3)] text-[var(--ink-0)] border border-[var(--paper-3)] font-semibold'
+                    : 'bg-transparent text-[var(--paper-1)] border border-[var(--ink-3)] hover:border-[var(--ink-4)] hover:text-[var(--paper-3)]'
+                }`}
+                style={{ fontFamily: 'var(--font-mono)' }}
+              >
+                {t.articles[`sort_${key}` as keyof typeof t.articles]}
+              </button>
+            ))}
           </div>
         </div>
       </div>
@@ -189,7 +271,7 @@ export default function ArticlesPage() {
             fontFamily: 'var(--font-mono)',
           }}
         >
-          {['', 'SIGNAL · EXTRACTION', 'MRR · Δ7D', 'HEAT', ''].map(
+          {['', t.articles.col_signal, t.articles.col_mrr, t.articles.col_heat, ''].map(
             (label, i) => (
               <span
                 key={i}

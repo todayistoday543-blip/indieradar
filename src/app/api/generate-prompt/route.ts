@@ -13,8 +13,20 @@ function getAnthropic() {
   return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY || 'placeholder' });
 }
 
+const LOCALE_LANGUAGE: Record<string, string> = {
+  ja: '日本語',
+  en: 'English',
+  zh: '中文',
+  ko: '한국어',
+  hi: 'हिन्दी',
+  de: 'Deutsch',
+  es: 'Español',
+  fr: 'Français',
+  pt: 'Português',
+};
+
 export async function POST(req: NextRequest) {
-  const { article_id, user_id, country_name, country_code } = await req.json();
+  const { article_id, user_id, country_name, country_code, locale } = await req.json();
 
   if (!user_id) {
     return NextResponse.json({ error: 'Login required' }, { status: 401 });
@@ -48,10 +60,10 @@ export async function POST(req: NextRequest) {
     ? `【${profile.name}での起業コスト目安】\n${profile.startupCost}\n\n【推奨決済プラットフォーム】\n${profile.paymentPlatforms.join(', ')}\n\n【税制情報】\n${profile.taxInfo}`
     : '';
 
-  const message = await getAnthropic().messages.create({
-    model: 'claude-sonnet-4-5',
-    max_tokens: 6000,
-    system: `あなたはPerplexity AIレベルの精度を持つ、AIビジネス構築の専門家です。
+  const targetLang = LOCALE_LANGUAGE[locale || 'ja'] || '日本語';
+  const isJa = !locale || locale === 'ja';
+
+  const systemPromptJa = `あなたはPerplexity AIレベルの精度を持つ、AIビジネス構築の専門家です。
 プログラミング経験ゼロの超初心者でも理解できるよう、丁寧にステップバイステップで解説してください。
 専門用語を使う場合は必ず（）内に初心者向けの説明を入れてください。
 具体的な金額、URL、サービス名を積極的に含めてください。
@@ -61,12 +73,32 @@ export async function POST(req: NextRequest) {
 - 競合分析は実名を挙げる（例：「Notion（$10B評価額）と同じ領域」）
 - 法規制の注意点は国ごとに具体的に記載
 - 成功確率の実データを引用（例：「SaaSの平均解約率は月5-7%」）
-- コストは月単位で具体的に試算（例：「初月$0→3ヶ月目$50/月→6ヶ月目$200/月」）`,
+- コストは月単位で具体的に試算（例：「初月$0→3ヶ月目$50/月→6ヶ月目$200/月」）`;
+
+  const systemPromptIntl = `You are an AI business-building expert with Perplexity AI-level precision.
+Respond ENTIRELY in ${targetLang}.
+Explain step-by-step so a complete beginner with zero programming experience can follow.
+When using technical terms, always include a beginner-friendly explanation in parentheses.
+Include specific dollar amounts, URLs, and service names wherever possible.
+
+【Quality Standards】
+- Market size with specific numbers (e.g., "$10B market growing at 15% YoY")
+- Competitor analysis with real names (e.g., "Same space as Notion ($10B valuation)")
+- Regulatory notes specific to the user's country
+- Real success rate data (e.g., "Average SaaS churn is 5-7% monthly")
+- Monthly cost projections (e.g., "Month 1: $0 → Month 3: $50/mo → Month 6: $200/mo")`;
+
+  const message = await getAnthropic().messages.create({
+    model: 'claude-sonnet-4-5-20250929',
+    max_tokens: 6000,
+    system: isJa ? systemPromptJa : systemPromptIntl,
     messages: [
       {
         role: 'user',
-        content: `以下の海外マネタイズ事例を再現するための「AI実現ガイド」を生成してください。
-合計3500〜5000文字で、超初心者にも丁寧に、かつPerplexity AIレベルの深い市場分析を含めて書いてください。
+        content: `${isJa
+          ? '以下の海外マネタイズ事例を再現するための「AI実現ガイド」を生成してください。\n合計3500〜5000文字で、超初心者にも丁寧に、かつPerplexity AIレベルの深い市場分析を含めて書いてください。'
+          : `Generate an "AI Realization Guide" to reproduce the following overseas monetization case.\nWrite 3500-5000 characters total in ${targetLang}, beginner-friendly with Perplexity AI-level market analysis.\nIMPORTANT: Your ENTIRE response must be in ${targetLang}.`
+        }
 
 ${marketContext}
 
@@ -166,6 +198,6 @@ ${profile ? `\n## ${profile.name}市場チェックリスト\n（${profile.name}
 
   return NextResponse.json({
     prompt: promptText,
-    model_used: 'claude-sonnet-4-5',
+    model_used: 'claude-sonnet-4-5-20250929',
   });
 }

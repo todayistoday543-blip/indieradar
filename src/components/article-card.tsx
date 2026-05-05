@@ -7,6 +7,7 @@ import { timeAgo } from '@/lib/time-ago';
 interface Article {
   id: string;
   source: string;
+  original_title?: string;
   ja_title: string;
   ja_summary: string;
   ja_insight: string;
@@ -99,13 +100,20 @@ function formatMrr(mrr: number): string {
 /* ── Component ───────────────────────────────────────────────── */
 
 export function ArticleCard({ article }: { article: Article }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
 
   const heat = getHeat(article.upvotes);
   const Icon = sourceIcon[article.source];
   const srcLabel = sourceLabel[article.source] || article.source.toUpperCase();
 
   const hasMrr = article.mrr_mentioned != null && article.mrr_mentioned > 0;
+
+  // Locale-aware title: ja → ja_title, others → original_title (English) with ja_title fallback
+  const displayTitle = locale === 'ja'
+    ? (article.ja_title || article.original_title || 'Untitled')
+    : (article.original_title || article.ja_title || 'Untitled');
+
+  // Locale-aware description: ja → ja_summary, others → shorter ja_summary (will show original when available)
   const descText = article.ja_summary ? article.ja_summary.slice(0, 120) : '';
 
   const tags: string[] = [];
@@ -135,7 +143,7 @@ export function ArticleCard({ article }: { article: Article }) {
         {/* 2 — Content area */}
         <div className="min-w-0 pr-4">
           <h3 className="font-display text-[19px] leading-tight text-[var(--paper-3)] truncate">
-            {article.ja_title || 'Untitled'}
+            {displayTitle}
           </h3>
           {descText && (
             <p className="font-sans text-[13px] leading-snug text-[var(--ink-5)] truncate max-w-[660px] mt-0.5">
@@ -199,7 +207,7 @@ export function ArticleCard({ article }: { article: Article }) {
         </span>
         <div className="min-w-0 pr-3">
           <h3 className="font-display text-[17px] leading-tight text-[var(--paper-3)] truncate">
-            {article.ja_title || 'Untitled'}
+            {displayTitle}
           </h3>
           <p className="font-mono text-[10px] text-[var(--ink-5)] mt-0.5 truncate">
             {timeAgo(article.created_at)}
@@ -243,7 +251,7 @@ export function ArticleCard({ article }: { article: Article }) {
           )}
         </div>
         <h3 className="font-display text-[17px] leading-tight text-[var(--paper-3)] mb-1">
-          {article.ja_title || 'Untitled'}
+          {displayTitle}
         </h3>
         {descText && (
           <p className="font-sans text-[13px] text-[var(--ink-5)] leading-snug line-clamp-2 mb-1.5">
