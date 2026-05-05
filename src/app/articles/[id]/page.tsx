@@ -5,6 +5,9 @@ import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useI18n } from '@/i18n/context';
 import { useUser } from '@/components/user-context';
+import { CommentsSection } from '@/components/comments-section';
+import { BookmarkButton } from '@/components/bookmark-button';
+import BusinessPlanModal from '@/components/business-plan-modal';
 import Link from 'next/link';
 
 interface Article {
@@ -173,6 +176,7 @@ export default function ArticleDetailPage() {
   const [translatedSummary, setTranslatedSummary] = useState<string | null>(null);
   const [translatedInsight, setTranslatedInsight] = useState<string | null>(null);
   const [translating, setTranslating] = useState(false);
+  const [businessPlanOpen, setBusinessPlanOpen] = useState(false);
   const viewTracked = useRef(false);
 
   // Access levels: free = preview only, basic = full content, pro = full + AI guide
@@ -449,6 +453,9 @@ export default function ArticleDetailPage() {
             </svg>
             {localUpvotes}
           </button>
+
+          {/* Bookmark button */}
+          <BookmarkButton articleId={article.id} />
         </div>
       </div>
 
@@ -631,6 +638,34 @@ export default function ArticleDetailPage() {
           </div>
         )}
       </div>
+
+      {/* ── "Start with this idea" button (Pro only) ──────── */}
+      {canUseGuide && (
+        <div className="mb-6">
+          <button
+            onClick={() => setBusinessPlanOpen(true)}
+            className="w-full rounded-2xl border border-[var(--signal-gold)]/30 bg-[rgba(212,162,74,0.06)] p-5 text-center hover:bg-[rgba(212,162,74,0.12)] transition-all group"
+          >
+            <div className="flex items-center justify-center gap-2 text-[var(--signal-gold)] font-bold text-sm">
+              <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+              </svg>
+              {(t as Record<string, Record<string, string>>).plan?.button || 'Start with this idea'}
+            </div>
+          </button>
+        </div>
+      )}
+
+      {/* ── Comments Section ─────────────────────────────────── */}
+      <CommentsSection articleId={article.id} />
+
+      {/* ── Business Plan Modal ──────────────────────────────── */}
+      <BusinessPlanModal
+        articleId={article.id}
+        articleTitle={displayTitle}
+        isOpen={businessPlanOpen}
+        onClose={() => setBusinessPlanOpen(false)}
+      />
 
       {/* ── Bottom nav ───────────────────────────────────────── */}
       <div className="flex items-center justify-between pt-5 border-t border-[var(--ink-2)]">

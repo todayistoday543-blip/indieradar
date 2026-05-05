@@ -1,6 +1,7 @@
 'use client';
 
 import { useI18n } from '@/i18n/context';
+import { NewsletterForm } from './newsletter-form';
 import Link from 'next/link';
 
 function ApertureLogo() {
@@ -78,9 +79,12 @@ export function Footer() {
                 IndieRadar
               </span>
             </div>
-            <p className="text-[12px] leading-[1.7] text-paper-1 max-w-[280px]">
+            <p className="text-[12px] leading-[1.7] text-paper-1 max-w-[280px] mb-[16px]">
               {t.footer.sources}
             </p>
+            <div className="max-w-[280px]">
+              <NewsletterForm />
+            </div>
           </div>
 
           {/* Column 2 — Product */}
