@@ -75,12 +75,16 @@ export async function POST(req: NextRequest) {
   const profile = country_code
     ? COUNTRY_PROFILES[country_code.toUpperCase()]
     : null;
-  const costSection = profile
-    ? `【${profile.name}での起業コスト目安】\n${profile.startupCost}\n\n【推奨決済プラットフォーム】\n${profile.paymentPlatforms.join(', ')}\n\n【税制情報】\n${profile.taxInfo}`
-    : '';
 
   const targetLang = LOCALE_LANGUAGE[locale || 'ja'] || '日本語';
   const isJa = !locale || locale === 'ja';
+
+  // Build country cost section in the appropriate language
+  const costSection = profile
+    ? isJa
+      ? `【${profile.name}での起業コスト目安】\n${profile.startupCost}\n\n【推奨決済プラットフォーム】\n${profile.paymentPlatforms.join(', ')}\n\n【税制情報】\n${profile.taxInfo}`
+      : `[Startup cost estimate for ${profile.name}]\n${profile.startupCost}\n\n[Recommended payment platforms]\n${profile.paymentPlatforms.join(', ')}\n\n[Tax information]\n${profile.taxInfo}`
+    : '';
 
   const systemPromptJa = `あなたはPerplexity AIレベルの精度を持つ、AIビジネス構築の専門家です。
 プログラミング経験ゼロの超初心者でも理解できるよう、丁寧にステップバイステップで解説してください。
@@ -95,29 +99,21 @@ export async function POST(req: NextRequest) {
 - コストは月単位で具体的に試算（例：「初月$0→3ヶ月目$50/月→6ヶ月目$200/月」）`;
 
   const systemPromptIntl = `You are an AI business-building expert with Perplexity AI-level precision.
-Respond ENTIRELY in ${targetLang}.
+Respond ENTIRELY in ${targetLang}. Do NOT use Japanese or any other language.
 Explain step-by-step so a complete beginner with zero programming experience can follow.
-When using technical terms, always include a beginner-friendly explanation in parentheses.
+When using technical terms, include a beginner-friendly explanation in parentheses.
 Include specific dollar amounts, URLs, and service names wherever possible.
 
-【Quality Standards】
+Quality Standards:
 - Market size with specific numbers (e.g., "$10B market growing at 15% YoY")
 - Competitor analysis with real names (e.g., "Same space as Notion ($10B valuation)")
 - Regulatory notes specific to the user's country
 - Real success rate data (e.g., "Average SaaS churn is 5-7% monthly")
 - Monthly cost projections (e.g., "Month 1: $0 → Month 3: $50/mo → Month 6: $200/mo")`;
 
-  const message = await getAnthropic().messages.create({
-    model: 'claude-sonnet-4-5-20250929',
-    max_tokens: 6000,
-    system: isJa ? systemPromptJa : systemPromptIntl,
-    messages: [
-      {
-        role: 'user',
-        content: `${isJa
-          ? '以下の海外マネタイズ事例を再現するための「AI実現ガイド」を生成してください。\n合計3500〜5000文字で、超初心者にも丁寧に、かつPerplexity AIレベルの深い市場分析を含めて書いてください。'
-          : `Generate an "AI Realization Guide" to reproduce the following overseas monetization case.\nWrite 3500-5000 characters total in ${targetLang}, beginner-friendly with Perplexity AI-level market analysis.\nIMPORTANT: Your ENTIRE response must be in ${targetLang}.`
-        }
+  // Build the user-facing prompt in the correct language
+  const userPromptJa = `以下の海外マネタイズ事例を再現するための「AI実現ガイド」を生成してください。
+合計3500〜5000文字で、超初心者にも丁寧に、かつPerplexity AIレベルの深い市場分析を含めて書いてください。
 
 ${marketContext}
 
@@ -207,7 +203,109 @@ ${profile ? `${profile.name}市場向けの最適化ポイントも含める。`
 
 ## 必要なツール・サービスと月額コスト
 （テーブル形式で: サービス名 | 用途 | 無料/有料 | 月額目安 | ${profile ? profile.name + 'での代替' : '備考'}）
-${profile ? `\n## ${profile.name}市場チェックリスト\n（${profile.name}でこの事業を始める際に確認すべき項目10個をチェックリスト形式で）` : ''}`,
+${profile ? `\n## ${profile.name}市場チェックリスト\n（${profile.name}でこの事業を始める際に確認すべき項目10個をチェックリスト形式で）` : ''}`;
+
+  const userPromptIntl = `Generate an "AI Realization Guide" to reproduce the following monetization case.
+Write 3500-5000 words in ${targetLang}, step-by-step for beginners, with Perplexity AI-level market analysis.
+IMPORTANT: Your ENTIRE response must be in ${targetLang}. Do not include Japanese text.
+
+${marketContext}
+
+${costSection}
+
+${industryContext}
+
+Case Title: ${article.ja_title}
+Summary: ${(article.ja_summary as string)?.slice(0, 2000)}
+Business Model: ${article.business_model || 'Unknown'}
+MRR: ${article.mrr_mentioned ? `$${article.mrr_mentioned}/mo` : 'Not mentioned'}
+
+Output in this structure:
+
+## Introduction
+(2-3 sentences explaining what this case is about and what the reader will learn.
+Include a market opportunity summary: TAM, growth rate, why now.)
+
+## Market Analysis: Will this work in ${profile ? profile.name : 'your country'}?
+- Global market size and growth trend for this business model
+${profile
+  ? `- ${profile.name}-specific market environment\n- Competitive landscape in ${profile.name} (name real competitors)\n- Regulations and legal requirements in ${profile.name}\n- Estimated success probability with justification`
+  : '- Global market opportunity\n- Feasibility comparison across 5 major markets (US/Japan/EU/SE Asia/India)'}
+
+## Step 1: Understand the Model (Days 1-2)
+- Core essence of this business in one sentence
+- Why money flows (explain value exchange clearly for beginners)
+- Key differentiation from competitors
+- 3 concrete examples of how YOU could apply this
+- Recommended learning resources (YouTube channels, blogs, podcasts — specific names)
+
+## Step 2: Set Up Your Stack (Days 3-5)
+- List of services to sign up for (with purpose explained for each)
+  Table format:
+  | Category | Service | Purpose | Monthly Cost |
+  |---|---|---|---|
+  - Domain: Cloudflare Registrar (~$10/yr)
+  - Hosting: Vercel (free tier sufficient)
+  - Payments: ${profile ? profile.paymentPlatforms[0] : 'Stripe'}
+  - Auth: Supabase Auth (free)
+  - Email: Resend (3,000/mo free)
+  - Analytics: PostHog (1M events/mo free)
+${profile ? `- Registration steps and gotchas specific to ${profile.name}` : '- Universal registration steps'}
+- Monthly cost simulation (Month 1 through Month 6)
+
+## Step 3: Build the MVP (Weeks 1-2)
+- Feature list (limit to 3-5; explain why these and what to cut)
+- Recommended tech stack with beginner-friendly rationale
+- Concrete AI prompt to build this (paste-ready code block)
+- Minimal DB and API design overview
+
+## Step 4: Launch (Weeks 2-3)
+- Where to post, specifically:
+${profile ? `  - Strategy for ${profile.topPlatforms.join(', ')}` : `  - Product Hunt (3-line prep guide)
+  - Reddit (which subreddits, what tone)
+  - Hacker News (Show HN template)`}
+- 5 concrete ways to get your first 10 users for free
+- Pricing framework (Free → $X/mo → $XX/mo with rationale)
+- 30-day marketing calendar
+
+## Step 5: Grow (Month 1+)
+- Actions at MRR $100 → $1,000 → $10,000 (specific steps per stage)
+- How to collect user feedback (tools and templates)
+- Iteration cadence
+- 3 tactics to reduce churn
+- Key growth levers
+
+## Cross-Industry Application Ideas
+- Distill the core mechanism of this case into one sentence
+- 4 application ideas in other industries:
+  Each in format: Target → Problem → Solution → Expected MRR → Time needed
+- Mark the lowest-risk idea with ★
+
+---
+
+## Ready-to-use AI Prompt
+
+Copy this into Claude (claude.ai) or Cursor. Replace [YOUR IDEA] with your own concept.
+
+\`\`\`
+(Detailed, customizable implementation prompt based on this case.
+Includes tech stack, feature requirements, DB design, API design.
+Placeholders: [YOUR IDEA], [TARGET USER], [PRICE POINT].
+${profile ? `Optimized for the ${profile.name} market.` : ''})
+\`\`\`
+
+## Required Tools & Monthly Costs
+(Table: Service | Purpose | Free/Paid | Est. Monthly Cost | ${profile ? profile.name + ' alternative' : 'Notes'})
+${profile ? `\n## ${profile.name} Market Checklist\n(10-item checklist for launching this business in ${profile.name})` : ''}`;
+
+  const message = await getAnthropic().messages.create({
+    model: 'claude-sonnet-4-5-20250929',
+    max_tokens: 6000,
+    system: isJa ? systemPromptJa : systemPromptIntl,
+    messages: [
+      {
+        role: 'user',
+        content: isJa ? userPromptJa : userPromptIntl,
       },
     ],
   });

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useI18n } from '@/i18n/context';
+import { localeToBCP47 } from '@/i18n/config';
 import { timeAgo } from '@/lib/time-ago';
 import { formatMrr } from '@/lib/format-mrr';
 
@@ -96,10 +97,8 @@ function rankBadge(rank: number): string {
 
 function formatWeekLabel(isoDate: string, locale: string): string {
   const d = new Date(isoDate);
-  return d.toLocaleDateString(locale === 'ja' ? 'ja-JP' : 'en-US', {
-    month: 'short',
-    day: 'numeric',
-  });
+  const bcp47 = localeToBCP47[locale as keyof typeof localeToBCP47] ?? 'en-US';
+  return d.toLocaleDateString(bcp47, { month: 'short', day: 'numeric' });
 }
 
 /* ── Page ─────────────────────────────────────────────────────── */
@@ -301,10 +300,8 @@ export default function WeeklyPage() {
               const Icon = sourceIcon[article.source];
               const srcLabel = sourceLabel[article.source] || article.source.toUpperCase();
               const hasMrr = article.mrr_mentioned != null && article.mrr_mentioned > 0;
-              const displayTitle =
-                locale === 'ja'
-                  ? article.ja_title || article.original_title || 'Untitled'
-                  : article.original_title || article.ja_title || 'Untitled';
+              // ja_title now stores the enriched English title (English-first architecture)
+              const displayTitle = article.ja_title || article.original_title || 'Untitled';
               const medal = rankBadge(rank);
               const isTop3 = rank <= 3;
 

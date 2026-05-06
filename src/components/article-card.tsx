@@ -99,16 +99,15 @@ export function ArticleCard({ article }: { article: Article }) {
 
   const hasMrr = article.mrr_mentioned != null && article.mrr_mentioned > 0;
 
-  // Locale-aware title: ja → ja_title, others → original_title (English) with ja_title fallback
-  const displayTitle = locale === 'ja'
-    ? (article.ja_title || article.original_title || 'Untitled')
-    : (article.original_title || article.ja_title || 'Untitled');
+  // ja_title now stores the enriched English title (English-first architecture).
+  // Use it for all locales; fall back to raw original_title if missing.
+  const displayTitle = article.ja_title || article.original_title || 'Untitled';
 
-  // Locale-aware description: only show the Japanese summary when locale is 'ja'
-  // (ja_summary is AI-generated Japanese text — no per-card translated version exists)
-  const descText = locale === 'ja' && article.ja_summary
+  // ja_summary now contains English content — show it only when the UI language
+  // is English to avoid mixing languages on the listing card.
+  const descText = locale === 'en' && article.ja_summary
     ? article.ja_summary
-        // Remove ## section headings (## Heading text → "")
+        // Remove ## section headings
         .replace(/^#{1,3}\s+.+$/gm, '')
         // Remove leading bullet/dash markers
         .replace(/^[-*]\s+/gm, '')
