@@ -128,18 +128,39 @@ export function ArticleCard({ article }: { article: Article }) {
 
   const descText = rawSummary
     ? rawSummary
+        // Strip HTML tags (original_content may contain HTML)
+        .replace(/<[^>]*>/g, '')
+        // Decode common HTML entities
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#x27;/g, "'")
+        .replace(/&#39;/g, "'")
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(+n))
+        .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCharCode(parseInt(h, 16)))
         // Remove ## section headings
         .replace(/^#{1,3}\s+.+$/gm, '')
         // Remove leading bullet/dash markers
         .replace(/^[-*]\s+/gm, '')
-        // Collapse multiple blank lines
+        // Collapse multiple blank lines / newlines into space
         .replace(/\n{2,}/g, ' ')
+        .replace(/\n/g, ' ')
         .trim()
         .slice(0, 120)
     : '';
 
+  // Localize the difficulty label (DB stores English: 'Easy'|'Medium'|'Hard')
+  const difficultyLabel = article.ja_difficulty
+    ? article.ja_difficulty === 'Easy' ? t.articles.diff_easy
+      : article.ja_difficulty === 'Medium' ? t.articles.diff_medium
+      : article.ja_difficulty === 'Hard' ? t.articles.diff_hard
+      : article.ja_difficulty
+    : null;
+
   const tags: string[] = [];
-  if (article.ja_difficulty) tags.push(article.ja_difficulty);
+  if (difficultyLabel) tags.push(difficultyLabel);
   if (article.business_model) tags.push(article.business_model);
 
   return (

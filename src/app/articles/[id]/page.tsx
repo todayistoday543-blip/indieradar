@@ -161,6 +161,24 @@ function guessType(heading: string): string {
   return 'point';
 }
 
+/* ── HTML entity / tag cleaner ─────────────────────────────── */
+
+function cleanHtml(raw: string): string {
+  return raw
+    // Strip HTML tags
+    .replace(/<[^>]*>/g, '')
+    // Decode common HTML entities
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#x27;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(+n))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
+}
+
 /* ── Session ID for view tracking ──────────────────────────── */
 
 function getSessionId(): string {
@@ -375,19 +393,24 @@ export default function ArticleDetailPage() {
 
   // Non-Japanese locales must NOT fall back to ja_* — showing Japanese text to
   // English/Spanish readers is worse than an empty section.
-  const summaryContent =
+  const rawSummary =
     locale === 'ja'
       ? (article.ja_summary || article.en_summary || '')
       : locale === 'es'
       ? (article.es_summary || article.en_summary || '')
       : (article.en_summary || '');
 
-  const insightContent =
+  // Clean HTML tags + decode entities (en_summary may contain raw HTML from original_content)
+  const summaryContent = rawSummary ? cleanHtml(rawSummary) : '';
+
+  const rawInsight =
     locale === 'ja'
       ? (article.ja_insight || article.en_insight || '')
       : locale === 'es'
       ? (article.es_insight || article.en_insight || '')
       : (article.en_insight || '');
+
+  const insightContent = rawInsight ? cleanHtml(rawInsight) : '';
 
   const sections = parseSections(summaryContent);
 
@@ -432,7 +455,10 @@ export default function ArticleDetailPage() {
             : article.ja_difficulty === 'Medium' ? 'bg-transparent border-amber-400/30 text-amber-400'
             : 'bg-transparent border-red-400/30 text-red-400'
           }`}>
-            {article.ja_difficulty}
+            {article.ja_difficulty === 'Easy' ? t.articles.diff_easy
+              : article.ja_difficulty === 'Medium' ? t.articles.diff_medium
+              : article.ja_difficulty === 'Hard' ? t.articles.diff_hard
+              : article.ja_difficulty}
           </span>
         )}
         {article.business_model && (

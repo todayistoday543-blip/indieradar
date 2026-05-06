@@ -92,6 +92,9 @@ export default {
     col_signal: 'SIGNAL · EXTRACTION',
     col_mrr: 'MRR · Δ7D',
     col_heat: 'HEAT',
+    diff_easy: '簡単',
+    diff_medium: '普通',
+    diff_hard: '難しい',
   },
   pricing: {
     heading: '料金プラン',
