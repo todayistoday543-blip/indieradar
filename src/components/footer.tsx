@@ -5,22 +5,24 @@ import { localeNames } from '@/i18n/config';
 import { NewsletterForm } from './newsletter-form';
 import Link from 'next/link';
 
-function ApertureLogo() {
+function IRLogoMark() {
   return (
     <svg
       width="22"
-      height="22"
-      viewBox="0 0 180 180"
+      height="18"
+      viewBox="0 0 34 28"
       aria-hidden="true"
+      fill="none"
       style={{ color: 'var(--paper-3)' }}
     >
-      <g transform="translate(90 90)">
-        <circle r="42" fill="none" stroke="currentColor" strokeWidth="6" strokeOpacity="0.6" />
-        <circle r="22" fill="none" stroke="#D4A24A" strokeWidth="6" />
-        <line x1="-6" y1="-22" x2="-6" y2="22" stroke="#D4A24A" strokeWidth="6" />
-        <line x1="6" y1="-22" x2="6" y2="22" stroke="#D4A24A" strokeWidth="6" />
-        <circle r="6" fill="#D4A24A" />
-      </g>
+      {/* I */}
+      <rect x="0" y="0" width="9" height="2.5" rx="0.5" fill="currentColor" />
+      <rect x="3" y="2.5" width="3" height="23" fill="currentColor" />
+      <rect x="0" y="25.5" width="9" height="2.5" rx="0.5" fill="currentColor" />
+      {/* R */}
+      <rect x="13" y="0" width="3" height="28" rx="0.5" fill="currentColor" />
+      <path d="M16 1.25 L22 1.25 A7 6.5 0 0 1 22 14.5 L16 14.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      <line x1="21.5" y1="14.5" x2="31.5" y2="26.5" stroke="#D4A24A" strokeWidth="3" strokeLinecap="round" />
     </svg>
   );
 }
@@ -56,16 +58,19 @@ export function Footer() {
           {/* Column 1 — Brand */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-[10px] mb-[16px]">
-              <ApertureLogo />
+              <IRLogoMark />
               <span
-                className="text-paper-3 tracking-[-0.02em]"
+                className="tracking-[-0.02em]"
                 style={{
                   fontFamily: 'var(--font-display)',
                   fontSize: '16px',
                   fontWeight: 500,
                 }}
               >
-                IndieRadar
+                <span style={{ color: 'var(--signal-gold)' }}>I</span>
+                <span style={{ color: 'var(--paper-3)' }}>ndie</span>
+                <span style={{ color: 'var(--signal-gold)' }}>R</span>
+                <span style={{ color: 'var(--paper-3)' }}>adar</span>
               </span>
             </div>
             <p className="text-[12px] leading-[1.7] text-paper-1 max-w-[280px] mb-[16px]">
