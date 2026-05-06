@@ -176,7 +176,13 @@ function cleanHtml(raw: string): string {
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, ' ')
     .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(+n))
-    .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCharCode(parseInt(h, 16)))
+    // Strip Markdown inline syntax
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')   // [text](url) → text
+    .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')  // ![alt](url) → alt
+    .replace(/\*\*([^*]+)\*\*/g, '$1')          // **bold** → bold
+    .replace(/\*([^*]+)\*/g, '$1')              // *italic* → italic
+    .replace(/`([^`]+)`/g, '$1');               // `code` → code
 }
 
 /* ── Session ID for view tracking ──────────────────────────── */

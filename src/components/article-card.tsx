@@ -140,6 +140,12 @@ export function ArticleCard({ article }: { article: Article }) {
         .replace(/&nbsp;/g, ' ')
         .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(+n))
         .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCharCode(parseInt(h, 16)))
+        // Strip Markdown inline syntax
+        .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')   // [text](url) → text
+        .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')  // ![alt](url) → alt
+        .replace(/\*\*([^*]+)\*\*/g, '$1')          // **bold** → bold
+        .replace(/\*([^*]+)\*/g, '$1')              // *italic* → italic
+        .replace(/`([^`]+)`/g, '$1')               // `code` → code
         // Remove ## section headings
         .replace(/^#{1,3}\s+.+$/gm, '')
         // Remove leading bullet/dash markers
