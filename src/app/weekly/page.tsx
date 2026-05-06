@@ -232,13 +232,13 @@ export default function WeeklyPage() {
             <svg className="w-10 h-10 text-red-400/60 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
             </svg>
-            <p className="text-sm text-[var(--ink-5)] mb-4">Failed to load rankings. Please try again.</p>
+            <p className="text-sm text-[var(--ink-5)] mb-4">{t.common.error_load}</p>
             <button
               onClick={() => setRefreshTick((n) => n + 1)}
               className="text-xs text-[var(--signal-gold)] border border-[var(--signal-gold)]/40 px-4 py-1.5 hover:bg-[rgba(212,162,74,0.08)] transition"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
-              Retry
+              {t.common.retry}
             </button>
           </div>
         ) : articles.length === 0 ? (
@@ -357,7 +357,7 @@ export default function WeeklyPage() {
                         {displayTitle}
                       </h3>
                       <p className="font-mono text-[10px] text-[var(--ink-5)] mt-0.5 truncate">
-                        {timeAgo(article.created_at)}
+                        {timeAgo(article.created_at, locale)}
                         {' · '}
                         <span className="uppercase">{srcLabel}</span>
                         {article.business_model && (
@@ -469,7 +469,7 @@ export default function WeeklyPage() {
                       className="text-[10px] text-[var(--ink-5)]"
                       style={{ fontFamily: 'var(--font-mono)' }}
                     >
-                      {timeAgo(article.created_at)}
+                      {timeAgo(article.created_at, locale)}
                       {' · '}
                       <span className="uppercase">{srcLabel}</span>
                       {' · '}

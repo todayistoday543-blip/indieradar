@@ -88,14 +88,14 @@ export default function BusinessPlanModal({
         if (res.status === 429) {
           setError(plan.daily_limit || 'Daily limit reached');
         } else {
-          setError(data.error || 'Failed to generate plan');
+          setError(data.error || t.common.error_load);
         }
         return;
       }
 
       setSections(data.sections || []);
     } catch {
-      setError('Network error');
+      setError(t.common.error_network);
     } finally {
       setLoading(false);
     }

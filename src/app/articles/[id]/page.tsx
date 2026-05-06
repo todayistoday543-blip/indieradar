@@ -307,9 +307,9 @@ export default function ArticleDetailPage() {
       });
       const data = await res.json();
       if (res.ok) setPrompt(data.prompt);
-      else setGuideError(data.error || 'Failed to generate guide');
+      else setGuideError(data.error || t.common.error_load);
     } catch {
-      setGuideError('Network error. Please try again.');
+      setGuideError(t.common.error_network);
     }
     setPromptLoading(false);
   }, [userId, article, countryName, countryCode, locale, canUseGuide]);

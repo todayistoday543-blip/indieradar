@@ -60,10 +60,10 @@ export function CommentsSection({ articleId }: { articleId: string }) {
         fetchComments();
       } else {
         const data = await res.json().catch(() => ({}));
-        setSubmitError(data.error || 'Failed to post comment');
+        setSubmitError(data.error || t.common.error_load);
       }
     } catch {
-      setSubmitError('Network error. Please try again.');
+      setSubmitError(t.common.error_network);
     } finally {
       setSubmitting(false);
     }
@@ -109,7 +109,7 @@ export function CommentsSection({ articleId }: { articleId: string }) {
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="Display name"
+              placeholder={t.comments.display_name_placeholder}
               maxLength={50}
               className="w-full sm:w-48 bg-[var(--ink-0)] border border-[var(--ink-3)] rounded-lg px-3 py-1.5 text-sm text-[var(--paper-2)] placeholder-[var(--ink-5)] focus:outline-none focus:border-[var(--signal-gold)] transition-colors mb-2"
               style={{ fontFamily: 'var(--font-mono)' }}

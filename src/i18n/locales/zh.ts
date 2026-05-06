@@ -13,6 +13,9 @@ export default {
     not_found: '页面未找到',
     not_found_desc: '您查找的页面不存在或已被移动。',
     back_home: '返回首页',
+    retry: '重试',
+    error_load: '加载失败，请重试。',
+    error_network: '网络错误，请重试。',
   },
   hero: {
     title_1: '每日洞察',
@@ -231,6 +234,7 @@ export default {
     delete_confirm: '删除此评论？',
     empty: '暂无评论',
     login_to_comment: '登录后发表评论',
+    display_name_placeholder: '显示名称',
   },
   bookmarks: {
     heading: '收藏夹',

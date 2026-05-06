@@ -30,7 +30,7 @@ export default function PricingPage() {
         setCheckoutError(data.error || 'Checkout creation failed');
       }
     } catch {
-      setCheckoutError('Network error. Please try again.');
+      setCheckoutError(t.common.error_network);
     } finally {
       setLoading(null);
     }

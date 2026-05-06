@@ -13,6 +13,9 @@ export default {
     not_found: 'Página no encontrada',
     not_found_desc: 'La página que buscas no existe o ha sido movida.',
     back_home: 'Volver al inicio',
+    retry: 'Reintentar',
+    error_load: 'Error al cargar. Por favor, inténtelo de nuevo.',
+    error_network: 'Error de red. Por favor, inténtelo de nuevo.',
   },
   hero: {
     title_1: 'Información diaria sobre cómo',
@@ -231,6 +234,7 @@ export default {
     delete_confirm: '¿Eliminar este comentario?',
     empty: 'Aún no hay comentarios',
     login_to_comment: 'Inicia sesión para comentar',
+    display_name_placeholder: 'Nombre para mostrar',
   },
   bookmarks: {
     heading: 'Marcadores',

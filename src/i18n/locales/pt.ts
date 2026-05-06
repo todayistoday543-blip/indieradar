@@ -13,6 +13,9 @@ export default {
     not_found: 'Página não encontrada',
     not_found_desc: 'A página que você procura não existe ou foi movida.',
     back_home: 'Voltar ao início',
+    retry: 'Tentar novamente',
+    error_load: 'Falha ao carregar. Tente novamente.',
+    error_network: 'Erro de rede. Tente novamente.',
   },
   hero: {
     title_1: 'Insights diários sobre como',
@@ -231,6 +234,7 @@ export default {
     delete_confirm: 'Excluir este comentário?',
     empty: 'Ainda sem comentários',
     login_to_comment: 'Faça login para comentar',
+    display_name_placeholder: 'Nome de exibição',
   },
   bookmarks: {
     heading: 'Favoritos',

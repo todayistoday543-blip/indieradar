@@ -13,6 +13,9 @@ export default {
     not_found: 'ページが見つかりません',
     not_found_desc: 'お探しのページは存在しないか、移動された可能性があります。',
     back_home: 'ホームに戻る',
+    retry: '再試行',
+    error_load: '読み込みに失敗しました。もう一度お試しください。',
+    error_network: 'ネットワークエラーが発生しました。もう一度お試しください。',
   },
   hero: {
     title_1: '海外インディーハッカーの',
@@ -236,6 +239,7 @@ export default {
     delete_confirm: 'このコメントを削除しますか？',
     empty: 'まだコメントはありません',
     login_to_comment: 'コメントするにはログインしてください',
+    display_name_placeholder: '表示名',
   },
   bookmarks: {
     heading: 'ブックマーク',

@@ -104,8 +104,9 @@ export function ArticleCard({ article }: { article: Article }) {
     ? (article.ja_title || article.original_title || 'Untitled')
     : (article.original_title || article.ja_title || 'Untitled');
 
-  // Locale-aware description: strip markdown headings/bullets, then take a snippet
-  const descText = article.ja_summary
+  // Locale-aware description: only show the Japanese summary when locale is 'ja'
+  // (ja_summary is AI-generated Japanese text — no per-card translated version exists)
+  const descText = locale === 'ja' && article.ja_summary
     ? article.ja_summary
         // Remove ## section headings (## Heading text → "")
         .replace(/^#{1,3}\s+.+$/gm, '')
@@ -158,7 +159,7 @@ export function ArticleCard({ article }: { article: Article }) {
                 <span>{' — '}</span>
               </>
             )}
-            <span>{timeAgo(article.created_at)}</span>
+            <span>{timeAgo(article.created_at, locale)}</span>
             <span>{' · '}</span>
             <span className="uppercase">{srcLabel}</span>
           </p>
@@ -206,7 +207,7 @@ export function ArticleCard({ article }: { article: Article }) {
             {displayTitle}
           </h3>
           <p className="font-mono text-[10px] text-[var(--ink-5)] mt-0.5 truncate">
-            {timeAgo(article.created_at)}
+            {timeAgo(article.created_at, locale)}
             <span>{' · '}</span>
             <span className="uppercase">{srcLabel}</span>
             {tags.length > 0 && (
@@ -255,7 +256,7 @@ export function ArticleCard({ article }: { article: Article }) {
           </p>
         )}
         <p className="font-mono text-[10px] text-[var(--ink-5)]">
-          {timeAgo(article.created_at)}
+          {timeAgo(article.created_at, locale)}
           <span>{' · '}</span>
           <span className="uppercase">{srcLabel}</span>
           {tags.length > 0 && (

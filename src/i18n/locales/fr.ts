@@ -13,6 +13,9 @@ export default {
     not_found: 'Page introuvable',
     not_found_desc: 'La page que vous recherchez n\'existe pas ou a été déplacée.',
     back_home: 'Retour à l\'accueil',
+    retry: 'Réessayer',
+    error_load: 'Échec du chargement. Veuillez réessayer.',
+    error_network: 'Erreur réseau. Veuillez réessayer.',
   },
   hero: {
     title_1: 'Chaque jour, découvrez comment',
@@ -231,6 +234,7 @@ export default {
     delete_confirm: 'Supprimer ce commentaire ?',
     empty: 'Pas encore de commentaires',
     login_to_comment: 'Connectez-vous pour commenter',
+    display_name_placeholder: "Nom d'affichage",
   },
   bookmarks: {
     heading: 'Favoris',

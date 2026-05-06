@@ -13,6 +13,9 @@ export default {
     not_found: 'Page not found',
     not_found_desc: 'The page you are looking for does not exist or has been moved.',
     back_home: 'Back to home',
+    retry: 'Retry',
+    error_load: 'Failed to load. Please try again.',
+    error_network: 'Network error. Please try again.',
   },
   hero: {
     title_1: 'Daily insights on how',
@@ -234,6 +237,7 @@ export default {
     delete_confirm: 'Delete this comment?',
     empty: 'No comments yet',
     login_to_comment: 'Log in to comment',
+    display_name_placeholder: 'Display name',
   },
   bookmarks: {
     heading: 'Bookmarks',

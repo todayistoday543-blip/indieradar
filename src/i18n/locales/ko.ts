@@ -13,6 +13,9 @@ export default {
     not_found: '페이지를 찾을 수 없습니다',
     not_found_desc: '찾고 있는 페이지가 존재하지 않거나 이동되었습니다.',
     back_home: '홈으로 돌아가기',
+    retry: '다시 시도',
+    error_load: '불러오기 실패. 다시 시도해 주세요.',
+    error_network: '네트워크 오류. 다시 시도해 주세요.',
   },
   hero: {
     title_1: '매일 알아보는',
@@ -231,6 +234,7 @@ export default {
     delete_confirm: '이 댓글을 삭제하시겠습니까?',
     empty: '아직 댓글이 없습니다',
     login_to_comment: '댓글을 작성하려면 로그인하세요',
+    display_name_placeholder: '표시 이름',
   },
   bookmarks: {
     heading: '북마크',

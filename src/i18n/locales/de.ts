@@ -13,6 +13,9 @@ export default {
     not_found: 'Seite nicht gefunden',
     not_found_desc: 'Die gesuchte Seite existiert nicht oder wurde verschoben.',
     back_home: 'Zurück zur Startseite',
+    retry: 'Wiederholen',
+    error_load: 'Laden fehlgeschlagen. Bitte versuchen Sie es erneut.',
+    error_network: 'Netzwerkfehler. Bitte versuchen Sie es erneut.',
   },
   hero: {
     title_1: 'Tägliche Einblicke, wie',
@@ -231,6 +234,7 @@ export default {
     delete_confirm: 'Diesen Kommentar löschen?',
     empty: 'Noch keine Kommentare',
     login_to_comment: 'Zum Kommentieren anmelden',
+    display_name_placeholder: 'Anzeigename',
   },
   bookmarks: {
     heading: 'Lesezeichen',

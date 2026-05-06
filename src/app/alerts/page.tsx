@@ -140,10 +140,10 @@ export default function AlertsPage() {
         fetchAlerts();
       } else {
         const data = await res.json().catch(() => ({}));
-        setSaveError(data.error || 'Failed to save alert');
+        setSaveError(data.error || t.common.error_load);
       }
     } catch {
-      setSaveError('Network error. Please try again.');
+      setSaveError(t.common.error_network);
     }
     setSaving(false);
   };
