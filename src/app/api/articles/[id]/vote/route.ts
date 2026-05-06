@@ -25,7 +25,7 @@ export async function POST(
   // Check existing vote
   const { data: existing } = await supabase
     .from('article_votes')
-    .select('id, vote_type')
+    .select('id')
     .eq('article_id', id)
     .eq('user_id', user_id)
     .single();
@@ -43,11 +43,10 @@ export async function POST(
     return NextResponse.json({ voted: false, action: 'removed' });
   }
 
-  // Insert vote
+  // Insert vote (article_votes schema: id, article_id, user_id, created_at)
   const { error } = await supabase.from('article_votes').insert({
     article_id: id,
     user_id,
-    vote_type: 'up',
   });
 
   if (error) {
