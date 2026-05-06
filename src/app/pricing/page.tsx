@@ -9,12 +9,14 @@ export default function PricingPage() {
   const { t } = useI18n();
   const { userId } = useUser();
   const [loading, setLoading] = useState<string | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const isLoggedIn = !!userId;
 
   const handleSubscribe = async (plan: 'basic' | 'pro') => {
     if (!userId) return;
     setLoading(plan);
+    setCheckoutError(null);
     try {
       const res = await fetch('/api/stripe/create-checkout', {
         method: 'POST',
@@ -25,10 +27,10 @@ export default function PricingPage() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert(data.error || 'Checkout creation failed');
+        setCheckoutError(data.error || 'Checkout creation failed');
       }
     } catch {
-      alert('Network error. Please try again.');
+      setCheckoutError('Network error. Please try again.');
     } finally {
       setLoading(null);
     }
@@ -43,6 +45,22 @@ export default function PricingPage() {
         <p className="text-[var(--ink-5)] text-lg">{t.pricing.subtitle}</p>
         <div className="mt-4 mx-auto w-12 h-[2px] bg-[var(--signal-gold)]" />
       </div>
+
+      {checkoutError && (
+        <div className="mb-8 flex items-center gap-3 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+          <span>{checkoutError}</span>
+          <button
+            onClick={() => setCheckoutError(null)}
+            className="ml-auto text-red-400/60 hover:text-red-400 transition-colors"
+            aria-label="Dismiss"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       <div className="grid md:grid-cols-3 gap-5 lg:gap-6">
         {/* Free */}

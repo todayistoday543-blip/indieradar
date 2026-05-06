@@ -179,6 +179,7 @@ export default function ArticleDetailPage() {
   const [translatedInsight, setTranslatedInsight] = useState<string | null>(null);
   const [translating, setTranslating] = useState(false);
   const [businessPlanOpen, setBusinessPlanOpen] = useState(false);
+  const [guideError, setGuideError] = useState<string | null>(null);
   const viewTracked = useRef(false);
   const translateAbortRef = useRef<AbortController | null>(null);
 
@@ -291,6 +292,7 @@ export default function ArticleDetailPage() {
   const handleGenerateGuide = useCallback(async () => {
     if (!userId || !article || !canUseGuide) return;
     setPromptLoading(true);
+    setGuideError(null);
     try {
       const res = await fetch('/api/generate-prompt', {
         method: 'POST',
@@ -305,9 +307,9 @@ export default function ArticleDetailPage() {
       });
       const data = await res.json();
       if (res.ok) setPrompt(data.prompt);
-      else alert(data.error);
+      else setGuideError(data.error || 'Failed to generate guide');
     } catch {
-      alert('Error generating guide');
+      setGuideError('Network error. Please try again.');
     }
     setPromptLoading(false);
   }, [userId, article, countryName, countryCode, locale, canUseGuide]);
@@ -641,6 +643,15 @@ export default function ArticleDetailPage() {
           /* Pro, ready to generate */
           <div>
             <p className="text-sm text-[var(--ink-5)] mb-4">{t.detail.guide_desc}</p>
+            {guideError && (
+              <div className="mb-4 flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-sm text-red-400">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9.303 3.376c.866 1.5-.217 3.374-1.948 3.374H2.645c-1.73 0-2.813-1.874-1.948-3.374L10.051 3.378c.866-1.5 3.032-1.5 3.898 0L21.303 16.126z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                <span>{guideError}</span>
+              </div>
+            )}
             <button
               onClick={handleGenerateGuide} disabled={promptLoading}
               className="rounded-xl bg-[var(--signal-gold)] px-6 py-3 text-[var(--ink-0)] text-sm font-medium hover:opacity-90 transition-all disabled:opacity-50 shadow-sm hover:shadow-md flex items-center gap-2"
