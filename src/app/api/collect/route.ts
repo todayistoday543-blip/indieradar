@@ -95,6 +95,12 @@ export async function GET(request: NextRequest) {
       continue;
     }
 
+    // Skip non-business articles entirely — don't pollute the feed
+    if (enriched.is_business_case === false) {
+      results.push(`[SKIP] not a business case: "${article.original_title.slice(0, 60)}"`);
+      continue;
+    }
+
     const { error: insertError } = await supabase.from('articles').insert({
       source:             article.source,
       source_type:        'crawler',

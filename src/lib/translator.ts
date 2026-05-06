@@ -13,6 +13,8 @@ export interface TranslationResult {
   ja_difficulty: 'Easy' | 'Medium' | 'Hard';
   business_model: string;
   mrr_mentioned: number | null;
+  /** true = genuine indie-hacker business case; false = skip publishing */
+  is_business_case: boolean;
 }
 
 /**
@@ -124,8 +126,13 @@ ja_summary は合計2500〜3500文字で、以下の7セクションを「## セ
 ソース: ${article.source}
 内容: ${article.original_content.slice(0, 6000)}
 
+【is_business_caseの判定基準】
+true: インディーハッカー・個人開発者・スモールチームによる収益化事例、プロダクト・サービスのローンチ、ビジネスモデルの解説
+false: 政治ニュース、有名人の話題、ゲーム会社の大型アップデート、風刺/パロディ記事、純粋な技術質問（ビジネス化要素なし）、求職活動報告
+
 【返答形式】必ずこのJSONのみを返してください:
 {
+  "is_business_case": true または false,
   "ja_title": "日本語タイトル（50字以内、数字を含めてキャッチーに）",
   "ja_summary": "## この事例のポイント\\n...\\n\\n## 何を作ったのか\\n...\\n\\n## どうやって稼いでいるのか\\n...\\n\\n## 成功までのストーリー\\n...\\n\\n## 技術スタック・使用ツール\\n...\\n\\n## あなたの地域での応用可能性\\n...\\n\\n## この事例から得られるアイデアのヒント\\n...",
   "ja_insight": "グローバルで応用可能な示唆（150字以内・市場データ含む）",
