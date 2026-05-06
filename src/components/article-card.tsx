@@ -104,8 +104,18 @@ export function ArticleCard({ article }: { article: Article }) {
     ? (article.ja_title || article.original_title || 'Untitled')
     : (article.original_title || article.ja_title || 'Untitled');
 
-  // Locale-aware description: ja → ja_summary, others → shorter ja_summary (will show original when available)
-  const descText = article.ja_summary ? article.ja_summary.slice(0, 120) : '';
+  // Locale-aware description: strip markdown headings/bullets, then take a snippet
+  const descText = article.ja_summary
+    ? article.ja_summary
+        // Remove ## section headings (## Heading text → "")
+        .replace(/^#{1,3}\s+.+$/gm, '')
+        // Remove leading bullet/dash markers
+        .replace(/^[-*]\s+/gm, '')
+        // Collapse multiple blank lines
+        .replace(/\n{2,}/g, ' ')
+        .trim()
+        .slice(0, 120)
+    : '';
 
   const tags: string[] = [];
   if (article.ja_difficulty) tags.push(article.ja_difficulty);
@@ -157,14 +167,9 @@ export function ArticleCard({ article }: { article: Article }) {
         {/* 3 — MRR amount */}
         <div className="text-right pr-3">
           {hasMrr ? (
-            <>
-              <span className="font-display text-[26px] leading-none text-[var(--signal-gold)]">
-                {formatMrr(article.mrr_mentioned!)}
-              </span>
-              <span className="block font-mono text-[10px] text-[var(--signal-live)] mt-0.5">
-                +{Math.min(article.upvotes, 99)}%
-              </span>
-            </>
+            <span className="font-display text-[26px] leading-none text-[var(--signal-gold)]">
+              {formatMrr(article.mrr_mentioned!)}
+            </span>
           ) : (
             <span className="font-display text-[26px] leading-none text-[var(--ink-4)]">
               —

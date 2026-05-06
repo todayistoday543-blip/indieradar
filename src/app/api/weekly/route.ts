@@ -75,6 +75,6 @@ export async function GET(request: NextRequest) {
     week_end: weekEnd.toISOString(),
   });
 
-  res.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=600');
+  res.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30');
   return res;
 }
