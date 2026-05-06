@@ -8,9 +8,15 @@ interface Article {
   id: string;
   source: string;
   original_title?: string;
-  ja_title: string;
-  ja_summary: string;
-  ja_insight: string;
+  en_title?: string;
+  en_summary?: string;
+  en_insight?: string;
+  ja_title?: string;
+  ja_summary?: string;
+  ja_insight?: string;
+  es_title?: string;
+  es_summary?: string;
+  es_insight?: string;
   ja_difficulty: string;
   business_model: string | null;
   mrr_mentioned: number | null;

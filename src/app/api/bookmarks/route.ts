@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
   if (list === 'true') {
     const { data, error } = await supabase
       .from('bookmarks')
-      .select('id, article_id, created_at, articles(id, source, original_title, ja_title, ja_summary, ja_insight, ja_difficulty, business_model, mrr_mentioned, upvotes, is_premium, original_url, created_at)')
+      .select('id, article_id, created_at, articles(id, source, original_title, en_title, en_summary, en_insight, ja_title, ja_summary, ja_insight, es_title, es_summary, es_insight, ja_difficulty, business_model, mrr_mentioned, upvotes, is_premium, original_url, created_at)')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 

@@ -121,8 +121,8 @@ ${costSection}
 
 ${industryContext}
 
-【事例タイトル】${article.ja_title}
-【概要】${(article.ja_summary as string)?.slice(0, 2000)}
+【事例タイトル】${article.ja_title || article.en_title}
+【概要】${((article.ja_summary || article.en_summary) as string)?.slice(0, 2000)}
 【事業モデル】${article.business_model || '不明'}
 【MRR】${article.mrr_mentioned ? `$${article.mrr_mentioned}/月` : '不明'}
 
@@ -215,8 +215,8 @@ ${costSection}
 
 ${industryContext}
 
-Case Title: ${article.ja_title}
-Summary: ${(article.ja_summary as string)?.slice(0, 2000)}
+Case Title: ${article.en_title || article.ja_title}
+Summary: ${((article.en_summary || article.ja_summary) as string)?.slice(0, 2000)}
 Business Model: ${article.business_model || 'Unknown'}
 MRR: ${article.mrr_mentioned ? `$${article.mrr_mentioned}/mo` : 'Not mentioned'}
 

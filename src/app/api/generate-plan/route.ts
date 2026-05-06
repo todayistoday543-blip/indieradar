@@ -109,8 +109,8 @@ Include specific numbers, dollar amounts, and service names wherever possible.`;
   const userPrompt = isJa
     ? `以下の事例に基づいて、ビジネスプランを生成してください。
 
-【事例タイトル】${article.ja_title || article.original_title}
-【概要】${(article.ja_summary as string)?.slice(0, 2000) || '情報なし'}
+【事例タイトル】${article.ja_title || article.en_title || article.original_title}
+【概要】${((article.ja_summary || article.en_summary) as string)?.slice(0, 2000) || '情報なし'}
 【事業モデル】${article.business_model || '不明'}
 【MRR】${article.mrr_mentioned ? `$${article.mrr_mentioned}/月` : '不明'}
 ${countryContext}
@@ -150,8 +150,8 @@ ${countryContext}
 必ず有効なJSONのみを出力してください。JSON以外の文字列を含めないでください。`
     : `Based on the following case study, generate a business plan.
 
-【Title】${article.original_title || article.ja_title}
-【Summary】${(article.ja_summary as string)?.slice(0, 2000) || 'No info'}
+【Title】${article.en_title || article.original_title}
+【Summary】${((article.en_summary || article.ja_summary) as string)?.slice(0, 2000) || 'No info'}
 【Business Model】${article.business_model || 'Unknown'}
 【MRR】${article.mrr_mentioned ? `$${article.mrr_mentioned}/mo` : 'Unknown'}
 ${countryContext}

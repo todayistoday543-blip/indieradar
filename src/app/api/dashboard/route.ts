@@ -38,7 +38,8 @@ function median(values: number[]): number {
 interface Article {
   id: string;
   source: string;
-  ja_title: string;
+  en_title: string | null;
+  ja_title: string | null;
   ja_difficulty: string | null;
   business_model: string | null;
   mrr_mentioned: number | null;
@@ -62,7 +63,7 @@ export async function GET() {
   // Fetch all published articles
   const { data, error } = await supabase
     .from('articles')
-    .select('id,source,ja_title,ja_difficulty,business_model,mrr_mentioned,upvotes,view_count,created_at,status')
+    .select('id,source,en_title,ja_title,ja_difficulty,business_model,mrr_mentioned,upvotes,view_count,created_at,status')
     .eq('status', 'published');
 
   if (error) {
@@ -146,7 +147,8 @@ export async function GET() {
     .slice(0, 5)
     .map(a => ({
       id: a.id,
-      ja_title: a.ja_title,
+      // Use English title for admin display; fall back to ja_title for older articles
+      ja_title: a.en_title || a.ja_title || '',
       mrr_mentioned: a.mrr_mentioned,
       source: a.source,
     }));
