@@ -3,6 +3,10 @@
     {
       "path": "/api/collect",
       "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/backfill-es",
+      "schedule": "*/5 * * * *"
     }
   ]
 }
