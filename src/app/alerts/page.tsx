@@ -38,6 +38,8 @@ export default function AlertsPage() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Form state
   const [keywordInput, setKeywordInput] = useState('');
@@ -110,6 +112,8 @@ export default function AlertsPage() {
     e.preventDefault();
     if (!userId || keywords.length === 0) return;
     setSaving(true);
+    setSaveError(null);
+    setSaveSuccess(false);
 
     try {
       const res = await fetch('/api/alerts', {
@@ -131,10 +135,15 @@ export default function AlertsPage() {
         setMinMrr('');
         setSelectedCategories([]);
         setNotifyEmail(true);
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
         fetchAlerts();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setSaveError(data.error || 'Failed to save alert');
       }
     } catch {
-      // silently fail
+      setSaveError('Network error. Please try again.');
     }
     setSaving(false);
   };
@@ -431,6 +440,19 @@ export default function AlertsPage() {
             t.alerts.save
           )}
         </button>
+
+        {saveError && (
+          <p className="text-sm text-red-400 mt-3 flex items-center gap-1.5">
+            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9.303 3.376c.866 1.5-.217 3.374-1.948 3.374H2.645c-1.73 0-2.813-1.874-1.948-3.374L10.051 3.378c.866-1.5 3.032-1.5 3.898 0L21.303 16.126z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 15.75h.007v.008H12v-.008z" />
+            </svg>
+            {saveError}
+          </p>
+        )}
+        {saveSuccess && (
+          <p className="text-sm text-emerald-400 mt-3 animate-fade-in">{t.settings.saved}</p>
+        )}
       </form>
 
       {/* Existing alerts list */}
