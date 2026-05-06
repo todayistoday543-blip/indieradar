@@ -43,9 +43,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, message: 'No articles to re-enrich.' });
   }
 
-  // Keep only short-summary articles
+  // Keep only articles whose en_summary is shorter than the new expanded target.
+  // Old prompt targeted 2500-3500 chars; new prompt targets 3500-5000 chars.
+  // We re-enrich anything below 3200 chars to ensure every article gets the upgraded content.
   const toProcess = articles
-    .filter(a => !a.en_summary || a.en_summary.length < 1800)
+    .filter(a => !a.en_summary || a.en_summary.length < 3200)
     .slice(0, BATCH_SIZE);
 
   if (toProcess.length === 0) {
@@ -100,13 +102,19 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Count how many still need processing
-  const { count: remaining } = await supabase
+  // Count how many still need re-enrichment
+  const { data: stillShort } = await supabase
     .from('articles')
-    .select('id', { count: 'exact', head: true })
-    .not('original_content', 'is', null);
+    .select('id, en_summary')
+    .not('original_content', 'is', null)
+    .order('created_at', { ascending: true })
+    .limit(500);
 
-  results.push(`--- Done: ${updated}/${toProcess.length} updated. Total articles: ${remaining ?? '?'} ---`);
+  const remainingCount = (stillShort ?? []).filter(
+    a => !a.en_summary || a.en_summary.length < 3200
+  ).length;
+
+  results.push(`--- Done: ${updated}/${toProcess.length} updated. Still needs re-enrichment: ~${remainingCount} ---`);
 
   return NextResponse.json({ success: true, results });
 }
