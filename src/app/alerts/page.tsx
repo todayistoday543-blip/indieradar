@@ -176,6 +176,7 @@ export default function AlertsPage() {
   };
 
   const deleteAlert = async (alertId: string) => {
+    if (!window.confirm(t.alerts.delete_confirm)) return;
     try {
       const res = await fetch('/api/alerts', {
         method: 'DELETE',
@@ -204,14 +205,22 @@ export default function AlertsPage() {
   // Not logged in
   if (!userId) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-16 text-center animate-fade-in">
-        <p className="text-[var(--ink-5)] text-lg mb-4">{t.settings.login_required}</p>
-        <Link
-          href="/auth/login"
-          className="inline-block rounded-md bg-[var(--signal-gold)] text-[var(--ink-0)] px-6 py-2.5 text-sm font-medium"
-        >
-          {t.common.login}
-        </Link>
+      <div className="min-h-[60vh] flex items-center justify-center px-4">
+        <div className="text-center animate-fade-in">
+          <div className="mx-auto w-14 h-14 bg-[var(--ink-1)] border border-[var(--ink-2)] flex items-center justify-center mb-5">
+            <svg className="w-7 h-7 text-[var(--ink-5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-[var(--paper-3)] mb-2">{t.alerts.heading}</h1>
+          <p className="text-[var(--ink-5)] mb-6">{t.settings.login_required}</p>
+          <Link
+            href="/auth/login"
+            className="inline-block bg-[var(--signal-gold)] px-7 py-3 text-[var(--ink-0)] font-semibold hover:brightness-110 transition-all font-mono text-sm tracking-wide"
+          >
+            {t.common.login}
+          </Link>
+        </div>
       </div>
     );
   }

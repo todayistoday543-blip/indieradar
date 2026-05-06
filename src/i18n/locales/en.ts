@@ -271,6 +271,7 @@ export default {
     active: 'ON',
     inactive: 'OFF',
     delete: 'Delete',
+    delete_confirm: 'Delete this alert?',
   },
   newsletter: {
     subscribe: 'Subscribe',

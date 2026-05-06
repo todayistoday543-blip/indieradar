@@ -268,6 +268,7 @@ export default {
     active: 'ON',
     inactive: 'OFF',
     delete: 'Excluir',
+    delete_confirm: 'Excluir este alerta?',
   },
   newsletter: {
     subscribe: 'Assinar',

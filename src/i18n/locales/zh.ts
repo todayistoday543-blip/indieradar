@@ -268,6 +268,7 @@ export default {
     active: '开',
     inactive: '关',
     delete: '删除',
+    delete_confirm: '删除此提醒？',
   },
   newsletter: {
     subscribe: '订阅',

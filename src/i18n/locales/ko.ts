@@ -268,6 +268,7 @@ export default {
     active: 'ON',
     inactive: 'OFF',
     delete: '삭제',
+    delete_confirm: '이 알림을 삭제하시겠습니까?',
   },
   newsletter: {
     subscribe: '구독',

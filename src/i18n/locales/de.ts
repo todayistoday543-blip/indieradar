@@ -268,6 +268,7 @@ export default {
     active: 'AN',
     inactive: 'AUS',
     delete: 'Löschen',
+    delete_confirm: 'Diese Benachrichtigung löschen?',
   },
   newsletter: {
     subscribe: 'Abonnieren',

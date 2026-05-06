@@ -268,6 +268,7 @@ export default {
     active: 'चालू',
     inactive: 'बंद',
     delete: 'हटाएं',
+    delete_confirm: 'इस अलर्ट को हटाएं?',
   },
   newsletter: {
     subscribe: 'सदस्यता',

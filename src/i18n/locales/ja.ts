@@ -273,6 +273,7 @@ export default {
     active: 'ON',
     inactive: 'OFF',
     delete: '削除',
+    delete_confirm: 'このアラートを削除しますか？',
   },
   newsletter: {
     subscribe: '登録',
