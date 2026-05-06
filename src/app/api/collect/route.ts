@@ -106,6 +106,7 @@ export async function GET(request: NextRequest) {
     const { error: insertError } = await supabase.from('articles').insert({
       source:             article.source,
       source_type:        'crawler',
+      source_url:         article.original_url,
       original_url:       article.original_url,
       original_title:     article.original_title,
       original_content:   article.original_content.slice(0, MAX_CONTENT_LENGTH),

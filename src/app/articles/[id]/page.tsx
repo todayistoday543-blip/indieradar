@@ -141,13 +141,13 @@ function parseSections(summary: string): ContentSection[] {
 }
 
 function guessType(heading: string): string {
-  if (/ポイント|point|overview|概要/i.test(heading)) return 'point';
-  if (/何を作った|product|作った|プロダクト/i.test(heading)) return 'product';
-  if (/稼い|revenue|収益|どうやって/i.test(heading)) return 'revenue';
-  if (/ストーリー|story|成功|経緯|journey/i.test(heading)) return 'story';
-  if (/技術|tech|stack|ツール|tool/i.test(heading)) return 'tech';
-  if (/地域|応用|local|country|あなた/i.test(heading)) return 'local';
-  if (/アイデア|ideas|ヒント|hint/i.test(heading)) return 'ideas';
+  if (/key takeaway|ポイント|point|overview|概要|core opportunity/i.test(heading)) return 'point';
+  if (/what was built|何を作った|product|作った|プロダクト/i.test(heading)) return 'product';
+  if (/how they make money|how.*mak.*money|稼い|revenue|収益|どうやって/i.test(heading)) return 'revenue';
+  if (/journey|ストーリー|story|成功|経緯/i.test(heading)) return 'story';
+  if (/tech stack|技術|tech|stack|ツール|tool/i.test(heading)) return 'tech';
+  if (/market applicability|地域|応用|local|country|あなた/i.test(heading)) return 'local';
+  if (/idea seeds|アイデア|ideas|ヒント|hint/i.test(heading)) return 'ideas';
   return 'point';
 }
 
@@ -162,6 +162,9 @@ function getSessionId(): string {
   }
   return sid;
 }
+
+// Locales that get AI translation from the English base content
+const NEEDS_AI_TRANSLATION = ['ja', 'es'];
 
 /* ── Component ─────────────────────────────────────────────── */
 
@@ -218,9 +221,8 @@ export default function ArticleDetailPage() {
   useEffect(() => {
     if (!article) return;
 
-    const title = locale === 'ja'
-      ? (article.ja_title || article.original_title || '')
-      : (article.original_title || article.ja_title || '');
+    // ja_title is now the English enriched title; use it as the canonical title
+    const title = article.ja_title || article.original_title || '';
 
     if (title) {
       document.title = `${title} | IndieRadar JP`;
@@ -314,9 +316,9 @@ export default function ArticleDetailPage() {
     setPromptLoading(false);
   }, [userId, article, countryName, countryCode, locale, canUseGuide]);
 
-  // On-demand translation (English only — other locales use Chrome translation)
+  // On-demand translation (for ja and es — English is the base language)
   const handleTranslate = useCallback(async () => {
-    if (!article || locale !== 'en') return;
+    if (!article || locale === 'en') return;
 
     // Cancel any in-flight translation request before starting a new one
     translateAbortRef.current?.abort();
@@ -346,9 +348,9 @@ export default function ArticleDetailPage() {
     }
   }, [article, locale]);
 
-  // Auto-translate for English only (other locales handled by Chrome translation)
+  // Auto-translate for ja and es (English is base, others handled by Chrome translation)
   useEffect(() => {
-    if (article && locale === 'en' && !translatedSummary) {
+    if (article && locale !== 'en' && NEEDS_AI_TRANSLATION.includes(locale) && !translatedSummary) {
       handleTranslate();
     }
   }, [article, locale, translatedSummary, handleTranslate]);
@@ -392,12 +394,16 @@ export default function ArticleDetailPage() {
   const showVia = article.source && platformDomains[article.source] &&
     !sourceDomain.includes(platformDomains[article.source]);
   // Locale-aware content selection
-  const displayTitle = locale === 'ja'
-    ? (article.ja_title || article.original_title || '')
-    : (article.original_title || article.ja_title || '');
+  // ja_title is now the English enriched title; original_title is the raw source title
+  const displayTitle = article.ja_title || article.original_title || '';
 
-  const summaryContent = (locale !== 'ja' && translatedSummary) ? translatedSummary : (article.ja_summary || '');
-  const insightContent = (locale !== 'ja' && translatedInsight) ? translatedInsight : (article.ja_insight || '');
+  // English = show base directly; others = show translation or English fallback
+  const summaryContent = locale === 'en'
+    ? (article.ja_summary || '')
+    : (translatedSummary || article.ja_summary || '');
+  const insightContent = locale === 'en'
+    ? (article.ja_insight || '')
+    : (translatedInsight || article.ja_insight || '');
   const sections = parseSections(summaryContent);
 
   return (
@@ -494,7 +500,7 @@ export default function ArticleDetailPage() {
       </h1>
 
       {/* ── Translation indicator ────────────────────────────── */}
-      {locale !== 'ja' && translating && (
+      {translating && locale !== 'en' && (
         <div className="flex items-center gap-2 mb-4 px-3 py-2 bg-[rgba(212,162,74,0.08)] border border-[rgba(212,162,74,0.2)] rounded-lg">
           <svg className="animate-spin h-4 w-4 text-[var(--signal-gold)]" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -589,7 +595,7 @@ export default function ArticleDetailPage() {
             {t.detail.insight_heading}
           </p>
           <p className="text-sm text-[var(--paper-1)] leading-relaxed">{insightContent}</p>
-          {locale !== 'ja' && translating && (
+          {translating && locale !== 'en' && (
             <p className="text-xs text-[var(--ink-5)] mt-2 italic">{t.detail.translating || 'Translating...'}</p>
           )}
         </div>

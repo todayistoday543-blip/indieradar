@@ -19,13 +19,13 @@ export interface TranslationResult {
 
 /**
  * Build a market intelligence context that covers major global markets.
- * Used in translation to enrich "応用可能性" analysis without knowing user's country.
+ * Used in analysis to enrich "Market Applicability" section without knowing user's country.
  */
 function buildGlobalMarketContext(): string {
   const majorMarkets = ['JP', 'US', 'KR', 'DE', 'IN', 'SG'];
   const summaries = majorMarkets.map(code => {
     const p = COUNTRY_PROFILES[code];
-    return `- ${p.name}（${p.nameLocal}）: EC市場${p.ecommerceMarketSize}、決済=${p.paymentPlatforms.slice(0, 2).join('/')}, ${p.culturalNotes.slice(0, 60)}...`;
+    return `- ${p.name}: e-commerce market ${p.ecommerceMarketSize}, payments=${p.paymentPlatforms.slice(0, 2).join('/')}, ${p.culturalNotes.slice(0, 60)}...`;
   });
   return summaries.join('\n');
 }
@@ -35,7 +35,7 @@ function buildGlobalMarketContext(): string {
  */
 function buildIndustryHints(): string {
   const top6 = INDUSTRY_VERTICALS.slice(0, 6);
-  return top6.map(v => `- ${v.name}: ${v.examples.join('、')}`).join('\n');
+  return top6.map(v => `- ${v.name}: ${v.examples.join(', ')}`).join('\n');
 }
 
 export async function translateAndEnrich(article: {
@@ -49,96 +49,96 @@ export async function translateAndEnrich(article: {
   const message = await getClient().messages.create({
     model: 'claude-sonnet-4-5-20250929',
     max_tokens: 6000,
-    system: `あなたはPerplexity AIレベルの市場分析能力を持つビジネスアナリストです。
-海外のインディーハッカー事例を分析し、グローバル市場での応用可能性を深く掘り下げてください。
-データに基づいた具体的な数字、市場規模、成功確率を含めてください。
-初心者にも分かりやすく、しかし深い洞察を提供してください。`,
+    system: `You are a business analyst with Perplexity AI-level market analysis capabilities.
+Analyze indie hacker case studies and provide deep insights on global market applicability.
+Include data-driven specific numbers, market sizes, and success probabilities.
+Write in clear, accessible English that beginners can understand, while providing deep insights.`,
     messages: [
       {
         role: 'user',
-        content: `以下の海外インディーハッカーの投稿を分析し、JSON形式で返してください。
-プログラミングやビジネスの初心者にもわかりやすく、具体的に書いてください。
+        content: `Analyze the following indie hacker post and return JSON format.
+Write clearly and concretely so beginners in programming or business can understand.
 
-【グローバル市場データ（参考）】
+[GLOBAL MARKET DATA (reference)]
 ${globalContext}
 
-【応用可能な業界】
+[APPLICABLE INDUSTRIES]
 ${industryHints}
 
-【分析ルール】
-ja_summary は合計2500〜3500文字で、以下の7セクションを「## セクション名」形式で構造化してください：
+[ANALYSIS RULES]
+ja_summary should total 2500-3500 characters, structured with 7 sections in "## Section Name" format:
 
-## この事例のポイント（200文字）
-- 一言で何がすごいのかを初心者にもわかるように説明
-- 具体的な数字（MRR、ユーザー数、成長率）を含める
+## Key Takeaways (200 chars)
+- Explain in one sentence what makes this case remarkable, accessible to beginners
+- Include specific numbers (MRR, user count, growth rate)
 
-## 何を作ったのか（400文字）
-- どんなサービス/プロダクトなのか
-- 誰が使うのか（ターゲットユーザーのペルソナ）
-- 何を解決しているのか（Before/Afterで説明）
-- TAM（潜在市場規模）の推定を含める
-- 初心者でもイメージできるよう具体例を交えて説明
+## What Was Built (400 chars)
+- What service/product was created
+- Who uses it (target user persona)
+- What problem it solves (Before/After explanation)
+- Include TAM (total addressable market) estimate
+- Use concrete examples so beginners can visualize it
 
-## どうやって稼いでいるのか（400文字）
-- 収益モデル（サブスク/買い切り/広告/アフィリエイト等）を詳しく
-- 価格設定の具体的な数字とその根拠（なぜその価格か）
-- 顧客獲得チャネル（どこから集客しているか）とCAC
-- ユニットエコノミクス（LTV/CACの推定）
-- 初心者向けに「つまりこういうこと」という解説を入れる
+## How They Make Money (400 chars)
+- Revenue model (subscription/one-time/ads/affiliate etc.) in detail
+- Specific pricing numbers and rationale (why that price)
+- Customer acquisition channels (where traffic comes from) and CAC
+- Unit economics (LTV/CAC estimates)
+- Include a "in other words, here's what this means" explanation for beginners
 
-## 成功までのストーリー（500文字）
-- 時系列で何があったか
-- どんな失敗をしたか、なぜ失敗したか
-- 何がターニングポイントだったか（再現可能な要因を分析）
-- 「ここが学びポイント」を明示する
-- 類似事例との比較で成功要因を浮き彫りにする
+## The Journey (500 chars)
+- What happened chronologically
+- What failures occurred and why
+- What the turning point was (analyze reproducible factors)
+- Explicitly highlight "key learning points"
+- Surface success factors by comparing to similar cases
 
-## 技術スタック・使用ツール（300文字）
-- 推察含めて記載
-- 各ツールが何をするものか初心者向けに1行説明をつける
-  例：「Stripe（オンライン決済サービス。月額課金の仕組みを簡単に作れる）」
-- 代替ツールも1〜2個併記（選択肢を示す）
-- 初期費用/月額目安を含める
+## Tech Stack & Tools (300 chars)
+- List tools including inferred ones
+- Add one-line beginner-friendly explanation per tool
+  e.g., "Stripe (online payment service - easily add subscription billing)"
+- Include 1-2 alternative tools (show options)
+- Include estimated initial/monthly costs
 
-## あなたの地域での応用可能性（500文字）
-このセクションはPerplexity級の市場分析を行ってください：
-- この事業モデルのグローバル適用性スコア（★1〜5）
-- 主要市場（日本/米国/欧州/東南アジア/インド）それぞれでの実現可能性を1行で
-- 最も有望な市場とその理由
-- 各市場固有の障壁（法規制、文化、決済）
-- ローカライズのポイント（言語、決済手段、マーケティングチャネル）
-- 「あなたの国で始めるなら」の具体的な第一歩
+## Market Applicability (500 chars)
+Provide Perplexity-level market analysis:
+- Global applicability score for this business model (★1-5)
+- Feasibility in each major market (Japan/US/Europe/SE Asia/India) in one line each
+- Most promising market and why
+- Market-specific barriers (regulations, culture, payments)
+- Localization points (language, payment methods, marketing channels)
+- Concrete first step if starting in your country
 
-## この事例から得られるアイデアのヒント（400文字）
-- この事例の核心的仕組み（抽象化）を1行で定義
-- その仕組みを別業界に応用するアイデアを4つ提案
-  各アイデアは：ターゲット＋課題＋ソリューション＋想定MRRの形式
-- 例：「○○の仕組みを△△業界に応用→□□が困っている◇◇を解決→月$X想定」
-- 最もローリスクで始められるアイデアを★マークで示す
+## Idea Seeds (400 chars)
+- Define the core mechanism of this case in one line (abstracted)
+- Propose 4 ideas applying this mechanism to other industries
+  Each idea in format: Target + Problem + Solution + Expected MRR
+- e.g., "Apply X mechanism to Y industry → solve Z problem for W → $X/mo expected"
+- Mark the lowest-risk idea to start with ★
 
-【ja_insightについて】
-- 「グローバルで応用するための示唆」として150文字以内で記述
-- 具体的な市場データ（市場規模、成長率）を含める
-- 特定の国に限定せず、世界中の読者が参考にできる内容にする
+[About ja_insight]
+- Write as "Global applicability insights" in 150 characters or less
+- Include specific market data (market size, growth rate)
+- Not limited to one country — write so readers worldwide can use it
 
-【元記事】
-タイトル: ${article.original_title}
-ソース: ${article.source}
-内容: ${article.original_content.slice(0, 6000)}
+[Original Article]
+Title: ${article.original_title}
+Source: ${article.source}
+Content: ${article.original_content.slice(0, 6000)}
 
-【is_business_caseの判定基準】
-true: インディーハッカー・個人開発者・スモールチームによる収益化事例、プロダクト・サービスのローンチ、ビジネスモデルの解説
-false: 政治ニュース、有名人の話題、ゲーム会社の大型アップデート、風刺/パロディ記事、純粋な技術質問（ビジネス化要素なし）、求職活動報告
+[is_business_case criteria]
+true: monetization cases by indie hackers/solo devs/small teams, product/service launches, business model explanations
+false: political news, celebrity topics, major game company updates, satire/parody articles, pure technical questions (no business angle), job search reports
 
-【返答形式】必ずこのJSONのみを返してください:
+[RESPONSE FORMAT] Return ONLY this JSON:
 {
-  "is_business_case": true または false,
-  "ja_title": "日本語タイトル（50字以内、数字を含めてキャッチーに）",
-  "ja_summary": "## この事例のポイント\\n...\\n\\n## 何を作ったのか\\n...\\n\\n## どうやって稼いでいるのか\\n...\\n\\n## 成功までのストーリー\\n...\\n\\n## 技術スタック・使用ツール\\n...\\n\\n## あなたの地域での応用可能性\\n...\\n\\n## この事例から得られるアイデアのヒント\\n...",
-  "ja_insight": "グローバルで応用可能な示唆（150字以内・市場データ含む）",
+  "is_business_case": true or false,
+  "ja_title": "English title (under 80 chars, catchy with numbers if available)",
+  "ja_summary": "## Key Takeaways\\n...\\n\\n## What Was Built\\n...\\n\\n## How They Make Money\\n...\\n\\n## The Journey\\n...\\n\\n## Tech Stack & Tools\\n...\\n\\n## Market Applicability\\n...\\n\\n## Idea Seeds\\n...",
+  "ja_insight": "Global applicability insight (under 150 chars, include market data)",
   "ja_difficulty": "Easy or Medium or Hard",
-  "business_model": "事業モデル名（例: SaaS, マーケットプレイス, Chrome拡張, API）",
-  "mrr_mentioned": MRR金額をUSDの整数で（記事中に収益言及がなければnull）
+  "business_model": "Business model name (e.g., SaaS, Marketplace, Chrome Extension, API)",
+  "mrr_mentioned": MRR amount as integer in USD (null if no revenue mentioned in article)
 }`,
       },
     ],

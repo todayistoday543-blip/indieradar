@@ -5,9 +5,10 @@ import { createServiceClient } from '@/lib/supabase';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // Vercel Pro: allow up to 60s for translation
 
-// Only these two locales get AI translation; others use Chrome translation
+// These locales get AI translation from the English base; others use Chrome translation
 const AI_TRANSLATED_LOCALES: Record<string, string> = {
-  en: 'English',
+  ja: 'Japanese',
+  es: 'Spanish',
 };
 
 function getAnthropic() {
@@ -21,9 +22,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing article_id or locale' }, { status: 400 });
   }
 
-  // Japanese is the source language — no translation needed
-  if (locale === 'ja') {
-    return NextResponse.json({ error: 'No translation needed for ja' }, { status: 400 });
+  // English is the base language — no translation needed
+  if (locale === 'en') {
+    return NextResponse.json({ error: 'No translation needed' }, { status: 400 });
   }
 
   // Non-AI-translated locales: return null so client falls back to Chrome translation
@@ -74,13 +75,13 @@ export async function POST(req: NextRequest) {
       max_tokens: 4000,
       messages: [{
         role: 'user',
-        content: `Translate the following Japanese indie hacker case study content to ${targetLang}.
+        content: `Translate the following English indie hacker case study to ${targetLang}.
 
 Rules:
 - Keep the same structure (## headings, formatting)
 - Translate naturally, not word-for-word
 - Keep technical terms, product names, URLs, and dollar/yen amounts as-is
-- Keep "Easy/Medium/Hard" difficulty labels in English
+- Keep "Easy/Medium/Hard" difficulty labels as-is
 
 ---SUMMARY---
 ${article.ja_summary || ''}
