@@ -42,7 +42,7 @@ export default function BusinessPlanModal({
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const stepInterval = useRef<ReturnType<typeof setInterval> | null>(null);
-  const plan = t.plan;
+  const plan = t.plan as Record<string, string>;
 
   // Animated progress steps during loading
   useEffect(() => {

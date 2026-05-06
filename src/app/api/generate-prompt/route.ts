@@ -43,13 +43,13 @@ export async function POST(req: NextRequest) {
   const supabase = createServiceClient();
 
   // Verify Pro plan — this endpoint calls the Anthropic API and must be gated
-  const { data: profile } = await supabase
+  const { data: userProfile } = await supabase
     .from('profiles')
     .select('subscription_plan')
     .eq('id', user_id)
     .single();
 
-  if (profile?.subscription_plan !== 'pro') {
+  if (userProfile?.subscription_plan !== 'pro') {
     return NextResponse.json({ error: 'Pro plan required' }, { status: 403 });
   }
 
