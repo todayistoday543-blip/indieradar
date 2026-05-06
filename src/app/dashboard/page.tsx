@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useI18n } from '@/i18n/context';
 import Link from 'next/link';
+import { formatMrr } from '@/lib/format-mrr';
 
 /* ── Types ────────────────────────────────────────────────── */
 
@@ -106,11 +107,6 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 
 /* ── Helpers ─────────────────────────────────────────────── */
 
-function formatMrr(value: number): string {
-  if (value >= 100000) return `$${Math.round(value / 1000)}K`;
-  if (value >= 1000) return `$${(value / 1000).toFixed(1).replace(/\.0$/, '')}K`;
-  return `$${value.toLocaleString()}`;
-}
 
 function formatNumber(value: number): string {
   return value.toLocaleString();

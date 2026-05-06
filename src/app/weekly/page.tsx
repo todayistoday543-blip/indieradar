@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useI18n } from '@/i18n/context';
 import { timeAgo } from '@/lib/time-ago';
+import { formatMrr } from '@/lib/format-mrr';
 
 /* ── Types ────────────────────────────────────────────────────── */
 
@@ -84,13 +85,6 @@ const sourceLabel: Record<string, string> = {
 
 /* ── Helpers ──────────────────────────────────────────────────── */
 
-function formatMrr(mrr: number): string {
-  if (mrr >= 1000) {
-    const k = mrr / 1000;
-    return `$${k % 1 === 0 ? k.toFixed(0) : k.toFixed(1)}K`;
-  }
-  return `$${mrr}`;
-}
 
 /** Medal emoji for ranks 1-3 */
 function rankBadge(rank: number): string {

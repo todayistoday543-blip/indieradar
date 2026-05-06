@@ -8,6 +8,8 @@ import { useUser } from '@/components/user-context';
 import { CommentsSection } from '@/components/comments-section';
 import { BookmarkButton } from '@/components/bookmark-button';
 import BusinessPlanModal from '@/components/business-plan-modal';
+import { localeToBCP47 } from '@/i18n/config';
+import { formatMrr } from '@/lib/format-mrr';
 import Link from 'next/link';
 
 interface Article {
@@ -178,6 +180,7 @@ export default function ArticleDetailPage() {
   const [translating, setTranslating] = useState(false);
   const [businessPlanOpen, setBusinessPlanOpen] = useState(false);
   const viewTracked = useRef(false);
+  const translateAbortRef = useRef<AbortController | null>(null);
 
   // Access levels: free = preview only, basic = full content, pro = full + AI guide
   const canReadFull = plan === 'basic' || plan === 'pro';
@@ -309,31 +312,41 @@ export default function ArticleDetailPage() {
     setPromptLoading(false);
   }, [userId, article, countryName, countryCode, locale, canUseGuide]);
 
-  // On-demand translation for non-ja locales
+  // On-demand translation (English only — other locales use Chrome translation)
   const handleTranslate = useCallback(async () => {
-    if (!article || locale === 'ja') return;
+    if (!article || locale !== 'en') return;
+
+    // Cancel any in-flight translation request before starting a new one
+    translateAbortRef.current?.abort();
+    const controller = new AbortController();
+    translateAbortRef.current = controller;
+
     setTranslating(true);
     try {
       const res = await fetch('/api/translate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          article_id: article.id,
-          locale: locale,
-        }),
+        body: JSON.stringify({ article_id: article.id, locale }),
+        signal: controller.signal,
       });
       const data = await res.json();
-      if (res.ok) {
+      if (res.ok && !data.chrome_translate) {
         if (data.summary) setTranslatedSummary(data.summary);
         if (data.insight) setTranslatedInsight(data.insight);
       }
-    } catch { /* silently fail */ }
-    setTranslating(false);
+    } catch (err) {
+      // AbortError is expected when locale changes rapidly — ignore silently
+      if (err instanceof Error && err.name !== 'AbortError') {
+        console.error('[translate] fetch failed:', err.message);
+      }
+    } finally {
+      setTranslating(false);
+    }
   }, [article, locale]);
 
-  // Auto-translate when locale is not Japanese
+  // Auto-translate for English only (other locales handled by Chrome translation)
   useEffect(() => {
-    if (article && locale !== 'ja' && !translatedSummary) {
+    if (article && locale === 'en' && !translatedSummary) {
       handleTranslate();
     }
   }, [article, locale, translatedSummary, handleTranslate]);
@@ -422,7 +435,7 @@ export default function ArticleDetailPage() {
         )}
         {article.mrr_mentioned != null && article.mrr_mentioned > 0 && (
           <span className="text-xs font-bold text-emerald-400 bg-transparent border border-emerald-400/30 px-2.5 py-1 rounded-full">
-            ${article.mrr_mentioned.toLocaleString()}/mo
+            {formatMrr(article.mrr_mentioned)}/mo
           </span>
         )}
 
@@ -670,7 +683,7 @@ export default function ArticleDetailPage() {
       {/* ── Bottom nav ───────────────────────────────────────── */}
       <div className="flex items-center justify-between pt-5 border-t border-[var(--ink-2)]">
         <span className="text-xs text-[var(--ink-5)]">
-          {new Date(article.created_at).toLocaleDateString(locale === 'ja' ? 'ja-JP' : locale === 'zh' ? 'zh-CN' : locale === 'ko' ? 'ko-KR' : locale === 'hi' ? 'hi-IN' : locale === 'de' ? 'de-DE' : locale === 'es' ? 'es-ES' : locale === 'fr' ? 'fr-FR' : locale === 'pt' ? 'pt-BR' : 'en-US')}
+          {new Date(article.created_at).toLocaleDateString(localeToBCP47[locale])}
         </span>
         <Link href="/articles" className="text-sm text-[var(--signal-gold)] font-medium hover:opacity-80 transition flex items-center gap-1">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>

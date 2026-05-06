@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useI18n } from '@/i18n/context';
 import { timeAgo } from '@/lib/time-ago';
+import { formatMrr } from '@/lib/format-mrr';
 
 interface Article {
   id: string;
@@ -85,16 +86,6 @@ function getHeat(upvotes: number): number {
   if (upvotes > 50) return 3;
   if (upvotes > 10) return 2;
   return 1;
-}
-
-/* ── MRR formatting ──────────────────────────────────────────── */
-
-function formatMrr(mrr: number): string {
-  if (mrr >= 1000) {
-    const k = mrr / 1000;
-    return `$${k % 1 === 0 ? k.toFixed(0) : k.toFixed(1)}K`;
-  }
-  return `$${mrr}`;
 }
 
 /* ── Component ───────────────────────────────────────────────── */
