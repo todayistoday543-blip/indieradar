@@ -26,13 +26,32 @@ const LOCALE_LANGUAGE: Record<string, string> = {
 };
 
 export async function POST(req: NextRequest) {
-  const { article_id, user_id, country_name, country_code, locale } = await req.json();
+  const body = await req.json().catch(() => null);
+  if (!body) {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+  }
+  const { article_id, user_id, country_name, country_code, locale } = body;
 
   if (!user_id) {
     return NextResponse.json({ error: 'Login required' }, { status: 401 });
   }
 
+  if (!article_id) {
+    return NextResponse.json({ error: 'article_id is required' }, { status: 400 });
+  }
+
   const supabase = createServiceClient();
+
+  // Verify Pro plan — this endpoint calls the Anthropic API and must be gated
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('subscription_plan')
+    .eq('id', user_id)
+    .single();
+
+  if (profile?.subscription_plan !== 'pro') {
+    return NextResponse.json({ error: 'Pro plan required' }, { status: 403 });
+  }
 
   const { data: article } = await supabase
     .from('articles')
