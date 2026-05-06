@@ -8,8 +8,8 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 300; // Vercel Pro max: 300s
 
 const MAX_CONTENT_LENGTH = 5000;
-// 50件 × 約7秒/翻訳 = 350秒 → タイムアウト。15件なら約105秒で余裕を持って収まる
-const MAX_ARTICLES_PER_RUN = 15;
+// 2 Claude calls per article (enrich + translate). 10 × 2 × ~10s = ~200s — within 300s limit.
+const MAX_ARTICLES_PER_RUN = 10;
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
@@ -111,9 +111,18 @@ export async function GET(request: NextRequest) {
       original_title:     article.original_title,
       original_content:   article.original_content.slice(0, MAX_CONTENT_LENGTH),
       author_profile_url: article.author_profile_url || null,
+      // English base
+      en_title:           enriched.en_title,
+      en_summary:         enriched.en_summary,
+      en_insight:         enriched.en_insight,
+      // Japanese (意訳)
       ja_title:           enriched.ja_title,
       ja_summary:         enriched.ja_summary,
       ja_insight:         enriched.ja_insight,
+      // Spanish (意訳)
+      es_title:           enriched.es_title,
+      es_summary:         enriched.es_summary,
+      es_insight:         enriched.es_insight,
       ja_difficulty:      enriched.ja_difficulty,
       business_model:     enriched.business_model || null,
       mrr_mentioned:      enriched.mrr_mentioned,
@@ -131,7 +140,7 @@ export async function GET(request: NextRequest) {
     }
 
     processed++;
-    results.push(`[OK] saved: "${enriched.ja_title?.slice(0, 50)}"`);
+    results.push(`[OK] saved: "${enriched.en_title?.slice(0, 50)}"`);
   }
 
   results.push(`--- Done: ${processed} saved / ${toProcess.length} attempted ---`);

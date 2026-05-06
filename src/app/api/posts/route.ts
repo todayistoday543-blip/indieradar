@@ -68,9 +68,18 @@ export async function POST(req: NextRequest) {
       author_id: user_id,
       status: 'pending',
       is_premium: false,
+      // English base
+      en_title:      enriched.en_title,
+      en_summary:    enriched.en_summary,
+      en_insight:    enriched.en_insight,
+      // Japanese (意訳)
       ja_title:      enriched.ja_title,
       ja_summary:    enriched.ja_summary,
       ja_insight:    enriched.ja_insight,
+      // Spanish (意訳)
+      es_title:      enriched.es_title,
+      es_summary:    enriched.es_summary,
+      es_insight:    enriched.es_insight,
       ja_difficulty: enriched.ja_difficulty,
       business_model: enriched.business_model || null,
       mrr_mentioned:  enriched.mrr_mentioned,

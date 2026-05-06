@@ -9,9 +9,18 @@ interface Article {
   id: string;
   source: string;
   original_title?: string;
-  ja_title: string;
-  ja_summary: string;
-  ja_insight: string;
+  // English base
+  en_title?: string;
+  en_summary?: string;
+  en_insight?: string;
+  // Japanese
+  ja_title?: string;
+  ja_summary?: string;
+  ja_insight?: string;
+  // Spanish
+  es_title?: string;
+  es_summary?: string;
+  es_insight?: string;
   ja_difficulty: string;
   business_model?: string | null;
   mrr_mentioned: number | null;
@@ -99,14 +108,24 @@ export function ArticleCard({ article }: { article: Article }) {
 
   const hasMrr = article.mrr_mentioned != null && article.mrr_mentioned > 0;
 
-  // ja_title now stores the enriched English title (English-first architecture).
-  // Use it for all locales; fall back to raw original_title if missing.
-  const displayTitle = article.ja_title || article.original_title || 'Untitled';
+  // Trilingual display: pick title for current locale with fallback chain.
+  const displayTitle =
+    locale === 'ja'
+      ? (article.ja_title || article.en_title || article.original_title || 'Untitled')
+      : locale === 'es'
+      ? (article.es_title || article.en_title || article.original_title || 'Untitled')
+      : (article.en_title || article.ja_title || article.original_title || 'Untitled');
 
-  // ja_summary now contains English content — show it only when the UI language
-  // is English to avoid mixing languages on the listing card.
-  const descText = locale === 'en' && article.ja_summary
-    ? article.ja_summary
+  // Pick the summary for the current locale (used for card preview blurb).
+  const rawSummary =
+    locale === 'ja'
+      ? (article.ja_summary || article.en_summary || '')
+      : locale === 'es'
+      ? (article.es_summary || article.en_summary || '')
+      : (article.en_summary || article.ja_summary || '');
+
+  const descText = rawSummary
+    ? rawSummary
         // Remove ## section headings
         .replace(/^#{1,3}\s+.+$/gm, '')
         // Remove leading bullet/dash markers

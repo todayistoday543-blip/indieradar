@@ -3,7 +3,7 @@ import { createServiceClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
-const ARTICLE_COLUMNS = 'id,source,original_title,ja_title,ja_summary,ja_insight,ja_difficulty,business_model,mrr_mentioned,upvotes,is_premium,original_url,author_profile_url,created_at,view_count,upvote_count';
+const ARTICLE_COLUMNS = 'id,source,original_title,en_title,en_summary,en_insight,ja_title,ja_summary,ja_insight,es_title,es_summary,es_insight,ja_difficulty,business_model,mrr_mentioned,upvotes,is_premium,original_url,author_profile_url,created_at,view_count,upvote_count';
 const VALID_SOURCES = ['hackernews', 'producthunt', 'reddit', 'indiehackers'];
 const VALID_SORTS = ['new', 'heat', 'upvotes', 'views', 'revenue', 'easy', 'small', 'priority'];
 

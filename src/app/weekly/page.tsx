@@ -13,9 +13,18 @@ interface RankedArticle {
   id: string;
   source: string;
   original_title?: string;
-  ja_title: string;
-  ja_summary: string;
-  ja_insight: string;
+  // English base
+  en_title?: string;
+  en_summary?: string;
+  en_insight?: string;
+  // Japanese
+  ja_title?: string;
+  ja_summary?: string;
+  ja_insight?: string;
+  // Spanish
+  es_title?: string;
+  es_summary?: string;
+  es_insight?: string;
   ja_difficulty: string;
   business_model: string | null;
   mrr_mentioned: number | null;
@@ -300,8 +309,13 @@ export default function WeeklyPage() {
               const Icon = sourceIcon[article.source];
               const srcLabel = sourceLabel[article.source] || article.source.toUpperCase();
               const hasMrr = article.mrr_mentioned != null && article.mrr_mentioned > 0;
-              // ja_title now stores the enriched English title (English-first architecture)
-              const displayTitle = article.ja_title || article.original_title || 'Untitled';
+              // Trilingual display: pick title for current locale with fallback chain.
+              const displayTitle =
+                locale === 'ja'
+                  ? (article.ja_title || article.en_title || article.original_title || 'Untitled')
+                  : locale === 'es'
+                  ? (article.es_title || article.en_title || article.original_title || 'Untitled')
+                  : (article.en_title || article.ja_title || article.original_title || 'Untitled');
               const medal = rankBadge(rank);
               const isTop3 = rank <= 3;
 

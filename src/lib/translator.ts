@@ -7,9 +7,19 @@ function getClient() {
 }
 
 export interface TranslationResult {
+  // English (base language)
+  en_title: string;
+  en_summary: string;
+  en_insight: string;
+  // Japanese (意訳 — contextual translation)
   ja_title: string;
   ja_summary: string;
   ja_insight: string;
+  // Spanish (意訳 — contextual translation)
+  es_title: string;
+  es_summary: string;
+  es_insight: string;
+  // Metadata
   ja_difficulty: 'Easy' | 'Medium' | 'Hard';
   business_model: string;
   mrr_mentioned: number | null;
@@ -38,17 +48,29 @@ function buildIndustryHints(): string {
   return top6.map(v => `- ${v.name}: ${v.examples.join(', ')}`).join('\n');
 }
 
-export async function translateAndEnrich(article: {
+/**
+ * CALL 1: Enrich article in English.
+ * Returns all metadata + English content fields.
+ */
+async function enrichInEnglish(article: {
   original_title: string;
   original_content: string;
   source: string;
-}): Promise<TranslationResult> {
+}): Promise<{
+  is_business_case: boolean;
+  en_title: string;
+  en_summary: string;
+  en_insight: string;
+  ja_difficulty: 'Easy' | 'Medium' | 'Hard';
+  business_model: string;
+  mrr_mentioned: number | null;
+}> {
   const globalContext = buildGlobalMarketContext();
   const industryHints = buildIndustryHints();
 
   const message = await getClient().messages.create({
     model: 'claude-sonnet-4-5-20250929',
-    max_tokens: 6000,
+    max_tokens: 5000,
     system: `You are a business analyst with Perplexity AI-level market analysis capabilities.
 Analyze indie hacker case studies and provide deep insights on global market applicability.
 Include data-driven specific numbers, market sizes, and success probabilities.
@@ -56,7 +78,7 @@ Write in clear, accessible English that beginners can understand, while providin
     messages: [
       {
         role: 'user',
-        content: `Analyze the following indie hacker post and return JSON format.
+        content: `Analyze the following indie hacker post and return JSON.
 Write clearly and concretely so beginners in programming or business can understand.
 
 [GLOBAL MARKET DATA (reference)]
@@ -66,7 +88,7 @@ ${globalContext}
 ${industryHints}
 
 [ANALYSIS RULES]
-ja_summary should total 2500-3500 characters, structured with 7 sections in "## Section Name" format:
+en_summary should total 2500-3500 characters, structured with 7 sections in "## Section Name" format:
 
 ## Key Takeaways (200 chars)
 - Explain in one sentence what makes this case remarkable, accessible to beginners
@@ -116,7 +138,7 @@ Provide Perplexity-level market analysis:
 - e.g., "Apply X mechanism to Y industry → solve Z problem for W → $X/mo expected"
 - Mark the lowest-risk idea to start with ★
 
-[About ja_insight]
+[About en_insight]
 - Write as "Global applicability insights" in 150 characters or less
 - Include specific market data (market size, growth rate)
 - Not limited to one country — write so readers worldwide can use it
@@ -133,9 +155,9 @@ false: political news, celebrity topics, major game company updates, satire/paro
 [RESPONSE FORMAT] Return ONLY this JSON:
 {
   "is_business_case": true or false,
-  "ja_title": "English title (under 80 chars, catchy with numbers if available)",
-  "ja_summary": "## Key Takeaways\\n...\\n\\n## What Was Built\\n...\\n\\n## How They Make Money\\n...\\n\\n## The Journey\\n...\\n\\n## Tech Stack & Tools\\n...\\n\\n## Market Applicability\\n...\\n\\n## Idea Seeds\\n...",
-  "ja_insight": "Global applicability insight (under 150 chars, include market data)",
+  "en_title": "English title (under 80 chars, catchy with numbers if available)",
+  "en_summary": "## Key Takeaways\\n...\\n\\n## What Was Built\\n...\\n\\n## How They Make Money\\n...\\n\\n## The Journey\\n...\\n\\n## Tech Stack & Tools\\n...\\n\\n## Market Applicability\\n...\\n\\n## Idea Seeds\\n...",
+  "en_insight": "Global applicability insight (under 150 chars, include market data)",
   "ja_difficulty": "Easy or Medium or Hard",
   "business_model": "Business model name (e.g., SaaS, Marketplace, Chrome Extension, API)",
   "mrr_mentioned": MRR amount as integer in USD (null if no revenue mentioned in article)
@@ -146,11 +168,133 @@ false: political news, celebrity topics, major game company updates, satire/paro
 
   const textBlock = message.content.find((b) => b.type === 'text');
   const text = textBlock ? textBlock.text : '{}';
-
   const match = text.match(/\{[\s\S]*\}/);
-  if (!match) {
-    throw new Error('Failed to parse Claude response as JSON');
+  if (!match) throw new Error('Failed to parse enrichment response as JSON');
+
+  return JSON.parse(match[0]);
+}
+
+/**
+ * CALL 2: Translate English content to both Japanese and Spanish simultaneously.
+ * Uses 意訳 (contextual/adaptive translation) — not literal word-for-word.
+ * Returns translated title, summary, and insight for both languages.
+ */
+async function translateToJaAndEs(english: {
+  en_title: string;
+  en_summary: string;
+  en_insight: string;
+}): Promise<{
+  ja_title: string;
+  ja_summary: string;
+  ja_insight: string;
+  es_title: string;
+  es_summary: string;
+  es_insight: string;
+}> {
+  const message = await getClient().messages.create({
+    model: 'claude-sonnet-4-5-20250929',
+    max_tokens: 8000,
+    system: `You are a professional translator and content strategist specializing in Japanese and Spanish localization.
+Your translations are 意訳 (contextual/adaptive) — you deeply understand the meaning and restructure
+sentences to feel completely natural to native speakers, rather than translating word-for-word.
+
+Translation principles:
+- Preserve the exact section structure (## headings must remain)
+- Adapt expressions, idioms, and metaphors to feel native in each target language
+- For Japanese: use a mix of formal and accessible language; use katakana for tech terms; keep $ amounts in USD
+- For Spanish: use Latin American Spanish conventions; keep tech terms natural; maintain an engaging tone
+- Keep all: product names, URLs, dollar/yen amounts, technical tool names, "Easy/Medium/Hard" labels
+- Section headings should be translated naturally (not literally)
+- Numbers, statistics, and facts must never change`,
+    messages: [
+      {
+        role: 'user',
+        content: `Translate the following English indie hacker case study content into BOTH Japanese AND Spanish.
+Both translations must be 意訳 — convey the exact meaning and spirit in a way that feels natural to native readers.
+
+[ENGLISH TITLE]
+${english.en_title}
+
+[ENGLISH SUMMARY]
+${english.en_summary}
+
+[ENGLISH INSIGHT]
+${english.en_insight}
+
+Return ONLY this JSON (no extra text, no markdown wrapper):
+{
+  "ja_title": "Japanese title — catchy, natural Japanese, not a literal translation",
+  "ja_summary": "Full Japanese summary preserving ## section headings — naturally written for Japanese readers",
+  "ja_insight": "Japanese insight (under 150 characters)",
+  "es_title": "Spanish title — catchy, natural Spanish, not a literal translation",
+  "es_summary": "Full Spanish summary preserving ## section headings — naturally written for Spanish readers",
+  "es_insight": "Spanish insight (under 150 characters)"
+}`,
+      },
+    ],
+  });
+
+  const textBlock = message.content.find((b) => b.type === 'text');
+  const text = textBlock ? textBlock.text : '{}';
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('Failed to parse translation response as JSON');
+
+  return JSON.parse(match[0]);
+}
+
+/**
+ * Main entry point: enrich and translate an article into all three languages.
+ * Uses 2 Claude API calls:
+ *   1. English enrichment + metadata extraction
+ *   2. Simultaneous Japanese + Spanish 意訳 translation
+ */
+export async function translateAndEnrich(article: {
+  original_title: string;
+  original_content: string;
+  source: string;
+}): Promise<TranslationResult> {
+  // --- Call 1: English enrichment ---
+  const enriched = await enrichInEnglish(article);
+
+  // If not a business case, skip the translation call entirely
+  if (!enriched.is_business_case) {
+    return {
+      is_business_case: false,
+      en_title: enriched.en_title || article.original_title,
+      en_summary: enriched.en_summary || '',
+      en_insight: enriched.en_insight || '',
+      ja_title: '',
+      ja_summary: '',
+      ja_insight: '',
+      es_title: '',
+      es_summary: '',
+      es_insight: '',
+      ja_difficulty: enriched.ja_difficulty || 'Medium',
+      business_model: enriched.business_model || '',
+      mrr_mentioned: enriched.mrr_mentioned ?? null,
+    };
   }
 
-  return JSON.parse(match[0]) as TranslationResult;
+  // --- Call 2: Simultaneous ja + es translation ---
+  const translated = await translateToJaAndEs({
+    en_title: enriched.en_title,
+    en_summary: enriched.en_summary,
+    en_insight: enriched.en_insight,
+  });
+
+  return {
+    is_business_case: true,
+    en_title: enriched.en_title,
+    en_summary: enriched.en_summary,
+    en_insight: enriched.en_insight,
+    ja_title: translated.ja_title || enriched.en_title,
+    ja_summary: translated.ja_summary || enriched.en_summary,
+    ja_insight: translated.ja_insight || enriched.en_insight,
+    es_title: translated.es_title || enriched.en_title,
+    es_summary: translated.es_summary || enriched.en_summary,
+    es_insight: translated.es_insight || enriched.en_insight,
+    ja_difficulty: enriched.ja_difficulty,
+    business_model: enriched.business_model,
+    mrr_mentioned: enriched.mrr_mentioned ?? null,
+  };
 }
