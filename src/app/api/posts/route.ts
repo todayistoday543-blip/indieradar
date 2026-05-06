@@ -54,6 +54,8 @@ export async function POST(req: NextRequest) {
     source: 'user',
   });
 
+  // Explicitly pick only DB columns from enriched — do NOT spread the whole object
+  // because TranslationResult includes `is_business_case` which is not a DB column.
   const { data, error } = await supabase
     .from('articles')
     .insert({
@@ -66,7 +68,12 @@ export async function POST(req: NextRequest) {
       author_id: user_id,
       status: 'pending',
       is_premium: false,
-      ...enriched,
+      ja_title:      enriched.ja_title,
+      ja_summary:    enriched.ja_summary,
+      ja_insight:    enriched.ja_insight,
+      ja_difficulty: enriched.ja_difficulty,
+      business_model: enriched.business_model || null,
+      mrr_mentioned:  enriched.mrr_mentioned,
     })
     .select('id')
     .single();
