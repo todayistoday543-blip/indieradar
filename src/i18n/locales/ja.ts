@@ -202,6 +202,11 @@ export default {
     has_account: '既にアカウントをお持ちの方は',
     confirm_email_title: '確認メールを送信しました',
     confirm_email_desc: 'に確認メールを送りました。メール内のリンクをクリックして登録を完了してください。',
+    error_invalid_credentials: 'メールアドレスまたはパスワードが正しくありません',
+    error_user_already_registered: 'このメールアドレスは既に登録されています',
+    error_email_not_confirmed: 'メールアドレスの確認が完了していません。確認メールをご確認ください',
+    error_rate_limit: 'リクエストが多すぎます。しばらくしてからお試しください',
+    error_generic: '予期しないエラーが発生しました。もう一度お試しください',
   },
   settings: {
     heading: '設定',

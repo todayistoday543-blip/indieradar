@@ -197,6 +197,11 @@ export default {
     has_account: '已有账户？',
     confirm_email_title: '确认邮件已发送',
     confirm_email_desc: '我们已向您发送确认邮件。点击链接完成注册。',
+    error_invalid_credentials: '邮箱或密码不正确',
+    error_user_already_registered: '该邮箱已被注册',
+    error_email_not_confirmed: '邮箱尚未验证，请查看您的收件箱',
+    error_rate_limit: '请求过于频繁，请稍后再试',
+    error_generic: '发生意外错误，请重试',
   },
   settings: {
     heading: '设置',

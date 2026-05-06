@@ -26,6 +26,13 @@ export default function SignupPage() {
 
   const strengthColor = ['bg-[var(--ink-2)]', 'bg-red-400', 'bg-amber-400', 'bg-emerald-400', 'bg-emerald-500'];
 
+  const getSignupError = (msg: string): string => {
+    if (msg.includes('User already registered') || msg.includes('user_already_exists')) return t.auth.error_user_already_registered;
+    if (msg.includes('Password should be at least') || msg.includes('weak_password')) return t.auth.error_generic;
+    if (msg.includes('Too many requests') || msg.includes('rate limit') || msg.includes('over_email_send_rate_limit')) return t.auth.error_rate_limit;
+    return t.auth.error_generic;
+  };
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -38,7 +45,7 @@ export default function SignupPage() {
     });
 
     if (error) {
-      setError(error.message);
+      setError(getSignupError(error.message));
     } else {
       setSuccess(true);
     }

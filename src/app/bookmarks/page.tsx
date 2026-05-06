@@ -81,7 +81,7 @@ export default function BookmarksPage() {
             {t.bookmarks?.heading || 'Bookmarks'}
           </h1>
           <p className="text-sm text-[var(--ink-5)] mb-5">
-            {t.comments?.login_to_comment || 'Log in to use this feature'}
+            {t.bookmarks?.login_to_bookmark || 'Log in to bookmark articles'}
           </p>
           <Link
             href="/auth/login"

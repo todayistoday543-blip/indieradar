@@ -12,6 +12,13 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const getLoginError = (msg: string): string => {
+    if (msg.includes('Invalid login credentials') || msg.includes('invalid_credentials')) return t.auth.error_invalid_credentials;
+    if (msg.includes('Email not confirmed') || msg.includes('email_not_confirmed')) return t.auth.error_email_not_confirmed;
+    if (msg.includes('Too many requests') || msg.includes('rate limit') || msg.includes('over_email_send_rate_limit')) return t.auth.error_rate_limit;
+    return t.auth.error_generic;
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -19,7 +26,7 @@ export default function LoginPage() {
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      setError(error.message);
+      setError(getLoginError(error.message));
       setLoading(false);
     } else {
       window.location.href = '/articles';

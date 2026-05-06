@@ -27,7 +27,6 @@ function ApertureLogo() {
 
 const productLinks = [
   { href: '/articles', labelKey: 'signals' as const },
-  { href: '/articles', labelKey: 'sources' as const },
   { href: '/submit', labelKey: 'submit' as const },
   { href: '/pricing', labelKey: 'pricing' as const },
 ];
@@ -38,7 +37,6 @@ const languages = Object.values(localeNames);
 const companyLinks = [
   { href: '/submit', label: 'Submit a case' },
   { href: '/pricing', label: 'Pricing' },
-  { href: '/submit', label: 'Contact' },
 ];
 
 export function Footer() {
@@ -46,7 +44,6 @@ export function Footer() {
 
   const productLabelMap: Record<string, string> = {
     signals: t.common.articles,
-    sources: 'Sources',
     submit: t.common.submit,
     pricing: t.common.pricing,
   };

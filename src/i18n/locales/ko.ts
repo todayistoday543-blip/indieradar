@@ -197,6 +197,11 @@ export default {
     has_account: '이미 계정이 있으신가요?',
     confirm_email_title: '확인 이메일이 발송되었습니다',
     confirm_email_desc: '확인 이메일을 보냈습니다. 링크를 클릭하여 가입을 완료하세요.',
+    error_invalid_credentials: '이메일 또는 비밀번호가 올바르지 않습니다',
+    error_user_already_registered: '이미 등록된 이메일입니다',
+    error_email_not_confirmed: '이메일이 아직 확인되지 않았습니다. 받은 편지함을 확인하세요',
+    error_rate_limit: '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요',
+    error_generic: '예기치 않은 오류가 발생했습니다. 다시 시도해 주세요',
   },
   settings: {
     heading: '설정',

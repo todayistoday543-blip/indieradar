@@ -197,6 +197,11 @@ export default {
     has_account: 'Vous avez déjà un compte ?',
     confirm_email_title: 'E-mail de confirmation envoyé',
     confirm_email_desc: "Nous vous avons envoyé un e-mail de confirmation. Cliquez sur le lien pour terminer l'inscription.",
+    error_invalid_credentials: 'E-mail ou mot de passe incorrect',
+    error_user_already_registered: 'Cet e-mail est déjà enregistré',
+    error_email_not_confirmed: "L'e-mail n'est pas encore confirmé. Vérifiez votre boîte de réception",
+    error_rate_limit: 'Trop de requêtes. Veuillez réessayer plus tard',
+    error_generic: 'Une erreur inattendue est survenue. Veuillez réessayer',
   },
   settings: {
     heading: 'Paramètres',

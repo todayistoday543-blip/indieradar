@@ -103,6 +103,7 @@ export default function ArticlesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [categoryOpen, setCategoryOpen] = useState(false);
   const categoryRef = useRef<HTMLDivElement>(null);
+  const isFirstRender = useRef(true);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -116,6 +117,12 @@ export default function ArticlesPage() {
   }, []);
 
   useEffect(() => {
+    // Scroll to top on filter/page changes (skip initial mount)
+    if (!isFirstRender.current) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    isFirstRender.current = false;
+
     async function load() {
       setLoading(true);
       const params = new URLSearchParams({ page: String(page), sort });

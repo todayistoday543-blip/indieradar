@@ -197,6 +197,11 @@ export default {
     has_account: 'Já tem uma conta?',
     confirm_email_title: 'E-mail de confirmação enviado',
     confirm_email_desc: 'Enviamos um e-mail de confirmação. Clique no link para concluir o cadastro.',
+    error_invalid_credentials: 'E-mail ou senha incorretos',
+    error_user_already_registered: 'Este e-mail já está cadastrado',
+    error_email_not_confirmed: 'E-mail ainda não confirmado. Verifique sua caixa de entrada',
+    error_rate_limit: 'Muitas solicitações. Por favor, tente novamente mais tarde',
+    error_generic: 'Ocorreu um erro inesperado. Por favor, tente novamente',
   },
   settings: {
     heading: 'Configurações',

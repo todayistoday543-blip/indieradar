@@ -197,6 +197,11 @@ export default {
     has_account: '¿Ya tienes cuenta?',
     confirm_email_title: 'Correo de confirmación enviado',
     confirm_email_desc: 'Te enviamos un correo de confirmación. Haz clic en el enlace para completar el registro.',
+    error_invalid_credentials: 'Correo electrónico o contraseña incorrectos',
+    error_user_already_registered: 'Este correo electrónico ya está registrado',
+    error_email_not_confirmed: 'Correo electrónico no confirmado aún. Revisa tu bandeja de entrada',
+    error_rate_limit: 'Demasiadas solicitudes. Por favor, inténtalo más tarde',
+    error_generic: 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo',
   },
   settings: {
     heading: 'Configuración',

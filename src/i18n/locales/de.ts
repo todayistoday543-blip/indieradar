@@ -197,6 +197,11 @@ export default {
     has_account: 'Bereits ein Konto?',
     confirm_email_title: 'Bestätigungs-E-Mail gesendet',
     confirm_email_desc: 'Wir haben Ihnen eine Bestätigungs-E-Mail gesendet. Klicken Sie auf den Link, um die Registrierung abzuschließen.',
+    error_invalid_credentials: 'E-Mail oder Passwort ist falsch',
+    error_user_already_registered: 'Diese E-Mail-Adresse ist bereits registriert',
+    error_email_not_confirmed: 'E-Mail noch nicht bestätigt. Bitte prüfen Sie Ihren Posteingang',
+    error_rate_limit: 'Zu viele Anfragen. Bitte versuchen Sie es später erneut',
+    error_generic: 'Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut',
   },
   settings: {
     heading: 'Einstellungen',

@@ -197,6 +197,11 @@ export default {
     has_account: 'पहले से अकाउंट है?',
     confirm_email_title: 'पुष्टि ईमेल भेजा गया',
     confirm_email_desc: 'हमने एक पुष्टि ईमेल भेजा है। रजिस्ट्रेशन पूरा करने के लिए लिंक पर क्लिक करें।',
+    error_invalid_credentials: 'ईमेल या पासवर्ड गलत है',
+    error_user_already_registered: 'यह ईमेल पहले से पंजीकृत है',
+    error_email_not_confirmed: 'ईमेल अभी तक सत्यापित नहीं है। अपना इनबॉक्स जांचें',
+    error_rate_limit: 'बहुत अधिक अनुरोध। कृपया बाद में पुनः प्रयास करें',
+    error_generic: 'एक अनपेक्षित त्रुटि हुई। कृपया पुनः प्रयास करें',
   },
   settings: {
     heading: 'सेटिंग्स',

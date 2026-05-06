@@ -200,6 +200,11 @@ export default {
     has_account: 'Already have an account?',
     confirm_email_title: 'Confirmation email sent',
     confirm_email_desc: 'We sent a confirmation email to . Click the link to complete registration.',
+    error_invalid_credentials: 'Invalid email or password',
+    error_user_already_registered: 'This email is already registered',
+    error_email_not_confirmed: 'Email not yet confirmed. Please check your inbox',
+    error_rate_limit: 'Too many requests. Please try again later',
+    error_generic: 'An unexpected error occurred. Please try again',
   },
   settings: {
     heading: 'Settings',
