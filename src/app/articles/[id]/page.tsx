@@ -380,6 +380,15 @@ export default function ArticleDetailPage() {
   const sourceDomain = (() => {
     try { return new URL(sourceUrl).hostname; } catch { return sourceUrl; }
   })();
+  // Show "via Platform" when the content URL doesn't belong to the discovery platform
+  const platformDomains: Record<string, string> = {
+    hackernews: 'ycombinator.com',
+    producthunt: 'producthunt.com',
+    reddit: 'reddit.com',
+    indiehackers: 'indiehackers.com',
+  };
+  const showVia = article.source && platformDomains[article.source] &&
+    !sourceDomain.includes(platformDomains[article.source]);
   // Locale-aware content selection
   const displayTitle = locale === 'ja'
     ? (article.ja_title || article.original_title || '')
@@ -400,6 +409,11 @@ export default function ArticleDetailPage() {
             </svg>
             <span className="font-medium flex-shrink-0">{t.articles.source_label}</span>
             <span className="truncate">{sourceDomain}</span>
+            {showVia && (
+              <span className="text-xs text-[var(--ink-4)] flex-shrink-0">
+                via {src.name}
+              </span>
+            )}
           </div>
           <a
             href={sourceUrl} target="_blank" rel="noopener noreferrer"
