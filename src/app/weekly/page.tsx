@@ -108,6 +108,7 @@ export default function WeeklyPage() {
   const { t, locale } = useI18n();
   const [articles, setArticles] = useState<RankedArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const [weekOffset, setWeekOffset] = useState(0); // 0 = current week, -1 = last week, etc.
   const [weekStart, setWeekStart] = useState('');
   const [weekEnd, setWeekEnd] = useState('');
@@ -125,17 +126,24 @@ export default function WeeklyPage() {
   useEffect(() => {
     async function load() {
       setLoading(true);
-      const params = new URLSearchParams();
-      if (weekOffset !== 0) {
-        const d = new Date();
-        d.setUTCDate(d.getUTCDate() + weekOffset * 7);
-        params.set('week', d.toISOString().split('T')[0]);
+      setFetchError(false);
+      try {
+        const params = new URLSearchParams();
+        if (weekOffset !== 0) {
+          const d = new Date();
+          d.setUTCDate(d.getUTCDate() + weekOffset * 7);
+          params.set('week', d.toISOString().split('T')[0]);
+        }
+        const res = await fetch(`/api/weekly?${params}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        setArticles(data.articles || []);
+        setWeekStart(data.week_start || '');
+        setWeekEnd(data.week_end || '');
+      } catch {
+        setFetchError(true);
+        setArticles([]);
       }
-      const res = await fetch(`/api/weekly?${params}`);
-      const data = await res.json();
-      setArticles(data.articles || []);
-      setWeekStart(data.week_start || '');
-      setWeekEnd(data.week_end || '');
       setLoading(false);
     }
     load();
@@ -217,6 +225,21 @@ export default function WeeklyPage() {
                 <div className="skeleton h-4 w-16" />
               </div>
             ))}
+          </div>
+        ) : fetchError ? (
+          /* Error state */
+          <div className="flex flex-col items-center justify-center py-24 px-6 text-center animate-fade-in">
+            <svg className="w-10 h-10 text-red-400/60 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+            <p className="text-sm text-[var(--ink-5)] mb-4">Failed to load rankings. Please try again.</p>
+            <button
+              onClick={() => setRefreshTick((n) => n + 1)}
+              className="text-xs text-[var(--signal-gold)] border border-[var(--signal-gold)]/40 px-4 py-1.5 hover:bg-[rgba(212,162,74,0.08)] transition"
+              style={{ fontFamily: 'var(--font-mono)' }}
+            >
+              Retry
+            </button>
           </div>
         ) : articles.length === 0 ? (
           /* Empty state */
