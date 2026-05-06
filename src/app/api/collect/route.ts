@@ -5,9 +5,11 @@ import { translateAndEnrich } from '@/lib/translator';
 import type { CollectedArticle } from '@/lib/collectors';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 300; // Vercel Pro max: 300s
 
 const MAX_CONTENT_LENGTH = 5000;
-const MAX_ARTICLES_PER_RUN = 50; // API cost limit
+// 50件 × 約7秒/翻訳 = 350秒 → タイムアウト。15件なら約105秒で余裕を持って収まる
+const MAX_ARTICLES_PER_RUN = 15;
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
