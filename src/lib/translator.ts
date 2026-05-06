@@ -206,7 +206,7 @@ export async function translateToJaAndEs(english: {
 }> {
   const message = await getClient().messages.create({
     model: 'claude-sonnet-4-5-20250929',
-    max_tokens: 16000,
+    max_tokens: 8000,
     system: `You are a professional translator and content strategist specializing in Japanese and Spanish localization.
 Your translations are 意訳 (contextual/adaptive) — you deeply understand the meaning and restructure
 sentences to feel completely natural to native speakers, rather than translating word-for-word.

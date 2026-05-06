@@ -5,10 +5,10 @@ import { enrichInEnglish } from '@/lib/translator';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
-// Phase 1: Re-generate English content only (claude-sonnet, ~60-90s/article).
-// 3 articles × ~80s each ≈ 240s — within the 300s Vercel Pro limit.
+// Phase 1: Re-generate English content only (claude-sonnet, ~100-150s/article).
+// BATCH_SIZE=1 ensures we stay well within the 300s Vercel Pro hard limit.
 // Phase 2: JA + ES translation is handled by /api/backfill-translations.
-const BATCH_SIZE = 3;
+const BATCH_SIZE = 1;
 
 // Re-enrich EN content below this threshold.
 // New prompt targets 3500-5000 chars; old was 2500-3500.

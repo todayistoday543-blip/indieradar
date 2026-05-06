@@ -7,8 +7,8 @@ export const maxDuration = 300;
 
 // Phase 2: Translate EN → JA + ES for articles that have expanded EN content
 // but are missing JA or ES translations.
-// claude-sonnet translation: ~60-90s/article. 3 × ~80s ≈ 240s < 300s.
-const BATCH_SIZE = 3;
+// claude-sonnet translation: ~100-150s/article. BATCH_SIZE=1 stays under 300s.
+const BATCH_SIZE = 1;
 
 // Minimum EN length to qualify for translation (matches Phase 1 threshold).
 const EN_THRESHOLD = 3200;
