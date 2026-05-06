@@ -230,7 +230,7 @@ export default function ArticleDetailPage() {
         ? (article.ja_title || article.en_title || article.original_title || '')
         : locale === 'es'
         ? (article.es_title || article.en_title || article.original_title || '')
-        : (article.en_title || article.ja_title || article.original_title || '');
+        : (article.en_title || article.original_title || '');
 
     if (title) {
       document.title = `${title} | IndieRadar JP`;
@@ -364,26 +364,30 @@ export default function ArticleDetailPage() {
   const showVia = article.source && platformDomains[article.source] &&
     !sourceDomain.includes(platformDomains[article.source]);
   // Trilingual content selection — all content is pre-stored in DB, no live API calls.
+  // English locale: en_title is always set (= original_title for old articles).
+  // Spanish: fall back to en_title, then original_title.
   const displayTitle =
     locale === 'ja'
       ? (article.ja_title || article.en_title || article.original_title || '')
       : locale === 'es'
       ? (article.es_title || article.en_title || article.original_title || '')
-      : (article.en_title || article.ja_title || article.original_title || '');
+      : (article.en_title || article.original_title || '');
 
+  // Non-Japanese locales must NOT fall back to ja_* — showing Japanese text to
+  // English/Spanish readers is worse than an empty section.
   const summaryContent =
     locale === 'ja'
       ? (article.ja_summary || article.en_summary || '')
       : locale === 'es'
       ? (article.es_summary || article.en_summary || '')
-      : (article.en_summary || article.ja_summary || '');
+      : (article.en_summary || '');
 
   const insightContent =
     locale === 'ja'
       ? (article.ja_insight || article.en_insight || '')
       : locale === 'es'
       ? (article.es_insight || article.en_insight || '')
-      : (article.en_insight || article.ja_insight || '');
+      : (article.en_insight || '');
 
   const sections = parseSections(summaryContent);
 

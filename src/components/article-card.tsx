@@ -117,12 +117,14 @@ export function ArticleCard({ article }: { article: Article }) {
       : (article.en_title || article.ja_title || article.original_title || 'Untitled');
 
   // Pick the summary for the current locale (used for card preview blurb).
+  // Non-Japanese locales must NOT fall back to ja_summary — showing Japanese
+  // text to English/Spanish readers is worse than showing nothing.
   const rawSummary =
     locale === 'ja'
       ? (article.ja_summary || article.en_summary || '')
       : locale === 'es'
       ? (article.es_summary || article.en_summary || '')
-      : (article.en_summary || article.ja_summary || '');
+      : (article.en_summary || '');
 
   const descText = rawSummary
     ? rawSummary
