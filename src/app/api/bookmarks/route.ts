@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
  * Returns: { action: 'added' | 'removed' }
  */
 export async function POST(req: NextRequest) {
-  const { user_id, article_id } = await req.json();
+  const { user_id, article_id } = await req.json().catch(() => ({}));
 
   if (!user_id || !article_id) {
     return NextResponse.json(

@@ -1,37 +1,37 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { useState } from 'react';
 import { useI18n } from '@/i18n/context';
+import { useUser } from '@/components/user-context';
 import Link from 'next/link';
 
 export default function PricingPage() {
   const { t } = useI18n();
+  const { userId } = useUser();
   const [loading, setLoading] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUserId(user?.id ?? null);
-    });
-  }, []);
 
   const isLoggedIn = !!userId;
 
   const handleSubscribe = async (plan: 'basic' | 'pro') => {
+    if (!userId) return;
     setLoading(plan);
-    const res = await fetch('/api/stripe/create-checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan, user_id: userId }),
-    });
-    const data = await res.json();
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      alert('Checkout creation failed');
+    try {
+      const res = await fetch('/api/stripe/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan, user_id: userId }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || 'Checkout creation failed');
+      }
+    } catch {
+      alert('Network error. Please try again.');
+    } finally {
+      setLoading(null);
     }
-    setLoading(null);
   };
 
   return (

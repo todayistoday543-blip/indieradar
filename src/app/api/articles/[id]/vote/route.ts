@@ -13,7 +13,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const { user_id } = await req.json();
+  const body = await req.json().catch(() => ({}));
+  const { user_id } = body;
 
   if (!user_id) {
     return NextResponse.json({ error: 'Login required' }, { status: 401 });

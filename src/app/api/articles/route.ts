@@ -71,8 +71,8 @@ export async function GET(request: NextRequest) {
       orderColumn = 'mrr_mentioned';
       break;
     case 'easy':
-      // Will use custom ordering — handled below
-      orderColumn = 'ja_difficulty';
+      // Uses generated difficulty_order column: Easy=1, Medium=2, Hard=3
+      orderColumn = 'difficulty_order';
       ascending = true;
       break;
     case 'small':
@@ -116,10 +116,9 @@ export async function GET(request: NextRequest) {
       .order('upvotes', { ascending: false })
       .order('mrr_mentioned', { ascending: false, nullsFirst: false });
   } else if (sort === 'easy') {
-    // Easy → Medium → Hard (alphabetical ascending works: E < H < M... not ideal)
-    // We'll sort by difficulty then by upvotes for tie-breaking
+    // Easy(1) → Medium(2) → Hard(3), tie-break by upvotes
     query = query
-      .order('ja_difficulty', { ascending: true })
+      .order('difficulty_order', { ascending: true, nullsFirst: false })
       .order('upvotes', { ascending: false });
   } else {
     query = query.order(orderColumn, { ascending, nullsFirst: false });

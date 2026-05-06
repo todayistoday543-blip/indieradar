@@ -5,11 +5,13 @@ import Stripe from 'stripe';
 
 export const dynamic = 'force-dynamic';
 
-function resolvePlan(priceId: string | undefined): string {
-  if (!priceId) return 'basic';
+function resolvePlan(priceId: string | undefined): 'free' | 'basic' | 'pro' {
+  if (!priceId) return 'free';
   if (priceId === process.env.STRIPE_PRICE_ID_PRO) return 'pro';
   if (priceId === process.env.STRIPE_PRICE_ID_BASIC) return 'basic';
-  return 'basic';
+  // Unknown price ID — default to free rather than silently granting access
+  console.warn(`[webhook] Unknown priceId: ${priceId}`);
+  return 'free';
 }
 
 export async function POST(request: NextRequest) {

@@ -22,10 +22,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'No subscription found' }, { status: 400 });
   }
 
-  const session = await stripe.billingPortal.sessions.create({
-    customer: profile.stripe_customer_id,
-    return_url: `${process.env.NEXT_PUBLIC_APP_URL}/articles`,
-  });
+  const appUrl = process.env.NEXT_PUBLIC_PROD_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
-  return NextResponse.json({ url: session.url });
+  try {
+    const session = await stripe.billingPortal.sessions.create({
+      customer: profile.stripe_customer_id,
+      return_url: `${appUrl}/articles`,
+    });
+    return NextResponse.json({ url: session.url });
+  } catch (err) {
+    console.error('[create-portal] Stripe error:', err);
+    const message = err instanceof Error ? err.message : 'Stripe error';
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }

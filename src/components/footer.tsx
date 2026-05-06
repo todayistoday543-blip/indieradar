@@ -1,6 +1,7 @@
 'use client';
 
 import { useI18n } from '@/i18n/context';
+import { localeNames } from '@/i18n/config';
 import { NewsletterForm } from './newsletter-form';
 import Link from 'next/link';
 
@@ -31,17 +32,8 @@ const productLinks = [
   { href: '/pricing', labelKey: 'pricing' as const },
 ];
 
-const languages = [
-  '日本語',
-  'English',
-  '한국어',
-  '中文',
-  'Español',
-  'Português',
-  'Deutsch',
-  'Français',
-  'العربية',
-];
+// Derived from config so it stays in sync with the actual supported locales
+const languages = Object.values(localeNames);
 
 const companyLinks = [
   { href: '/submit', label: 'Submit a case' },

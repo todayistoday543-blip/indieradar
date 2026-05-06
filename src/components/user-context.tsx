@@ -1,10 +1,19 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { ReactNode } from 'react';
 
 export type Plan = 'free' | 'basic' | 'pro';
+
+const VALID_PLANS: Plan[] = ['free', 'basic', 'pro'];
+
+function safePlan(value: unknown): Plan {
+  if (typeof value === 'string' && VALID_PLANS.includes(value as Plan)) {
+    return value as Plan;
+  }
+  return 'free';
+}
 
 interface UserState {
   userId: string | null;
@@ -14,67 +23,60 @@ interface UserState {
   countryName: string | null;
 }
 
-const UserContext = createContext<UserState>({
+const LOGGED_OUT: UserState = {
   userId: null,
   plan: 'free',
-  loading: true,
+  loading: false,
   countryCode: null,
   countryName: null,
+};
+
+const UserContext = createContext<UserState>({
+  ...LOGGED_OUT,
+  loading: true,
 });
 
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<UserState>({
-    userId: null,
-    plan: 'free',
-    loading: true,
-    countryCode: null,
-    countryName: null,
-  });
+  const [state, setState] = useState<UserState>({ ...LOGGED_OUT, loading: true });
 
-  useEffect(() => {
-    async function load() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+  const load = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
 
-      if (!user) {
-        setState({ userId: null, plan: 'free', loading: false, countryCode: null, countryName: null });
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('subscription_plan, country_code, country_name')
-        .eq('id', user.id)
-        .single();
-
-      const plan = (profile?.subscription_plan as Plan) || 'free';
-
-      setState({
-        userId: user.id,
-        plan,
-        loading: false,
-        countryCode: profile?.country_code || null,
-        countryName: profile?.country_name || null,
-      });
+    if (!user) {
+      setState(LOGGED_OUT);
+      return;
     }
 
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('subscription_plan, country_code, country_name')
+      .eq('id', user.id)
+      .single();
+
+    setState({
+      userId: user.id,
+      plan: safePlan(profile?.subscription_plan),
+      loading: false,
+      countryCode: profile?.country_code ?? null,
+      countryName: profile?.country_name ?? null,
+    });
+  }, []);
+
+  useEffect(() => {
     load();
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session?.user) {
-        setState({ userId: null, plan: 'free', loading: false, countryCode: null, countryName: null });
-      } else {
-        // Re-fetch profile on auth change
+    // Only re-fetch on actual sign-in / sign-out events, not on every token
+    // refresh (which fires TOKEN_REFRESHED every ~60 min and causes needless DB calls).
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
         load();
+      } else if (event === 'SIGNED_OUT') {
+        setState(LOGGED_OUT);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [load]);
 
   return <UserContext.Provider value={state}>{children}</UserContext.Provider>;
 }

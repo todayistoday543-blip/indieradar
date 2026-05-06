@@ -10,6 +10,9 @@ import {
 } from 'react';
 import { type Locale, defaultLocale, locales } from './config';
 import type jaMessages from './locales/ja';
+// Eagerly import the default (ja) locale so the initial render never shows a
+// full-screen "Loading..." flash for Japanese users (the majority).
+import jaDefault from './locales/ja';
 
 type DeepString<T> = {
   [K in keyof T]: T[K] extends string ? string : DeepString<T[K]>;
@@ -24,11 +27,11 @@ const I18nContext = createContext<{
 }>({
   locale: defaultLocale,
   setLocale: () => {},
-  t: {} as Messages,
+  t: jaDefault as Messages,
 });
 
 const loaders: Record<Locale, () => Promise<{ default: Messages }>> = {
-  ja: () => import('./locales/ja'),
+  ja: () => Promise.resolve({ default: jaDefault as Messages }),
   en: () => import('./locales/en'),
   zh: () => import('./locales/zh'),
   ko: () => import('./locales/ko'),
@@ -51,8 +54,9 @@ function getSavedLocale(): Locale {
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {
+  // Start with ja messages so the first render never shows a spinner
   const [locale, setLocaleState] = useState<Locale>(defaultLocale);
-  const [messages, setMessages] = useState<Messages | null>(null);
+  const [messages, setMessages] = useState<Messages>(jaDefault as Messages);
 
   const loadMessages = useCallback(async (l: Locale) => {
     const mod = await loaders[l]();
@@ -71,18 +75,16 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const initial = getSavedLocale();
-    setLocaleState(initial);
-    document.documentElement.lang = initial;
-    loadMessages(initial);
+    // Only trigger a load (and state update) when the preferred locale differs
+    // from the default already rendered; avoids a spurious re-render for ja users.
+    if (initial !== defaultLocale) {
+      setLocaleState(initial);
+      document.documentElement.lang = initial;
+      loadMessages(initial);
+    } else {
+      document.documentElement.lang = initial;
+    }
   }, [loadMessages]);
-
-  if (!messages) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-gray-400">
-        Loading...
-      </div>
-    );
-  }
 
   return (
     <I18nContext.Provider value={{ locale, setLocale, t: messages }}>

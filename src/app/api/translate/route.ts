@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Anthropic from '@anthropic-ai/sdk';
 import { createServiceClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60; // Vercel Pro: allow up to 60s for translation
 
-const LOCALE_NAMES: Record<string, string> = {
+// Only these two locales get AI translation; others use Chrome translation
+const AI_TRANSLATED_LOCALES: Record<string, string> = {
   en: 'English',
-  zh: 'Chinese (Simplified)',
-  ko: 'Korean',
-  hi: 'Hindi',
-  de: 'German',
-  es: 'Spanish',
-  fr: 'French',
-  pt: 'Portuguese',
 };
+
+function getAnthropic() {
+  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY || 'placeholder' });
+}
 
 export async function POST(req: NextRequest) {
   const { article_id, locale } = await req.json();
@@ -21,14 +21,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing article_id or locale' }, { status: 400 });
   }
 
-  // Japanese doesn't need translation
+  // Japanese is the source language — no translation needed
   if (locale === 'ja') {
     return NextResponse.json({ error: 'No translation needed for ja' }, { status: 400 });
   }
 
+  // Non-AI-translated locales: return null so client falls back to Chrome translation
+  if (!AI_TRANSLATED_LOCALES[locale]) {
+    return NextResponse.json({ summary: null, insight: null, chrome_translate: true });
+  }
+
   const supabase = createServiceClient();
 
-  // Check cache first (gracefully handle if table doesn't exist)
+  // Check cache first
   try {
     const { data: cached } = await supabase
       .from('article_translations')
@@ -37,18 +42,14 @@ export async function POST(req: NextRequest) {
       .eq('locale', locale)
       .single();
 
-    if (cached) {
-      return NextResponse.json({
-        summary: cached.summary,
-        insight: cached.insight,
-        cached: true,
-      });
+    if (cached?.summary) {
+      return NextResponse.json({ summary: cached.summary, insight: cached.insight, cached: true });
     }
   } catch {
     // Table may not exist yet — proceed without cache
   }
 
-  // Fetch the article
+  // Fetch the Japanese source article
   const { data: article } = await supabase
     .from('articles')
     .select('ja_summary, ja_insight')
@@ -59,34 +60,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Article not found' }, { status: 404 });
   }
 
-  const targetLang = LOCALE_NAMES[locale] || 'English';
-  const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
+  const targetLang = AI_TRANSLATED_LOCALES[locale];
+  const apiKey = process.env.ANTHROPIC_API_KEY;
 
-  if (!ANTHROPIC_KEY || ANTHROPIC_KEY === 'placeholder') {
-    // Return original content if no API key available
-    return NextResponse.json({
-      summary: article.ja_summary,
-      insight: article.ja_insight,
-      translated: false,
-    });
+  if (!apiKey || apiKey === 'placeholder') {
+    return NextResponse.json({ summary: null, insight: null, translated: false });
   }
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5-20250929',
-        max_tokens: 4000,
-        messages: [{
-          role: 'user',
-          content: `Translate the following Japanese article content to ${targetLang}.
-Keep the same structure (## headings, bullet points, formatting).
-Translate naturally, not literally. Keep technical terms, product names, and dollar amounts as-is.
+    const anthropic = getAnthropic();
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-5-20250929',
+      max_tokens: 4000,
+      messages: [{
+        role: 'user',
+        content: `Translate the following Japanese indie hacker case study content to ${targetLang}.
+
+Rules:
+- Keep the same structure (## headings, formatting)
+- Translate naturally, not word-for-word
+- Keep technical terms, product names, URLs, and dollar/yen amounts as-is
+- Keep "Easy/Medium/Hard" difficulty labels in English
 
 ---SUMMARY---
 ${article.ja_summary || ''}
@@ -94,47 +88,35 @@ ${article.ja_summary || ''}
 ---INSIGHT---
 ${article.ja_insight || ''}
 
-Return your response in this exact format:
+Return in this exact format (no extra text):
 ---SUMMARY---
-(translated summary here)
+(translated summary)
 
 ---INSIGHT---
-(translated insight here)`,
-        }],
-      }),
+(translated insight)`,
+      }],
     });
 
-    if (!res.ok) {
-      // API error (likely credit exhaustion) — return original
-      return NextResponse.json({
-        summary: article.ja_summary,
-        insight: article.ja_insight,
-        translated: false,
-      });
-    }
+    const textBlock = message.content.find(b => b.type === 'text');
+    const text = textBlock && textBlock.type === 'text' ? textBlock.text : '';
 
-    const data = await res.json();
-    const textBlock = data.content?.find((b: { type: string }) => b.type === 'text');
-    const text = textBlock ? textBlock.text : '';
-
-    // Parse response
     const summaryMatch = text.match(/---SUMMARY---\s*([\s\S]*?)(?=---INSIGHT---|$)/);
     const insightMatch = text.match(/---INSIGHT---\s*([\s\S]*?)$/);
 
-    const translatedSummary = summaryMatch ? summaryMatch[1].trim() : article.ja_summary;
-    const translatedInsight = insightMatch ? insightMatch[1].trim() : article.ja_insight;
+    const translatedSummary = summaryMatch ? summaryMatch[1].trim() : null;
+    const translatedInsight = insightMatch ? insightMatch[1].trim() : null;
 
-    // Cache the translation (ignore errors — table may not exist)
-    try {
-      await supabase.from('article_translations').upsert({
-        article_id,
-        locale,
-        summary: translatedSummary,
-        insight: translatedInsight,
-        created_at: new Date().toISOString(),
-      }, { onConflict: 'article_id,locale' });
-    } catch {
-      // Cache table may not exist yet — skip
+    // Cache for next request (best-effort)
+    if (translatedSummary) {
+      try {
+        await supabase.from('article_translations').upsert({
+          article_id,
+          locale,
+          summary: translatedSummary,
+          insight: translatedInsight,
+          created_at: new Date().toISOString(),
+        }, { onConflict: 'article_id,locale' });
+      } catch { /* skip if table doesn't exist */ }
     }
 
     return NextResponse.json({
@@ -142,12 +124,8 @@ Return your response in this exact format:
       insight: translatedInsight,
       translated: true,
     });
-  } catch {
-    // On any error, return original content
-    return NextResponse.json({
-      summary: article.ja_summary,
-      insight: article.ja_insight,
-      translated: false,
-    });
+  } catch (err) {
+    console.error('Translation error:', err);
+    return NextResponse.json({ summary: null, insight: null, translated: false });
   }
 }

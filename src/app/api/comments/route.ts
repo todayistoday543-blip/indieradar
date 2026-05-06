@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
  * Body: { article_id, user_id, display_name, body }
  */
 export async function POST(req: NextRequest) {
-  const { article_id, user_id, display_name, body } = await req.json();
+  const { article_id, user_id, display_name, body } = await req.json().catch(() => ({}));
 
   if (!article_id || !user_id || !body) {
     return NextResponse.json(

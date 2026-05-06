@@ -23,6 +23,9 @@ export function BookmarkButton({ articleId }: { articleId: string }) {
   const handleToggle = useCallback(async () => {
     if (!userId || loading) return;
 
+    // Optimistic update
+    const prev = bookmarked;
+    setBookmarked(!prev);
     setLoading(true);
     try {
       const res = await fetch('/api/bookmarks', {
@@ -30,15 +33,20 @@ export function BookmarkButton({ articleId }: { articleId: string }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, article_id: articleId }),
       });
-      const data = await res.json();
-      if (data.action === 'added') {
-        setBookmarked(true);
+      if (!res.ok) {
+        // Revert on server error
+        setBookmarked(prev);
       } else {
-        setBookmarked(false);
+        const data = await res.json();
+        setBookmarked(data.action === 'added');
       }
-    } catch { /* ignore */ }
-    setLoading(false);
-  }, [userId, articleId, loading]);
+    } catch {
+      // Revert on network error
+      setBookmarked(prev);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId, articleId, loading, bookmarked]);
 
   const tooltipText = !userId
     ? (t.bookmarks?.login_to_bookmark || 'Log in to bookmark')

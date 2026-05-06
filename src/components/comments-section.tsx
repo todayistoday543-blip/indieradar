@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useUser } from '@/components/user-context';
 import { useI18n } from '@/i18n/context';
+import { timeAgo } from '@/lib/time-ago';
 
 interface Comment {
   id: string;
@@ -13,31 +14,6 @@ interface Comment {
   created_at: string;
 }
 
-function relativeTime(dateStr: string, locale: string): string {
-  const now = Date.now();
-  const date = new Date(dateStr).getTime();
-  const diff = now - date;
-
-  const seconds = Math.floor(diff / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-
-  if (locale === 'ja') {
-    if (days > 30) return new Date(dateStr).toLocaleDateString('ja-JP');
-    if (days > 0) return `${days}日前`;
-    if (hours > 0) return `${hours}時間前`;
-    if (minutes > 0) return `${minutes}分前`;
-    return 'たった今';
-  }
-
-  if (days > 30) return new Date(dateStr).toLocaleDateString('en-US');
-  if (days > 0) return `${days}d ago`;
-  if (hours > 0) return `${hours}h ago`;
-  if (minutes > 0) return `${minutes}m ago`;
-  return 'just now';
-}
-
 export function CommentsSection({ articleId }: { articleId: string }) {
   const { userId } = useUser();
   const { t, locale } = useI18n();
@@ -46,6 +22,7 @@ export function CommentsSection({ articleId }: { articleId: string }) {
   const [body, setBody] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const fetchComments = useCallback(async () => {
     try {
@@ -65,6 +42,7 @@ export function CommentsSection({ articleId }: { articleId: string }) {
     if (!userId || !body.trim()) return;
 
     setSubmitting(true);
+    setSubmitError(null);
     try {
       const res = await fetch('/api/comments', {
         method: 'POST',
@@ -80,9 +58,15 @@ export function CommentsSection({ articleId }: { articleId: string }) {
       if (res.ok) {
         setBody('');
         fetchComments();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setSubmitError(data.error || 'Failed to post comment');
       }
-    } catch { /* ignore */ }
-    setSubmitting(false);
+    } catch {
+      setSubmitError('Network error. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleDelete = async (commentId: string) => {
@@ -153,6 +137,11 @@ export function CommentsSection({ articleId }: { articleId: string }) {
               {submitting ? '...' : (t.comments?.submit || 'Post')}
             </button>
           </div>
+          {submitError && (
+            <p className="mt-2 text-xs text-[var(--signal-warn)]" style={{ fontFamily: 'var(--font-mono)' }}>
+              {submitError}
+            </p>
+          )}
         </form>
       ) : (
         <div className="mb-5 px-4 py-3 border border-[var(--ink-2)] rounded-lg bg-[var(--ink-0)] text-center">
@@ -191,7 +180,7 @@ export function CommentsSection({ articleId }: { articleId: string }) {
                     {comment.display_name || 'Anonymous'}
                   </span>
                   <span className="text-xs text-[var(--ink-5)] flex-shrink-0" style={{ fontFamily: 'var(--font-mono)' }}>
-                    {relativeTime(comment.created_at, locale)}
+                    {timeAgo(comment.created_at, locale)}
                   </span>
                 </div>
 
