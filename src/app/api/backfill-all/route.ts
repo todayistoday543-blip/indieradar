@@ -6,8 +6,9 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
 // Small batch per run: re-enrichment uses claude-sonnet + two large completions per article.
-// 3 articles × ~80s each ≈ 240s — safely within the 300s limit.
-const BATCH_SIZE = 3;
+// Each article: ~60-90s (EN enrich) + ~60-90s (JA+ES translate) ≈ 120-180s total.
+// 2 articles × ~130s each ≈ 260s — within the 300s limit with some margin.
+const BATCH_SIZE = 2;
 
 // Re-enrich anything below this char count.
 // Old prompts targeted 2500-3500 chars; new prompts target 3500-5000 chars.
