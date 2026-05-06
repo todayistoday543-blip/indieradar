@@ -51,8 +51,9 @@ function buildIndustryHints(): string {
 /**
  * CALL 1: Enrich article in English.
  * Returns all metadata + English content fields.
+ * Exported so backfill routes can call it independently of the translation step.
  */
-async function enrichInEnglish(article: {
+export async function enrichInEnglish(article: {
   original_title: string;
   original_content: string;
   source: string;
@@ -187,10 +188,11 @@ false: political news, celebrity topics, major game company updates, satire/paro
 
 /**
  * CALL 2: Translate English content to both Japanese and Spanish simultaneously.
+ * Exported so backfill routes can call it independently of the enrichment step.
  * Uses 意訳 (contextual/adaptive translation) — not literal word-for-word.
  * Returns translated title, summary, and insight for both languages.
  */
-async function translateToJaAndEs(english: {
+export async function translateToJaAndEs(english: {
   en_title: string;
   en_summary: string;
   en_insight: string;
