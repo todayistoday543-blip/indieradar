@@ -92,6 +92,9 @@ export default {
     col_signal: 'SIGNAL · EXTRACTION',
     col_mrr: 'MRR · Δ7D',
     col_heat: 'HEAT',
+    diff_easy: 'Facile',
+    diff_medium: 'Moyen',
+    diff_hard: 'Difficile',
   },
   pricing: {
     heading: 'Tarifs',
