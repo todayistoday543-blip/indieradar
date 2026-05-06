@@ -160,7 +160,7 @@ export function Header() {
               <Link
                 href="/bookmarks"
                 className="text-[var(--ink-5)] hover:text-[var(--paper-2)] p-1.5 rounded-md hover:bg-[var(--ink-2)] transition-colors"
-                title={t.bookmarks?.heading || 'Bookmarks'}
+                title={t.bookmarks.heading}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
@@ -270,7 +270,7 @@ export function Header() {
                   className="block text-[13px] tracking-[0.04em] text-[var(--paper-1)] hover:text-[var(--paper-2)] mb-2 transition-colors"
                   style={{ fontFamily: 'var(--font-mono)' }}
                 >
-                  {t.settings?.heading || 'SETTINGS'}
+                  {t.settings.heading}
                 </Link>
                 <button
                   onClick={() => {

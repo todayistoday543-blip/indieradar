@@ -54,7 +54,7 @@ export default function BookmarksPage() {
 
   // Set page title
   useEffect(() => {
-    document.title = `${t.bookmarks?.heading || 'Bookmarks'} | IndieRadar JP`;
+    document.title = `${t.bookmarks.heading} | IndieRadar JP`;
   }, [t]);
 
   if (userLoading || loading) {
@@ -78,10 +78,10 @@ export default function BookmarksPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
           </svg>
           <h1 className="text-xl font-bold text-[var(--paper-3)] mb-2" style={{ fontFamily: 'var(--font-display)' }}>
-            {t.bookmarks?.heading || 'Bookmarks'}
+            {t.bookmarks.heading}
           </h1>
           <p className="text-sm text-[var(--ink-5)] mb-5">
-            {t.bookmarks?.login_to_bookmark || 'Log in to bookmark articles'}
+            {t.bookmarks.login_to_bookmark}
           </p>
           <Link
             href="/auth/login"
@@ -100,7 +100,7 @@ export default function BookmarksPage() {
         className="text-2xl sm:text-3xl font-bold text-[var(--paper-3)] mb-6"
         style={{ fontFamily: 'var(--font-display)' }}
       >
-        {t.bookmarks?.heading || 'Bookmarks'}
+        {t.bookmarks.heading}
       </h1>
 
       {bookmarks.length === 0 ? (
@@ -109,7 +109,7 @@ export default function BookmarksPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
           </svg>
           <p className="text-[var(--ink-5)]">
-            {t.bookmarks?.empty || 'No bookmarks yet'}
+            {t.bookmarks.empty}
           </p>
           <Link
             href="/articles"

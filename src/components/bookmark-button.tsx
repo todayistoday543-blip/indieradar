@@ -49,10 +49,10 @@ export function BookmarkButton({ articleId }: { articleId: string }) {
   }, [userId, articleId, loading, bookmarked]);
 
   const tooltipText = !userId
-    ? (t.bookmarks?.login_to_bookmark || 'Log in to bookmark')
+    ? (t.bookmarks.login_to_bookmark)
     : bookmarked
-      ? (t.bookmarks?.remove || 'Remove bookmark')
-      : (t.bookmarks?.saved || 'Bookmark');
+      ? (t.bookmarks.remove)
+      : (t.bookmarks.saved);
 
   return (
     <button

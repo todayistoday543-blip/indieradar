@@ -71,7 +71,7 @@ export function CommentsSection({ articleId }: { articleId: string }) {
 
   const handleDelete = async (commentId: string) => {
     if (!userId) return;
-    const confirmed = window.confirm(t.comments?.delete_confirm || 'Delete this comment?');
+    const confirmed = window.confirm(t.comments.delete_confirm);
     if (!confirmed) return;
 
     try {
@@ -93,7 +93,7 @@ export function CommentsSection({ articleId }: { articleId: string }) {
         <svg className="w-5 h-5 text-[var(--signal-gold)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
         </svg>
-        {t.comments?.heading || 'Comments'}
+        {t.comments.heading}
         {comments.length > 0 && (
           <span className="text-sm font-normal text-[var(--ink-5)]" style={{ fontFamily: 'var(--font-mono)' }}>
             ({comments.length})
@@ -118,7 +118,7 @@ export function CommentsSection({ articleId }: { articleId: string }) {
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            placeholder={t.comments?.placeholder || 'Write a comment...'}
+            placeholder={t.comments.placeholder}
             maxLength={2000}
             rows={3}
             className="w-full bg-[var(--ink-0)] border border-[var(--ink-3)] rounded-lg px-3 py-2.5 text-sm text-[var(--paper-2)] placeholder-[var(--ink-5)] focus:outline-none focus:border-[var(--signal-gold)] transition-colors resize-y"
@@ -134,7 +134,7 @@ export function CommentsSection({ articleId }: { articleId: string }) {
               className="rounded-lg bg-[var(--signal-gold)] text-[var(--ink-0)] px-4 py-1.5 text-sm font-medium hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
-              {submitting ? '...' : (t.comments?.submit || 'Post')}
+              {submitting ? '...' : (t.comments.submit)}
             </button>
           </div>
           {submitError && (
@@ -146,7 +146,7 @@ export function CommentsSection({ articleId }: { articleId: string }) {
       ) : (
         <div className="mb-5 px-4 py-3 border border-[var(--ink-2)] rounded-lg bg-[var(--ink-0)] text-center">
           <p className="text-sm text-[var(--ink-5)]">
-            {t.comments?.login_to_comment || 'Log in to comment'}
+            {t.comments.login_to_comment}
           </p>
         </div>
       )}
@@ -159,7 +159,7 @@ export function CommentsSection({ articleId }: { articleId: string }) {
         </div>
       ) : comments.length === 0 ? (
         <p className="text-sm text-[var(--ink-5)] text-center py-4">
-          {t.comments?.empty || 'No comments yet'}
+          {t.comments.empty}
         </p>
       ) : (
         <div className="space-y-3">
@@ -189,7 +189,7 @@ export function CommentsSection({ articleId }: { articleId: string }) {
                   <button
                     onClick={() => handleDelete(comment.id)}
                     className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-[var(--ink-2)] transition-all text-[var(--ink-5)] hover:text-[var(--signal-warn)]"
-                    title={t.comments?.delete_confirm || 'Delete'}
+                    title={t.comments.delete_confirm}
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

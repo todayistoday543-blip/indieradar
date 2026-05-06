@@ -688,7 +688,7 @@ export default function ArticleDetailPage() {
               <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
               </svg>
-              {(t as Record<string, Record<string, string>>).plan?.button || 'Start with this idea'}
+              {t.plan.button}
             </div>
           </button>
         </div>
