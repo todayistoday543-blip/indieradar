@@ -33,13 +33,7 @@ const I18nContext = createContext<{
 const loaders: Record<Locale, () => Promise<{ default: Messages }>> = {
   ja: () => Promise.resolve({ default: jaDefault as Messages }),
   en: () => import('./locales/en'),
-  zh: () => import('./locales/zh'),
-  ko: () => import('./locales/ko'),
-  hi: () => import('./locales/hi'),
-  de: () => import('./locales/de'),
   es: () => import('./locales/es'),
-  fr: () => import('./locales/fr'),
-  pt: () => import('./locales/pt'),
 };
 
 function getSavedLocale(): Locale {

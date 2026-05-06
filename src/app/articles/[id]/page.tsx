@@ -418,7 +418,19 @@ export default function ArticleDetailPage() {
 
   const insightContent = rawInsight ? cleanHtml(rawInsight) : '';
 
-  const sections = parseSections(summaryContent);
+  // Character-count-based gating: free users see first ~35% of content
+  // regardless of whether the summary uses ## headings or not.
+  // This ensures EN, JA, and ES are gated identically.
+  const FREE_CHAR_LIMIT = 900;
+  const isContentTruncated = !canReadFull && summaryContent.length > FREE_CHAR_LIMIT;
+  const visibleSummary = isContentTruncated
+    ? summaryContent.slice(0, FREE_CHAR_LIMIT)
+    : summaryContent;
+  const sections = parseSections(visibleSummary);
+  // When content IS truncated, also compute blurred preview from the hidden part
+  const hiddenPreview = isContentTruncated
+    ? summaryContent.slice(FREE_CHAR_LIMIT, FREE_CHAR_LIMIT + 400)
+    : '';
 
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 py-10 animate-fade-in">
@@ -518,35 +530,30 @@ export default function ArticleDetailPage() {
 
       {/* ── Structured Content Sections ──────────────────────── */}
       <div className="space-y-6 mb-8">
-        {sections.map((section, i) => {
-          // Free users: show first section only, blur the rest
-          const isGated = !canReadFull && i > 0;
-          if (isGated) return null;
-          return (
-            <div key={i}>
-              {section.heading && (
-                <div className="flex items-center gap-2 mb-2">
-                  <SectionIcon type={section.type} />
-                  <h2 className="text-lg font-bold text-[var(--paper-3)]" style={{ fontFamily: 'var(--font-display)' }}>
-                    {section.heading}
-                  </h2>
-                </div>
-              )}
-              <div className="text-[var(--paper-1)] leading-relaxed text-[15px] whitespace-pre-line pl-0 sm:pl-7">
-                {section.body}
+        {sections.map((section, i) => (
+          <div key={i}>
+            {section.heading && (
+              <div className="flex items-center gap-2 mb-2">
+                <SectionIcon type={section.type} />
+                <h2 className="text-lg font-bold text-[var(--paper-3)]" style={{ fontFamily: 'var(--font-display)' }}>
+                  {section.heading}
+                </h2>
               </div>
+            )}
+            <div className="text-[var(--paper-1)] leading-relaxed text-[15px] whitespace-pre-line pl-0 sm:pl-7">
+              {section.body}
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
 
-      {/* ── Paywall Gate (Free users) ────────────────────────── */}
-      {!canReadFull && sections.length > 1 && (
+      {/* ── Paywall Gate (Free users — content truncated at ~35%) ── */}
+      {isContentTruncated && (
         <div className="relative mb-8">
           {/* Blurred preview hint */}
           <div className="relative overflow-hidden rounded-2xl" style={{ maxHeight: '120px' }}>
             <div className="text-[var(--paper-1)] leading-relaxed text-[15px] whitespace-pre-line opacity-40" style={{ filter: 'blur(4px)', userSelect: 'none' }}>
-              {sections.slice(1, 3).map(s => s.body).join('\n\n').slice(0, 300)}
+              {hiddenPreview}
             </div>
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[var(--ink-0)]/60 to-[var(--ink-0)]" />
           </div>

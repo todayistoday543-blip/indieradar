@@ -70,7 +70,7 @@ async function enrichInEnglish(article: {
 
   const message = await getClient().messages.create({
     model: 'claude-sonnet-4-5-20250929',
-    max_tokens: 5000,
+    max_tokens: 8000,
     system: `You are a business analyst with Perplexity AI-level market analysis capabilities.
 Analyze indie hacker case studies and provide deep insights on global market applicability.
 Include data-driven specific numbers, market sizes, and success probabilities.
@@ -79,7 +79,8 @@ Write in clear, accessible English that beginners can understand, while providin
       {
         role: 'user',
         content: `Analyze the following indie hacker post and return JSON.
-Write clearly and concretely so beginners in programming or business can understand.
+Write with DEPTH and DENSITY — every section should be packed with concrete details, specific numbers, and actionable insights.
+Write clearly enough that a beginner can understand while still delivering expert-level analysis.
 
 [GLOBAL MARKET DATA (reference)]
 ${globalContext}
@@ -88,60 +89,70 @@ ${globalContext}
 ${industryHints}
 
 [ANALYSIS RULES]
-en_summary should total 2500-3500 characters, structured with 7 sections in "## Section Name" format:
+en_summary MUST total 3500-5000 characters. Be thorough, specific, and information-dense throughout.
+Structure with exactly 7 sections using "## Section Name" format:
 
-## Key Takeaways (200 chars)
-- Explain in one sentence what makes this case remarkable, accessible to beginners
-- Include specific numbers (MRR, user count, growth rate)
+## Key Takeaways (300-400 chars)
+- 2-3 sentences capturing why this case is remarkable and what makes it replicable
+- Lead with the most impressive metric (MRR, growth rate, user count, time-to-revenue)
+- Include one "counterintuitive" insight that surprises even experienced indie hackers
 
-## What Was Built (400 chars)
-- What service/product was created
-- Who uses it (target user persona)
-- What problem it solves (Before/After explanation)
-- Include TAM (total addressable market) estimate
-- Use concrete examples so beginners can visualize it
+## What Was Built (600-800 chars)
+- Full product description: what it does, what problem it replaces, how users interact with it daily
+- Detailed target user persona: job title, frustration, how they found the product
+- Before/After: quantify the pain (hours saved, money saved, revenue gained)
+- TAM estimate with methodology: bottom-up calculation with supporting data
+- Concrete example: walk through one user's experience from problem to solution
+- Why this is hard to replicate naively (the non-obvious insight)
 
-## How They Make Money (400 chars)
-- Revenue model (subscription/one-time/ads/affiliate etc.) in detail
-- Specific pricing numbers and rationale (why that price)
-- Customer acquisition channels (where traffic comes from) and CAC
-- Unit economics (LTV/CAC estimates)
-- Include a "in other words, here's what this means" explanation for beginners
+## How They Make Money (600-800 chars)
+- Complete pricing structure: every tier, what's included, why each tier exists
+- Revenue breakdown if available (# of free vs paid, conversion rate, churn rate)
+- Acquisition channel deep-dive: top 2-3 channels, estimated % of traffic, CAC per channel
+- Full unit economics: LTV calculation, payback period, gross margin estimate
+- Pricing strategy analysis: why this price works (anchoring, value metric, competitor gap)
+- "Beginner translation": explain the business model in simple terms with an analogy
 
-## The Journey (500 chars)
-- What happened chronologically
-- What failures occurred and why
-- What the turning point was (analyze reproducible factors)
-- Explicitly highlight "key learning points"
-- Surface success factors by comparing to similar cases
+## The Journey (700-900 chars)
+- Detailed chronological timeline: months/years, key milestones, revenue inflection points
+- First customer story: how did they land customer #1? What did it take?
+- Biggest failure or near-death experience: what went wrong and what was learned
+- The turning point: single decision or discovery that changed everything
+- 3 key learning points explicitly labeled — lessons that apply broadly
+- Comparison to similar cases: what makes this one different from similar attempts?
+- What they would do differently if starting over today
 
-## Tech Stack & Tools (300 chars)
-- List tools including inferred ones
-- Add one-line beginner-friendly explanation per tool
-  e.g., "Stripe (online payment service - easily add subscription billing)"
-- Include 1-2 alternative tools (show options)
-- Include estimated initial/monthly costs
+## Tech Stack & Tools (400-500 chars)
+- Complete tool list including inferred infrastructure choices
+- Each tool: name + one-line explanation + why this tool specifically (not alternatives)
+- Estimated monthly costs at their current scale (hosting, APIs, SaaS tools)
+- Build vs buy decisions: what they custom-built and why
+- 2-3 alternative stacks for different skill sets/budgets
+- Time investment: how long did technical setup take?
 
-## Market Applicability (500 chars)
-Provide Perplexity-level market analysis:
-- Global applicability score for this business model (★1-5)
-- Feasibility in each major market (Japan/US/Europe/SE Asia/India) in one line each
-- Most promising market and why
-- Market-specific barriers (regulations, culture, payments)
-- Localization points (language, payment methods, marketing channels)
-- Concrete first step if starting in your country
+## Market Applicability (700-900 chars)
+Perplexity-level market intelligence:
+- Global applicability score: ★1-5 with detailed reasoning
+- Market-by-market feasibility: Japan / US / Europe / SE Asia / India / LATAM — one detailed line each including market size, regulatory notes, and local competition
+- Most promising expansion market: specific analysis with data points
+- Regulatory/legal barriers: any compliance requirements, payment restrictions, data laws
+- Localization checklist: language, payment methods, cultural adaptations, marketing channels
+- Competitive landscape: who already does this globally? What's the gap?
+- Concrete 90-day action plan for someone starting in their country today
 
-## Idea Seeds (400 chars)
-- Define the core mechanism of this case in one line (abstracted)
-- Propose 4 ideas applying this mechanism to other industries
-  Each idea in format: Target + Problem + Solution + Expected MRR
-- e.g., "Apply X mechanism to Y industry → solve Z problem for W → $X/mo expected"
-- Mark the lowest-risk idea to start with ★
+## Idea Seeds (500-700 chars)
+- Core mechanism in one sentence (the abstracted pattern)
+- 5 application ideas using this mechanism in different industries
+  Format per idea: [Target User] + [Problem] + [Solution using mechanism] + [Estimated MRR range] + [Key risk]
+- Mark ★ on the lowest-risk starting idea
+- Mark ★★ on the highest-upside idea
+- "Adjacent pivot" idea: what happens if you take this exact product and change just the target market?
+- Anti-idea: one thing that sounds like it would work but probably won't, and why
 
 [About en_insight]
-- Write as "Global applicability insights" in 150 characters or less
-- Include specific market data (market size, growth rate)
-- Not limited to one country — write so readers worldwide can use it
+- 1 sentence of global applicability insight in 150 characters or less
+- Must include a specific market size, growth rate, or success rate statistic
+- Should apply to readers in any country, not just one market
 
 [Original Article]
 Title: ${article.original_title}
@@ -193,7 +204,7 @@ async function translateToJaAndEs(english: {
 }> {
   const message = await getClient().messages.create({
     model: 'claude-sonnet-4-5-20250929',
-    max_tokens: 8000,
+    max_tokens: 16000,
     system: `You are a professional translator and content strategist specializing in Japanese and Spanish localization.
 Your translations are 意訳 (contextual/adaptive) — you deeply understand the meaning and restructure
 sentences to feel completely natural to native speakers, rather than translating word-for-word.
@@ -210,7 +221,9 @@ Translation principles:
       {
         role: 'user',
         content: `Translate the following English indie hacker case study content into BOTH Japanese AND Spanish.
-Both translations must be 意訳 — convey the exact meaning and spirit in a way that feels natural to native readers.
+Both translations must be 意訳 — deeply understand the meaning and restructure naturally for each language.
+Do NOT shorten, summarize, or omit any content. The translated summaries must match the original in length and depth.
+Every data point, example, metric, and insight from the English MUST appear in both translations.
 
 [ENGLISH TITLE]
 ${english.en_title}
@@ -224,10 +237,10 @@ ${english.en_insight}
 Return ONLY this JSON (no extra text, no markdown wrapper):
 {
   "ja_title": "Japanese title — catchy, natural Japanese, not a literal translation",
-  "ja_summary": "Full Japanese summary preserving ## section headings — naturally written for Japanese readers",
+  "ja_summary": "Complete Japanese summary — same length and depth as the English, preserving all ## section headings",
   "ja_insight": "Japanese insight (under 150 characters)",
   "es_title": "Spanish title — catchy, natural Spanish, not a literal translation",
-  "es_summary": "Full Spanish summary preserving ## section headings — naturally written for Spanish readers",
+  "es_summary": "Complete Spanish summary — same length and depth as the English, preserving all ## section headings",
   "es_insight": "Spanish insight (under 150 characters)"
 }`,
       },

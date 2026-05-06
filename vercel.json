@@ -5,7 +5,7 @@
       "schedule": "0 */6 * * *"
     },
     {
-      "path": "/api/backfill-es",
+      "path": "/api/backfill-all",
       "schedule": "*/5 * * * *"
     }
   ]
