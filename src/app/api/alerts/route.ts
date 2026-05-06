@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
   }
 
-  const { user_id, keywords, min_mrr, categories, notify_email, id } = body;
+  const { user_id, keywords, min_mrr, categories, notify_email, is_active, id } = body;
 
   if (!user_id || typeof user_id !== 'string') {
     return NextResponse.json({ error: 'user_id is required' }, { status: 400 });
@@ -81,7 +81,8 @@ export async function POST(request: NextRequest) {
     min_mrr: typeof min_mrr === 'number' ? min_mrr : null,
     categories: Array.isArray(categories) ? categories : [],
     notify_email: notify_email === true,
-    is_active: true,
+    // For updates (id present) honour the caller's is_active; new alerts always start active.
+    is_active: id ? (typeof is_active === 'boolean' ? is_active : true) : true,
     updated_at: new Date().toISOString(),
   };
 

@@ -17,10 +17,12 @@ export default function SubmitPage() {
     error?: string;
   } | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUserId(user?.id ?? null);
+      setAuthLoading(false);
     });
   }, []);
 
@@ -46,6 +48,14 @@ export default function SubmitPage() {
     }
     setLoading(false);
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center px-4">
+        <div className="skeleton h-10 w-48 rounded" />
+      </div>
+    );
+  }
 
   if (!userId) {
     return (

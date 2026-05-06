@@ -111,6 +111,16 @@ export default function WeeklyPage() {
   const [weekOffset, setWeekOffset] = useState(0); // 0 = current week, -1 = last week, etc.
   const [weekStart, setWeekStart] = useState('');
   const [weekEnd, setWeekEnd] = useState('');
+  const [refreshTick, setRefreshTick] = useState(0);
+
+  // Force re-fetch when navigating back (Next.js router cache keeps the component alive)
+  useEffect(() => {
+    function handlePopState() {
+      setRefreshTick((t) => t + 1);
+    }
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -129,7 +139,7 @@ export default function WeeklyPage() {
       setLoading(false);
     }
     load();
-  }, [weekOffset]);
+  }, [weekOffset, refreshTick]);
 
   const weekLabel =
     weekOffset === 0

@@ -140,6 +140,12 @@ export default function AlertsPage() {
   };
 
   const toggleAlertActive = async (alert: Alert) => {
+    // Optimistic update first for instant feedback
+    const newActive = !alert.is_active;
+    setAlerts((prev) =>
+      prev.map((a) => (a.id === alert.id ? { ...a, is_active: newActive } : a))
+    );
+
     try {
       const res = await fetch('/api/alerts', {
         method: 'POST',
@@ -151,24 +157,21 @@ export default function AlertsPage() {
           min_mrr: alert.min_mrr,
           categories: alert.categories,
           notify_email: alert.notify_email,
+          is_active: newActive,
         }),
       });
 
-      if (res.ok) {
-        // Optimistically toggle
+      if (!res.ok) {
+        // Revert optimistic update on failure
         setAlerts((prev) =>
-          prev.map((a) =>
-            a.id === alert.id ? { ...a, is_active: !a.is_active } : a
-          )
+          prev.map((a) => (a.id === alert.id ? { ...a, is_active: alert.is_active } : a))
         );
-
-        // Then update on server
-        // The POST endpoint always sets is_active to true, so we need a separate approach
-        // For now, refetch
-        fetchAlerts();
       }
     } catch {
-      // silently fail
+      // Revert on network error
+      setAlerts((prev) =>
+        prev.map((a) => (a.id === alert.id ? { ...a, is_active: alert.is_active } : a))
+      );
     }
   };
 

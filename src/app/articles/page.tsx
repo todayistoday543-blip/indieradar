@@ -102,6 +102,7 @@ export default function ArticlesPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [categoryOpen, setCategoryOpen] = useState(false);
+  const [refreshTick, setRefreshTick] = useState(0);
   const categoryRef = useRef<HTMLDivElement>(null);
   const isFirstRender = useRef(true);
 
@@ -116,13 +117,28 @@ export default function ArticlesPage() {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
+  // Force re-fetch when user navigates back — Next.js App Router keeps client
+  // components in its router cache, so deps won't change on back-navigation.
+  // popstate fires whenever the browser history stack moves (back / forward).
   useEffect(() => {
-    // Scroll to top on filter/page changes (skip initial mount)
+    function handlePopState() {
+      setRefreshTick((t) => t + 1);
+    }
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Scroll to top only on deliberate filter / page changes (not back-nav refresh)
+  useEffect(() => {
     if (!isFirstRender.current) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     isFirstRender.current = false;
+  }, [page, source, sort, category]);
 
+  // Fetch articles — also re-runs on refreshTick so back-navigation always
+  // shows fresh data even when filter state hasn't changed.
+  useEffect(() => {
     async function load() {
       setLoading(true);
       const params = new URLSearchParams({ page: String(page), sort });
@@ -136,7 +152,7 @@ export default function ArticlesPage() {
       setLoading(false);
     }
     load();
-  }, [page, source, sort, category]);
+  }, [page, source, sort, category, refreshTick]);
 
   const categoryLabel = (key: string) => {
     if (!key) return t.articles.cat_all;
