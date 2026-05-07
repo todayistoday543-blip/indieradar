@@ -36,10 +36,7 @@ function DigestPanel() {
           WEEKLY SIGNAL DIGEST
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="relative flex h-[6px] w-[6px]">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--signal-live)] opacity-75" />
-            <span className="relative inline-flex rounded-full h-[6px] w-[6px] bg-[var(--signal-live)]" />
-          </span>
+          <span className="inline-flex rounded-full h-[6px] w-[6px] bg-[var(--signal-live)]" />
           <span
             className="text-[10px] tracking-[0.18em] text-[var(--signal-live)]"
             style={{ fontFamily: 'var(--font-mono)' }}
@@ -188,10 +185,7 @@ export default function Home() {
             <div>
               {/* Status line */}
               <div className="flex items-center gap-2 mb-6">
-                <span className="relative flex h-[7px] w-[7px]">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--signal-live)] opacity-75" />
-                  <span className="relative inline-flex rounded-full h-[7px] w-[7px] bg-[var(--signal-live)]" />
-                </span>
+                <span className="inline-flex rounded-full h-[7px] w-[7px] bg-[var(--signal-live)]" />
                 <span
                   className="text-[11px] tracking-[0.18em] text-[var(--ink-5)]"
                   style={{ fontFamily: 'var(--font-mono)' }}
