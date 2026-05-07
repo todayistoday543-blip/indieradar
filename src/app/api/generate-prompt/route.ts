@@ -8,6 +8,7 @@ import {
 } from '@/lib/market-intelligence';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 120;
 
 function getAnthropic() {
   return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY || 'placeholder' });

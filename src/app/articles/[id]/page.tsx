@@ -396,6 +396,8 @@ export default function ArticleDetailPage() {
     setPromptLoading(true);
     setGuideError(null);
     try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 150000); // 2.5 min timeout
       const res = await fetch('/api/generate-prompt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -406,7 +408,9 @@ export default function ArticleDetailPage() {
           country_code: countryCode || null,
           locale: locale,
         }),
+        signal: ctrl.signal,
       });
+      clearTimeout(timer);
       const data = await res.json();
       if (res.ok) setPrompt(data.prompt);
       else setGuideError(data.error || t.common.error_load);
