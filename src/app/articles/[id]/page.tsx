@@ -24,14 +24,17 @@ interface Article {
   en_title: string | null;
   en_summary: string | null;
   en_insight: string | null;
+  en_idea_catalyst: string | null;
   // Japanese (意訳)
   ja_title: string | null;
   ja_summary: string | null;
   ja_insight: string | null;
+  ja_idea_catalyst: string | null;
   // Spanish (意訳)
   es_title: string | null;
   es_summary: string | null;
   es_insight: string | null;
+  es_idea_catalyst: string | null;
   ja_difficulty: string;
   business_model: string | null;
   mrr_mentioned: number | null;
@@ -101,6 +104,30 @@ function SectionIcon({ type }: { type: string }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
         </svg>
       );
+    case 'catalyst':
+      return (
+        <svg className={cls} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+        </svg>
+      );
+    case 'niche':
+      return (
+        <svg className={cls} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+        </svg>
+      );
+    case 'decompose':
+      return (
+        <svg className={cls} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+        </svg>
+      );
+    case 'validate':
+      return (
+        <svg className={cls} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+        </svg>
+      );
     default:
       return (
         <svg className={cls} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
@@ -123,6 +150,12 @@ interface ContentSection {
  * Covers English, Japanese, and Spanish keywords.
  */
 function guessType(text: string): string {
+  // Idea Catalyst section headings
+  if (/opportunity\s*was\s*discovered|how\s*this.*discovered|発見|きっかけ|c[oó]mo\s*se\s*descubri|origen/i.test(text)) return 'catalyst';
+  if (/niche\s*discovery|ニッチ|niche|nicho|descubr.*nicho|finding\s*your/i.test(text)) return 'niche';
+  if (/first\s*principles?\s*decompos|分解|原理|descomposici[oó]n|principios?\s*fundamental/i.test(text)) return 'decompose';
+  if (/48.hour|validation\s*sprint|検証|バリデーション|sprint\s*de\s*validaci[oó]n|validar/i.test(text)) return 'validate';
+  // Main summary section headings
   if (/key\s*takeaway|ポイント|事例のポイント|overview|概要|core\s*opportunity|puntos?\s*clave|conclusi[oó]n|resumen|destacado|lo\s*m[aá]s\s*importante/i.test(text)) return 'point';
   if (/what\s*was\s*built|何を作った|プロダクト|product\s*(overview|detail|created)?|qu[eé]\s*se\s*construy|producto\s*(creado|desarrollado)?|lo\s*que\s*(se\s*)?construy|el\s*producto/i.test(text)) return 'product';
   if (/how\s*(they\s*)?make\s*money|how.*earn|稼い|収益|どうやって|ingres|modelo\s*de\s*negocio|monetiz|revenue|pricing|subscription|mrr|arr/i.test(text)) return 'revenue';
@@ -452,6 +485,16 @@ export default function ArticleDetailPage() {
 
   const insightContent = rawInsight ? cleanHtml(rawInsight) : '';
 
+  // Idea Catalyst content (BASIC+ gated)
+  const rawCatalyst =
+    locale === 'ja'
+      ? (article.ja_idea_catalyst || article.en_idea_catalyst || '')
+      : locale === 'es'
+      ? (article.es_idea_catalyst || article.en_idea_catalyst || '')
+      : (article.en_idea_catalyst || '');
+  const catalystContent = rawCatalyst ? cleanHtml(rawCatalyst) : '';
+  const catalystSections = catalystContent ? parseSections(catalystContent) : [];
+
   // Character-count-based gating: free users see first ~35% of content
   // regardless of whether the summary uses ## headings or not.
   // This ensures EN, JA, and ES are gated identically.
@@ -637,6 +680,41 @@ export default function ArticleDetailPage() {
           <a href={article.author_profile_url} target="_blank" rel="noopener noreferrer" className="text-[var(--signal-gold)] hover:opacity-80 transition truncate">
             {t.detail.author_label} →
           </a>
+        </div>
+      )}
+
+      {/* ── Idea Catalyst (BASIC+ only) ────────────────────── */}
+      {canReadFull && catalystSections.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center">
+              <svg className="w-4.5 h-4.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-bold text-[var(--paper-3)]" style={{ fontFamily: 'var(--font-display)' }}>
+              {t.detail.catalyst_heading}
+            </h2>
+          </div>
+          <div className="bg-gradient-to-br from-[rgba(245,158,11,0.04)] to-transparent rounded-2xl border border-amber-500/15 p-5 sm:p-6">
+            <div className="space-y-5">
+              {catalystSections.map((section, i) => (
+                <div key={i}>
+                  {section.heading && (
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <SectionIcon type={section.type} />
+                      <h3 className="text-[15px] font-bold text-[var(--paper-3)]">
+                        {section.heading}
+                      </h3>
+                    </div>
+                  )}
+                  <div className="text-[var(--paper-1)] leading-relaxed text-[15px] whitespace-pre-line pl-0 sm:pl-7">
+                    {section.body}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 

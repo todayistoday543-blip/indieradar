@@ -173,6 +173,7 @@ export default {
     guide_login_button: 'Log in to use',
     guide_button: 'Generate AI Guide',
     guide_generating: 'Generating...',
+    catalyst_heading: 'Idea Discovery Process',
     insight_heading: 'Global Action Points',
     country_context_heading: 'Applicability in Your Country',
     country_context_desc:

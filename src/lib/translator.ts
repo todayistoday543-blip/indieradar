@@ -11,14 +11,17 @@ export interface TranslationResult {
   en_title: string;
   en_summary: string;
   en_insight: string;
+  en_idea_catalyst: string;
   // Japanese (意訳 — contextual translation)
   ja_title: string;
   ja_summary: string;
   ja_insight: string;
+  ja_idea_catalyst: string;
   // Spanish (意訳 — contextual translation)
   es_title: string;
   es_summary: string;
   es_insight: string;
+  es_idea_catalyst: string;
   // Metadata
   ja_difficulty: 'Easy' | 'Medium' | 'Hard';
   business_model: string;
@@ -62,6 +65,7 @@ export async function enrichInEnglish(article: {
   en_title: string;
   en_summary: string;
   en_insight: string;
+  en_idea_catalyst: string;
   ja_difficulty: 'Easy' | 'Medium' | 'Hard';
   business_model: string;
   mrr_mentioned: number | null;
@@ -71,7 +75,7 @@ export async function enrichInEnglish(article: {
 
   const message = await getClient().messages.create({
     model: 'claude-sonnet-4-5-20250929',
-    max_tokens: 8000,
+    max_tokens: 10000,
     system: `You are a business analyst with Perplexity AI-level market analysis capabilities.
 Analyze indie hacker case studies and provide deep insights on global market applicability.
 Include data-driven specific numbers, market sizes, and success probabilities.
@@ -150,6 +154,37 @@ Perplexity-level market intelligence:
 - "Adjacent pivot" idea: what happens if you take this exact product and change just the target market?
 - Anti-idea: one thing that sounds like it would work but probably won't, and why
 
+[IDEA CATALYST — en_idea_catalyst field]
+en_idea_catalyst MUST total 1500-2500 characters. This is NOT a copy of the analysis above.
+It is a standalone creative-thinking guide that helps readers INVENT THEIR OWN IDEAS inspired by this case.
+Structure with exactly 4 sections using "## Section Name" format:
+
+## How This Opportunity Was Discovered (300-400 chars)
+- Reverse-engineer the founder's "aha moment": what specific signal, frustration, or observation sparked this idea?
+- What market signal or user complaint pattern would have led YOU to the same discovery?
+- The general "trigger pattern" — e.g., "noticing professionals still using spreadsheets for X"
+
+## Niche Discovery Framework (400-600 chars)
+- 3 concrete methods to find similar underserved niches TODAY (not generic advice — specific actions):
+  Method 1: [Where to look] + [What signal to watch for] + [Concrete example of a niche you'd find]
+  Method 2: [Community/forum to monitor] + [Type of complaint that signals opportunity]
+  Method 3: [Data source or tool] + [How to use it to spot gaps]
+- "The niche is too small" myth: why the founder succeeded BECAUSE the niche was small
+
+## First Principles Decomposition (400-600 chars)
+- Strip away the industry: what is the ABSTRACT MECHANISM that makes this business work?
+  Express as: "[Type of person] has [recurring problem] → this product [transforms X into Y] → they pay because [value proposition]"
+- Now apply YOUR expertise: if you know [field A], the same mechanism becomes [specific idea]
+- If you know [field B], it becomes [different specific idea]
+- The "10x test": would a user pay 10x the current price if it saved them 10x more time? If yes, the mechanism is robust.
+
+## Your 48-Hour Validation Sprint (300-500 chars)
+- Day 1 Morning: Find 5 potential users (where to find them, what to search for, exact communities)
+- Day 1 Afternoon: Ask ONE question (the exact question phrasing that validates demand — not "would you use X?" but the right way to ask)
+- Day 2: Build a no-code landing page in 2 hours (which tool, what to put on it, what CTA)
+- Success signal: the specific number/response that means "go" vs. "pivot"
+- Kill signal: what tells you to abandon this niche immediately
+
 [About en_insight]
 - 1 sentence of global applicability insight in 150 characters or less
 - Must include a specific market size, growth rate, or success rate statistic
@@ -169,6 +204,7 @@ false: political news, celebrity topics, major game company updates, satire/paro
   "is_business_case": true or false,
   "en_title": "English title (under 80 chars, catchy with numbers if available)",
   "en_summary": "## Key Takeaways\\n...\\n\\n## What Was Built\\n...\\n\\n## How They Make Money\\n...\\n\\n## The Journey\\n...\\n\\n## Tech Stack & Tools\\n...\\n\\n## Market Applicability\\n...\\n\\n## Idea Seeds\\n...",
+  "en_idea_catalyst": "## How This Opportunity Was Discovered\\n...\\n\\n## Niche Discovery Framework\\n...\\n\\n## First Principles Decomposition\\n...\\n\\n## Your 48-Hour Validation Sprint\\n...",
   "en_insight": "Global applicability insight (under 150 chars, include market data)",
   "ja_difficulty": "Easy or Medium or Hard",
   "business_model": "Business model name (e.g., SaaS, Marketplace, Chrome Extension, API)",
@@ -196,17 +232,31 @@ export async function translateToJaAndEs(english: {
   en_title: string;
   en_summary: string;
   en_insight: string;
+  en_idea_catalyst?: string;
 }): Promise<{
   ja_title: string;
   ja_summary: string;
   ja_insight: string;
+  ja_idea_catalyst: string;
   es_title: string;
   es_summary: string;
   es_insight: string;
+  es_idea_catalyst: string;
 }> {
+  const catalystBlock = english.en_idea_catalyst
+    ? `\n\n[ENGLISH IDEA CATALYST]\n${english.en_idea_catalyst}`
+    : '';
+  const catalystJsonHint = english.en_idea_catalyst
+    ? `,
+  "ja_idea_catalyst": "Complete Japanese idea catalyst — same length and depth, preserving all ## section headings",
+  "es_idea_catalyst": "Complete Spanish idea catalyst — same length and depth, preserving all ## section headings"`
+    : `,
+  "ja_idea_catalyst": "",
+  "es_idea_catalyst": ""`;
+
   const message = await getClient().messages.create({
     model: 'claude-sonnet-4-5-20250929',
-    max_tokens: 8000,
+    max_tokens: 12000,
     system: `You are a professional translator and content strategist specializing in Japanese and Spanish localization.
 Your translations are 意訳 (contextual/adaptive) — you deeply understand the meaning and restructure
 sentences to feel completely natural to native speakers, rather than translating word-for-word.
@@ -224,7 +274,7 @@ Translation principles:
         role: 'user',
         content: `Translate the following English indie hacker case study content into BOTH Japanese AND Spanish.
 Both translations must be 意訳 — deeply understand the meaning and restructure naturally for each language.
-Do NOT shorten, summarize, or omit any content. The translated summaries must match the original in length and depth.
+Do NOT shorten, summarize, or omit any content. The translated versions must match the original in length and depth.
 Every data point, example, metric, and insight from the English MUST appear in both translations.
 
 [ENGLISH TITLE]
@@ -234,13 +284,13 @@ ${english.en_title}
 ${english.en_summary}
 
 [ENGLISH INSIGHT]
-${english.en_insight}
+${english.en_insight}${catalystBlock}
 
 Return ONLY this JSON (no extra text, no markdown wrapper):
 {
   "ja_title": "Japanese title — catchy, natural Japanese, not a literal translation",
   "ja_summary": "Complete Japanese summary — same length and depth as the English, preserving all ## section headings",
-  "ja_insight": "Japanese insight (under 150 characters)",
+  "ja_insight": "Japanese insight (under 150 characters)"${catalystJsonHint},
   "es_title": "Spanish title — catchy, natural Spanish, not a literal translation",
   "es_summary": "Complete Spanish summary — same length and depth as the English, preserving all ## section headings",
   "es_insight": "Spanish insight (under 150 characters)"
@@ -278,12 +328,15 @@ export async function translateAndEnrich(article: {
       en_title: enriched.en_title || article.original_title,
       en_summary: enriched.en_summary || '',
       en_insight: enriched.en_insight || '',
+      en_idea_catalyst: '',
       ja_title: '',
       ja_summary: '',
       ja_insight: '',
+      ja_idea_catalyst: '',
       es_title: '',
       es_summary: '',
       es_insight: '',
+      es_idea_catalyst: '',
       ja_difficulty: enriched.ja_difficulty || 'Medium',
       business_model: enriched.business_model || '',
       mrr_mentioned: enriched.mrr_mentioned ?? null,
@@ -295,6 +348,7 @@ export async function translateAndEnrich(article: {
     en_title: enriched.en_title,
     en_summary: enriched.en_summary,
     en_insight: enriched.en_insight,
+    en_idea_catalyst: enriched.en_idea_catalyst,
   });
 
   return {
@@ -302,12 +356,15 @@ export async function translateAndEnrich(article: {
     en_title: enriched.en_title,
     en_summary: enriched.en_summary,
     en_insight: enriched.en_insight,
+    en_idea_catalyst: enriched.en_idea_catalyst || '',
     ja_title: translated.ja_title || enriched.en_title,
     ja_summary: translated.ja_summary || enriched.en_summary,
     ja_insight: translated.ja_insight || enriched.en_insight,
+    ja_idea_catalyst: translated.ja_idea_catalyst || enriched.en_idea_catalyst || '',
     es_title: translated.es_title || enriched.en_title,
     es_summary: translated.es_summary || enriched.en_summary,
     es_insight: translated.es_insight || enriched.en_insight,
+    es_idea_catalyst: translated.es_idea_catalyst || enriched.en_idea_catalyst || '',
     ja_difficulty: enriched.ja_difficulty,
     business_model: enriched.business_model,
     mrr_mentioned: enriched.mrr_mentioned ?? null,

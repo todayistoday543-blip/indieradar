@@ -171,6 +171,7 @@ export default {
     guide_login_button: 'Iniciar sesión para usar',
     guide_button: 'Generar guía de IA',
     guide_generating: 'Generando...',
+    catalyst_heading: 'Proceso de descubrimiento de ideas',
     insight_heading: 'Puntos de acción globales',
     country_context_heading: 'Aplicabilidad en tu país',
     country_context_desc: 'Configura tu país en tu perfil para obtener consejos específicos del mercado en la guía de IA.',

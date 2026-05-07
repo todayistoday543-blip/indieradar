@@ -175,6 +175,7 @@ export default {
     guide_login_button: 'ログインして利用する',
     guide_button: 'AI実現ガイドを生成',
     guide_generating: '生成中...',
+    catalyst_heading: 'アイデア発想プロセス',
     insight_heading: 'グローバル活用ポイント',
     country_context_heading: 'あなたの国での応用可能性',
     country_context_desc:

@@ -5,7 +5,7 @@ import { enrichInEnglish } from '@/lib/translator';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
-// Phase 1: Re-generate English content only (claude-sonnet, ~100-150s/article).
+// Phase 1: Re-generate English content only (claude-sonnet, ~120-180s/article).
 // BATCH_SIZE=1 ensures we stay well within the 300s Vercel Pro hard limit.
 // Phase 2: JA + ES translation is handled by /api/backfill-translations.
 const BATCH_SIZE = 1;
@@ -30,10 +30,12 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Scan up to 1000 articles to find those with short en_summary.
+  // Scan up to 1000 articles to find those needing EN re-enrichment:
+  // - Short en_summary (old content)
+  // - OR missing en_idea_catalyst (new field not yet generated)
   const { data: summaryIndex, error: indexError } = await supabase
     .from('articles')
-    .select('id, en_summary')
+    .select('id, en_summary, en_idea_catalyst')
     .not('original_content', 'is', null)
     .order('created_at', { ascending: true })
     .limit(1000);
@@ -46,18 +48,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, message: 'No articles found in DB.' });
   }
 
-  const allShort = summaryIndex.filter(
-    a => !a.en_summary || a.en_summary.length < SHORT_THRESHOLD
+  const allNeedsWork = summaryIndex.filter(
+    a => !a.en_summary || a.en_summary.length < SHORT_THRESHOLD || !a.en_idea_catalyst
   );
 
-  if (allShort.length === 0) {
+  if (allNeedsWork.length === 0) {
     return NextResponse.json({
       success: true,
-      message: `Phase 1 complete: all ${summaryIndex.length} articles have EN content ≥${SHORT_THRESHOLD} chars.`,
+      message: `Phase 1 complete: all ${summaryIndex.length} articles have EN content ≥${SHORT_THRESHOLD} chars + idea_catalyst.`,
     });
   }
 
-  const batchIds = allShort.slice(0, BATCH_SIZE).map(a => a.id);
+  const batchIds = allNeedsWork.slice(0, BATCH_SIZE).map(a => a.id);
 
   // Fetch full original content for just this batch.
   const { data: articles, error: fetchError } = await supabase
@@ -90,6 +92,7 @@ export async function GET(request: NextRequest) {
           .from('articles')
           .update({
             en_summary: ((enriched.en_summary || '(not a business case)') + ' ').padEnd(SHORT_THRESHOLD),
+            en_idea_catalyst: '(not a business case)',
           })
           .eq('id', article.id);
         results.push(`[SKIP not-business] ${article.original_title?.slice(0, 50)}`);
@@ -99,19 +102,22 @@ export async function GET(request: NextRequest) {
       const { error: updateError } = await supabase
         .from('articles')
         .update({
-          en_title:       enriched.en_title,
-          en_summary:     enriched.en_summary,
-          en_insight:     enriched.en_insight,
-          ja_difficulty:  enriched.ja_difficulty,
-          business_model: enriched.business_model || null,
-          mrr_mentioned:  enriched.mrr_mentioned ?? null,
+          en_title:          enriched.en_title,
+          en_summary:        enriched.en_summary,
+          en_insight:        enriched.en_insight,
+          en_idea_catalyst:  enriched.en_idea_catalyst || null,
+          ja_difficulty:     enriched.ja_difficulty,
+          business_model:    enriched.business_model || null,
+          mrr_mentioned:     enriched.mrr_mentioned ?? null,
           // Clear ja/es so backfill-translations picks them up next.
-          ja_title:    null,
-          ja_summary:  null,
-          ja_insight:  null,
-          es_title:    null,
-          es_summary:  null,
-          es_insight:  null,
+          ja_title:          null,
+          ja_summary:        null,
+          ja_insight:        null,
+          ja_idea_catalyst:  null,
+          es_title:          null,
+          es_summary:        null,
+          es_insight:        null,
+          es_idea_catalyst:  null,
         })
         .eq('id', article.id);
 
@@ -119,7 +125,7 @@ export async function GET(request: NextRequest) {
         results.push(`[UPDATE ERROR] ${article.id}: ${updateError.message}`);
       } else {
         updated++;
-        results.push(`[EN OK] ${enriched.en_title?.slice(0, 50)} — ${enriched.en_summary?.length ?? 0} chars`);
+        results.push(`[EN OK] ${enriched.en_title?.slice(0, 50)} — ${enriched.en_summary?.length ?? 0}c summary, ${enriched.en_idea_catalyst?.length ?? 0}c catalyst`);
       }
     } catch (e) {
       results.push(`[ERROR] ${article.original_title?.slice(0, 40)}: ${e instanceof Error ? e.message : e}`);
@@ -127,7 +133,7 @@ export async function GET(request: NextRequest) {
   }
 
   results.push(
-    `--- Phase 1 done: ${updated}/${articles.length} EN re-enriched. Remaining: ~${allShort.length - updated} ---`
+    `--- Phase 1 done: ${updated}/${articles.length} EN re-enriched. Remaining: ~${allNeedsWork.length - updated} ---`
   );
 
   return NextResponse.json({ success: true, results });

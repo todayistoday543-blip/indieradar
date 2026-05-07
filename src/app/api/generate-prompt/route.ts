@@ -300,7 +300,8 @@ ${profile ? `\n## ${profile.name} Market Checklist\n(10-item checklist for launc
 
   const message = await getAnthropic().messages.create({
     model: 'claude-sonnet-4-5-20250929',
-    max_tokens: 6000,
+    max_tokens: 8000,
+    temperature: 0.3,
     system: isJa ? systemPromptJa : systemPromptIntl,
     messages: [
       {

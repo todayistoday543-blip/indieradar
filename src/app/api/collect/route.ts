@@ -115,14 +115,17 @@ export async function GET(request: NextRequest) {
       en_title:           enriched.en_title,
       en_summary:         enriched.en_summary,
       en_insight:         enriched.en_insight,
+      en_idea_catalyst:   enriched.en_idea_catalyst || null,
       // Japanese (意訳)
       ja_title:           enriched.ja_title,
       ja_summary:         enriched.ja_summary,
       ja_insight:         enriched.ja_insight,
+      ja_idea_catalyst:   enriched.ja_idea_catalyst || null,
       // Spanish (意訳)
       es_title:           enriched.es_title,
       es_summary:         enriched.es_summary,
       es_insight:         enriched.es_insight,
+      es_idea_catalyst:   enriched.es_idea_catalyst || null,
       ja_difficulty:      enriched.ja_difficulty,
       business_model:     enriched.business_model || null,
       mrr_mentioned:      enriched.mrr_mentioned,

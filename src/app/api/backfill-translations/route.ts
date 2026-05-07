@@ -6,8 +6,8 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
 // Phase 2: Translate EN → JA + ES for articles that have expanded EN content
-// but are missing JA or ES translations.
-// claude-sonnet translation: ~100-150s/article. BATCH_SIZE=1 stays under 300s.
+// but are missing JA or ES translations (including idea_catalyst).
+// claude-sonnet translation: ~120-180s/article. BATCH_SIZE=1 stays under 300s.
 const BATCH_SIZE = 1;
 
 // Minimum EN length to qualify for translation (matches Phase 1 threshold).
@@ -30,10 +30,9 @@ export async function GET(request: NextRequest) {
   }
 
   // Find articles that have long EN content but missing JA or ES translations.
-  // We scan a window and filter client-side because PostgREST can't do len() < N.
   const { data: index, error: indexError } = await supabase
     .from('articles')
-    .select('id, en_title, en_summary, en_insight, ja_summary, es_summary')
+    .select('id, en_title, en_summary, en_insight, en_idea_catalyst, ja_summary, ja_idea_catalyst, es_summary, es_idea_catalyst')
     .not('en_summary', 'is', null)
     .order('created_at', { ascending: true })
     .limit(1000);
@@ -46,10 +45,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, message: 'No articles found.' });
   }
 
-  // Qualify: EN is long (Phase 1 done) but JA or ES is missing/short.
+  // Qualify: EN is long (Phase 1 done) but JA or ES is missing/short,
+  // OR idea_catalyst exists in EN but not yet translated.
   const needsTranslation = index.filter(a =>
-    a.en_summary && a.en_summary.length >= EN_THRESHOLD &&
-    (!a.ja_summary || a.ja_summary.length < 2500 || !a.es_summary || a.es_summary.length < 2500)
+    a.en_summary && a.en_summary.length >= EN_THRESHOLD && (
+      !a.ja_summary || a.ja_summary.length < 2500 ||
+      !a.es_summary || a.es_summary.length < 2500 ||
+      (a.en_idea_catalyst && a.en_idea_catalyst.length > 100 && (!a.ja_idea_catalyst || !a.es_idea_catalyst))
+    )
   );
 
   if (needsTranslation.length === 0) {
@@ -71,20 +74,23 @@ export async function GET(request: NextRequest) {
 
     try {
       const translated = await translateToJaAndEs({
-        en_title:   article.en_title,
-        en_summary: article.en_summary,
-        en_insight: article.en_insight,
+        en_title:          article.en_title,
+        en_summary:        article.en_summary,
+        en_insight:        article.en_insight,
+        en_idea_catalyst:  article.en_idea_catalyst || undefined,
       });
 
       const { error: updateError } = await supabase
         .from('articles')
         .update({
-          ja_title:   translated.ja_title   || article.en_title,
-          ja_summary: translated.ja_summary || article.en_summary,
-          ja_insight: translated.ja_insight || article.en_insight,
-          es_title:   translated.es_title   || article.en_title,
-          es_summary: translated.es_summary || article.en_summary,
-          es_insight: translated.es_insight || article.en_insight,
+          ja_title:          translated.ja_title   || article.en_title,
+          ja_summary:        translated.ja_summary || article.en_summary,
+          ja_insight:        translated.ja_insight  || article.en_insight,
+          ja_idea_catalyst:  translated.ja_idea_catalyst || article.en_idea_catalyst || null,
+          es_title:          translated.es_title   || article.en_title,
+          es_summary:        translated.es_summary || article.en_summary,
+          es_insight:        translated.es_insight  || article.en_insight,
+          es_idea_catalyst:  translated.es_idea_catalyst || article.en_idea_catalyst || null,
         })
         .eq('id', article.id);
 
@@ -93,7 +99,7 @@ export async function GET(request: NextRequest) {
       } else {
         updated++;
         results.push(
-          `[JA+ES OK] ${article.en_title?.slice(0, 50)} — ja:${translated.ja_summary?.length ?? 0}c es:${translated.es_summary?.length ?? 0}c`
+          `[JA+ES OK] ${article.en_title?.slice(0, 50)} — ja:${translated.ja_summary?.length ?? 0}c es:${translated.es_summary?.length ?? 0}c catalyst_ja:${translated.ja_idea_catalyst?.length ?? 0}c`
         );
       }
     } catch (e) {
