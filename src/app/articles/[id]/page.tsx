@@ -329,7 +329,7 @@ export default function ArticleDetailPage() {
         : (article.en_title || article.original_title || '');
 
     if (title) {
-      document.title = `${title} | IndieRadar JP`;
+      document.title = `${title} | NicheHunt`;
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://indieradar.jp';

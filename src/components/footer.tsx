@@ -168,7 +168,7 @@ export function Footer() {
         }}
       >
         <span className="text-ink-4">
-          &copy; 2026 INDIERADAR &middot; DISCOVERY ENGINE V0.4
+          &copy; 2026 NICHEHUNT &middot; DISCOVERY ENGINE V0.4
         </span>
         <span className="text-ink-4">
           ALL SYSTEMS NOMINAL

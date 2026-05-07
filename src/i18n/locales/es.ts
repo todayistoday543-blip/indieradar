@@ -27,7 +27,7 @@ export default {
     cta_pricing: 'Precios',
   },
   features: {
-    heading: 'Por qué IndieRadar',
+    heading: 'Por qué NicheHunt',
     auto_collect_title: 'Recopilación automática',
     auto_collect_desc:
       'Recopilación diaria automatizada de casos de estudio de indie hackers de Hacker News, Product Hunt, Reddit y X.',
@@ -187,9 +187,9 @@ export default {
   },
   auth: {
     login_title: 'Iniciar sesión',
-    login_subtitle: 'Iniciar sesión en IndieRadar',
+    login_subtitle: 'Iniciar sesión en NicheHunt',
     signup_title: 'Registrarse',
-    signup_subtitle: 'Comenzar con IndieRadar',
+    signup_subtitle: 'Comenzar con NicheHunt',
     google_login: 'Iniciar sesión con Google',
     google_signup: 'Registrarse con Google',
     or_email: 'o con correo electrónico',
@@ -305,7 +305,7 @@ export default {
     daily_limit: 'Límite diario alcanzado (5/día)',
   },
   footer: {
-    tagline: 'IndieRadar — Casos de estudio diarios de monetización de indie hackers',
+    tagline: 'NicheHunt — Casos de estudio diarios de monetización de indie hackers',
     sources: 'Recopilación automática de Hacker News / Product Hunt / Reddit / X con traducción por IA',
   },
 } as const;
