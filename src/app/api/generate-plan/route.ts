@@ -229,10 +229,14 @@ Output ONLY valid JSON. Do not include any text outside the JSON.`;
       remaining: rateCheck.remaining,
       model_used: 'claude-sonnet-4-5-20250929',
     });
-  } catch (err) {
-    console.error('Generate plan error:', err);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    console.error('Generate plan error:', msg);
+    if (msg.includes('credit') || msg.includes('balance')) {
+      return NextResponse.json({ error: 'AI service temporarily unavailable. Please try again later.' }, { status: 503 });
+    }
     return NextResponse.json(
-      { error: 'Failed to generate plan' },
+      { error: `Failed to generate plan: ${msg}` },
       { status: 500 }
     );
   }

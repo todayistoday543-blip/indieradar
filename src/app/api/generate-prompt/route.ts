@@ -404,24 +404,33 @@ Output full file names and complete code for each step.
 (Table: Service | Purpose | Free/Paid | Est. Monthly Cost | ${profile ? profile.name + ' alternative' : 'Notes'})
 ${profile ? `\n## ${profile.name} Market Checklist\n(10-item checklist for launching this business in ${profile.name})` : ''}`;
 
-  const message = await getAnthropic().messages.create({
-    model: 'claude-sonnet-4-5-20250929',
-    max_tokens: 8000,
-    temperature: 0.3,
-    system: isJa ? systemPromptJa : systemPromptIntl,
-    messages: [
-      {
-        role: 'user',
-        content: isJa ? userPromptJa : userPromptIntl,
-      },
-    ],
-  });
+  try {
+    const message = await getAnthropic().messages.create({
+      model: 'claude-sonnet-4-5-20250929',
+      max_tokens: 8000,
+      temperature: 0.3,
+      system: isJa ? systemPromptJa : systemPromptIntl,
+      messages: [
+        {
+          role: 'user',
+          content: isJa ? userPromptJa : userPromptIntl,
+        },
+      ],
+    });
 
-  const textBlock = message.content.find((b) => b.type === 'text');
-  const promptText = textBlock ? textBlock.text : '';
+    const textBlock = message.content.find((b) => b.type === 'text');
+    const promptText = textBlock ? textBlock.text : '';
 
-  return NextResponse.json({
-    prompt: promptText,
-    model_used: 'claude-sonnet-4-5-20250929',
-  });
+    return NextResponse.json({
+      prompt: promptText,
+      model_used: 'claude-sonnet-4-5-20250929',
+    });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    console.error('generate-prompt error:', msg);
+    if (msg.includes('credit') || msg.includes('balance')) {
+      return NextResponse.json({ error: 'AI service temporarily unavailable. Please try again later.' }, { status: 503 });
+    }
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }
