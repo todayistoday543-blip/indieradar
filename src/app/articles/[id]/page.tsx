@@ -197,7 +197,12 @@ function parseSections(summary: string): ContentSection[] {
         const preamble = summary.slice(0, match.index).trim();
         if (preamble) parts.push({ heading: '', body: preamble, type: 'point' });
       }
-      lastHeading = match[1].trim();
+      lastHeading = match[1].trim()
+        // Strip "(○○文字)" / "(200 words)" from headings
+        .replace(/[（(]\s*\d+\s*[〜~\-]\s*\d+\s*文字\s*[）)]/g, '')
+        .replace(/[（(]\s*\d+\s*文字\s*[）)]/g, '')
+        .replace(/\(\s*\d+\s*words?\s*\)/gi, '')
+        .trim();
       lastType = guessType(lastHeading);
       lastIndex = (match.index ?? 0) + match[0].length;
     }
@@ -500,7 +505,13 @@ export default function ArticleDetailPage() {
       : locale === 'es'
       ? (article.es_idea_catalyst || article.en_idea_catalyst || '')
       : (article.en_idea_catalyst || '');
-  const catalystContent = rawCatalyst ? cleanHtml(rawCatalyst) : '';
+  const catalystContent = rawCatalyst
+    ? cleanHtml(rawCatalyst)
+        // Strip "(○○文字)" / "(200〜300文字)" / "(200 words)" from section headings
+        .replace(/[（(]\s*\d+\s*[〜~\-]\s*\d+\s*文字\s*[）)]/g, '')
+        .replace(/[（(]\s*\d+\s*文字\s*[）)]/g, '')
+        .replace(/\(\s*\d+\s*words?\s*\)/gi, '')
+    : '';
   const catalystSections = catalystContent ? parseSections(catalystContent) : [];
 
   // Character-count-based gating: free users see first ~35% of content
