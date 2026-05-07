@@ -213,6 +213,7 @@ export default {
     error_email_not_confirmed: 'メールアドレスの確認が完了していません。確認メールをご確認ください',
     error_rate_limit: 'リクエストが多すぎます。しばらくしてからお試しください',
     error_generic: '予期しないエラーが発生しました。もう一度お試しください',
+    error_oauth_failed: 'Googleログインに失敗しました。メールアドレスとパスワードでのログインをお試しください',
   },
   settings: {
     heading: '設定',

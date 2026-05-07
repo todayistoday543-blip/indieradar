@@ -211,6 +211,7 @@ export default {
     error_email_not_confirmed: 'Email not yet confirmed. Please check your inbox',
     error_rate_limit: 'Too many requests. Please try again later',
     error_generic: 'An unexpected error occurred. Please try again',
+    error_oauth_failed: 'Google sign-in failed. Please try signing in with email and password instead',
   },
   settings: {
     heading: 'Settings',

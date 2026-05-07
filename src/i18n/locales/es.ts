@@ -208,6 +208,7 @@ export default {
     error_email_not_confirmed: 'Correo electrónico no confirmado aún. Revisa tu bandeja de entrada',
     error_rate_limit: 'Demasiadas solicitudes. Por favor, inténtalo más tarde',
     error_generic: 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo',
+    error_oauth_failed: 'El inicio de sesión con Google falló. Por favor, inicia sesión con correo electrónico y contraseña',
   },
   settings: {
     heading: 'Configuración',
