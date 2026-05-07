@@ -108,6 +108,10 @@ export function ArticleCard({ article }: { article: Article }) {
 
   const hasMrr = article.mrr_mentioned != null && article.mrr_mentioned > 0;
 
+  // Case-study articles have real revenue data or a known business model.
+  // Everything else is mindset / experience content.
+  const isCaseStudy = hasMrr || !!article.business_model;
+
   // Trilingual display: pick title for current locale with fallback chain.
   const displayTitle =
     locale === 'ja'
@@ -165,7 +169,17 @@ export function ArticleCard({ article }: { article: Article }) {
       : article.ja_difficulty
     : null;
 
+  // Localize article-type label
+  const articleTypeLabel = isCaseStudy
+    ? null // case-study type is implicit (has MRR / business_model tags)
+    : locale === 'ja'
+    ? 'マインド・経験談'
+    : locale === 'es'
+    ? 'Mentalidad'
+    : 'Mindset';
+
   const tags: string[] = [];
+  if (!isCaseStudy && articleTypeLabel) tags.push(articleTypeLabel);
   if (difficultyLabel) tags.push(difficultyLabel);
   if (article.business_model) tags.push(article.business_model);
 
@@ -212,17 +226,19 @@ export function ArticleCard({ article }: { article: Article }) {
           </p>
         </div>
 
-        {/* 3 — MRR amount */}
+        {/* 3 — MRR amount (case-study articles only) */}
         <div className="text-right pr-3">
-          {hasMrr ? (
-            <span className="font-display text-[26px] leading-none text-[var(--signal-gold)]">
-              {formatMrr(article.mrr_mentioned!)}
-            </span>
-          ) : (
-            <span className="font-display text-[26px] leading-none text-[var(--ink-4)]">
-              —
-            </span>
-          )}
+          {isCaseStudy ? (
+            hasMrr ? (
+              <span className="font-display text-[26px] leading-none text-[var(--signal-gold)]">
+                {formatMrr(article.mrr_mentioned!)}
+              </span>
+            ) : (
+              <span className="font-display text-[26px] leading-none text-[var(--ink-4)]">
+                —
+              </span>
+            )
+          ) : null}
         </div>
 
         {/* 4 — Heat meter */}
@@ -266,13 +282,15 @@ export function ArticleCard({ article }: { article: Article }) {
           </p>
         </div>
         <div className="text-right pr-2">
-          {hasMrr ? (
-            <span className="font-display text-[22px] leading-none text-[var(--signal-gold)]">
-              {formatMrr(article.mrr_mentioned!)}
-            </span>
-          ) : (
-            <span className="font-display text-[22px] leading-none text-[var(--ink-4)]">—</span>
-          )}
+          {isCaseStudy ? (
+            hasMrr ? (
+              <span className="font-display text-[22px] leading-none text-[var(--signal-gold)]">
+                {formatMrr(article.mrr_mentioned!)}
+              </span>
+            ) : (
+              <span className="font-display text-[22px] leading-none text-[var(--ink-4)]">—</span>
+            )
+          ) : null}
         </div>
         <div className="flex items-center justify-center gap-[2px]">
           {[1, 2, 3, 4, 5].map((level) => (
@@ -288,7 +306,7 @@ export function ArticleCard({ article }: { article: Article }) {
       <div className="md:hidden py-3 px-3">
         <div className="flex items-center gap-2 mb-2">
           {Icon ? <Icon /> : <span className="text-[10px] text-[var(--ink-5)] font-mono">{srcLabel}</span>}
-          {hasMrr && (
+          {isCaseStudy && hasMrr && (
             <span className="font-display text-[18px] text-[var(--signal-gold)] ml-auto">
               {formatMrr(article.mrr_mentioned!)}
             </span>
