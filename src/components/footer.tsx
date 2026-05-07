@@ -170,11 +170,7 @@ export function Footer() {
         <span className="text-ink-4">
           &copy; 2026 INDIERADAR &middot; DISCOVERY ENGINE V0.4
         </span>
-        <span className="text-ink-4 flex items-center gap-[6px]">
-          <span
-            className="inline-block w-[6px] h-[6px] rounded-full bg-signal-live"
-            style={{ boxShadow: '0 0 8px var(--signal-live)' }}
-          />
+        <span className="text-ink-4">
           ALL SYSTEMS NOMINAL
         </span>
       </div>

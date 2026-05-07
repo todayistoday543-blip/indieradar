@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { ArticleCard } from '@/components/article-card';
 import { useI18n } from '@/i18n/context';
+import { useUser } from '@/components/user-context';
 
 interface Article {
   id: string;
@@ -100,7 +101,9 @@ const LIST_COLUMNS = '40px 1fr 130px 120px 40px';
 
 export default function ArticlesPage() {
   const { t, locale } = useI18n();
+  const { userId } = useUser();
   const [articles, setArticles] = useState<Article[]>([]);
+  const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [source, setSource] = useState<string>('');
   const [sort, setSort] = useState<string>('priority');
@@ -111,6 +114,18 @@ export default function ArticlesPage() {
   const [refreshTick, setRefreshTick] = useState(0);
   const categoryRef = useRef<HTMLDivElement>(null);
   const isFirstRender = useRef(true);
+
+  // Fetch bookmarked article IDs for logged-in user
+  useEffect(() => {
+    if (!userId) return;
+    fetch(`/api/bookmarks?list=true&user_id=${userId}`)
+      .then((r) => r.json())
+      .then((d) => {
+        const ids = new Set<string>((d.bookmarks || []).map((b: { article_id: string }) => b.article_id));
+        setBookmarkedIds(ids);
+      })
+      .catch(() => {});
+  }, [userId]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -364,7 +379,7 @@ export default function ArticlesPage() {
         ) : (
           <div className="animate-fade-in">
             {articles.map((article) => (
-              <ArticleCard key={article.id} article={article} />
+              <ArticleCard key={article.id} article={article} bookmarkedInit={bookmarkedIds.has(article.id)} />
             ))}
           </div>
         )}

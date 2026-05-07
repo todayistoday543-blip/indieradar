@@ -150,17 +150,6 @@ export function Header() {
 
         {/* ---- Right side ------------------------------------------ */}
         <div className="hidden md:flex items-center gap-3">
-          {/* LIVE indicator */}
-          <div className="flex items-center gap-1.5 mr-1">
-            <span className="inline-flex rounded-full h-2 w-2 bg-[var(--signal-live)]" />
-            <span
-              className="text-[11px] tracking-[0.06em] text-[var(--signal-live)]"
-              style={{ fontFamily: 'var(--font-mono)' }}
-            >
-              LIVE
-            </span>
-          </div>
-
           {/* Theme toggle */}
           <ThemeToggle />
 
@@ -254,20 +243,6 @@ export function Header() {
                 </Link>
               );
             })}
-
-            {/* LIVE indicator (mobile) */}
-            <div className="flex items-center gap-1.5 px-3 py-2">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--signal-live)] opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--signal-live)]" />
-              </span>
-              <span
-                className="text-[11px] tracking-[0.06em] text-[var(--signal-live)]"
-                style={{ fontFamily: 'var(--font-mono)' }}
-              >
-                LIVE
-              </span>
-            </div>
 
             <div className="pt-2 pb-1 px-3 flex items-center gap-3">
               <ThemeToggle />

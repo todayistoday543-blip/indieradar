@@ -129,7 +129,7 @@ export default function BookmarksPage() {
           {bookmarks.map((bm) => {
             if (!bm.articles) return null;
             return (
-              <ArticleCard key={bm.id} article={bm.articles} />
+              <ArticleCard key={bm.id} article={bm.articles} bookmarkedInit={true} />
             );
           })}
         </div>

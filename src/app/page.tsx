@@ -35,14 +35,11 @@ function DigestPanel() {
         >
           WEEKLY SIGNAL DIGEST
         </span>
-        <span className="flex items-center gap-1.5">
-          <span className="inline-flex rounded-full h-[6px] w-[6px] bg-[var(--signal-live)]" />
-          <span
-            className="text-[10px] tracking-[0.18em] text-[var(--signal-live)]"
-            style={{ fontFamily: 'var(--font-mono)' }}
-          >
-            ACTIVE
-          </span>
+        <span
+          className="text-[10px] tracking-[0.18em] text-[var(--ink-5)]"
+          style={{ fontFamily: 'var(--font-mono)' }}
+        >
+          AUTO
         </span>
       </div>
 
@@ -183,17 +180,6 @@ export default function Home() {
           <div className="grid grid-cols-1 xl:grid-cols-[1.5fr_1fr] gap-[60px] items-end">
             {/* Left column */}
             <div>
-              {/* Status line */}
-              <div className="flex items-center gap-2 mb-6">
-                <span className="inline-flex rounded-full h-[7px] w-[7px] bg-[var(--signal-live)]" />
-                <span
-                  className="text-[11px] tracking-[0.18em] text-[var(--ink-5)]"
-                  style={{ fontFamily: 'var(--font-mono)' }}
-                >
-                  SCANNING &mdash; HN &middot; PH &middot; REDDIT &middot; X &middot; USER
-                </span>
-              </div>
-
               {/* Headline */}
               <h1
                 className="text-[40px] md:text-[56px] xl:text-[76px] leading-[1.05] tracking-[-0.03em] text-[var(--paper-3)] mb-6"

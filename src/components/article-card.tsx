@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import { useState, useCallback } from 'react';
 import { useI18n } from '@/i18n/context';
+import { useUser } from '@/components/user-context';
 import { timeAgo } from '@/lib/time-ago';
 import { formatMrr } from '@/lib/format-mrr';
 
@@ -99,8 +101,39 @@ function getHeat(upvotes: number): number {
 
 /* ── Component ───────────────────────────────────────────────── */
 
-export function ArticleCard({ article }: { article: Article }) {
+export function ArticleCard({ article, bookmarkedInit }: { article: Article; bookmarkedInit?: boolean }) {
   const { t, locale } = useI18n();
+  const { userId } = useUser();
+  const [bookmarked, setBookmarked] = useState(bookmarkedInit ?? false);
+  const [bmLoading, setBmLoading] = useState(false);
+
+  const toggleBookmark = useCallback(
+    async (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!userId || bmLoading) return;
+      const prev = bookmarked;
+      setBookmarked(!prev);
+      setBmLoading(true);
+      try {
+        const res = await fetch('/api/bookmarks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId, article_id: article.id }),
+        });
+        if (!res.ok) setBookmarked(prev);
+        else {
+          const d = await res.json();
+          setBookmarked(d.action === 'added');
+        }
+      } catch {
+        setBookmarked(prev);
+      } finally {
+        setBmLoading(false);
+      }
+    },
+    [userId, article.id, bmLoading, bookmarked],
+  );
 
   const heat = getHeat(article.upvotes);
   const Icon = sourceIcon[article.source];
@@ -251,10 +284,21 @@ export function ArticleCard({ article }: { article: Article }) {
           ))}
         </div>
 
-        {/* 5 — Arrow */}
-        <span className="font-mono text-[16px] text-[var(--ink-4)] text-center transition-colors duration-[var(--dur-std)] group-hover:text-[var(--signal-gold)]">
-          →
-        </span>
+        {/* 5 — Bookmark */}
+        {userId ? (
+          <button
+            onClick={toggleBookmark}
+            className={`flex justify-center transition-colors ${bookmarked ? 'text-[var(--signal-gold)]' : 'text-[var(--ink-4)] hover:text-[var(--paper-2)]'}`}
+          >
+            <svg className="w-4 h-4" fill={bookmarked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+            </svg>
+          </button>
+        ) : (
+          <span className="font-mono text-[16px] text-[var(--ink-4)] text-center transition-colors duration-[var(--dur-std)] group-hover:text-[var(--signal-gold)]">
+            →
+          </span>
+        )}
       </div>
 
       {/* ─── TABLET 768–1023 ────────────────────────────────── */}
@@ -307,9 +351,19 @@ export function ArticleCard({ article }: { article: Article }) {
         <div className="flex items-center gap-2 mb-2">
           {Icon ? <Icon /> : <span className="text-[10px] text-[var(--ink-5)] font-mono">{srcLabel}</span>}
           {isCaseStudy && hasMrr && (
-            <span className="font-display text-[18px] text-[var(--signal-gold)] ml-auto">
+            <span className="font-display text-[18px] text-[var(--signal-gold)] ml-auto mr-1">
               {formatMrr(article.mrr_mentioned!)}
             </span>
+          )}
+          {userId && (
+            <button
+              onClick={toggleBookmark}
+              className={`${!(isCaseStudy && hasMrr) ? 'ml-auto' : ''} transition-colors ${bookmarked ? 'text-[var(--signal-gold)]' : 'text-[var(--ink-4)]'}`}
+            >
+              <svg className="w-4 h-4" fill={bookmarked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
+              </svg>
+            </button>
           )}
         </div>
         <h3 className="font-display text-[17px] leading-tight text-[var(--paper-3)] mb-1">
