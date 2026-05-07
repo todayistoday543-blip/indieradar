@@ -411,7 +411,11 @@ export default function ArticleDetailPage() {
       });
       clearTimeout(timer);
       const data = await res.json();
-      if (res.ok) setPrompt(data.prompt);
+      if (res.ok) {
+        // Strip "(○○文字)" / "(200 words)" etc. from section headings
+        const cleaned = (data.prompt as string).replace(/[（(]\s*\d+\s*[〜~\-]\s*\d+\s*文字\s*[）)]/g, '').replace(/[（(]\s*\d+\s*文字\s*[）)]/g, '').replace(/\(\s*\d+\s*words?\s*\)/gi, '');
+        setPrompt(cleaned);
+      }
       else setGuideError(data.error || t.common.error_load);
     } catch {
       setGuideError(t.common.error_network);

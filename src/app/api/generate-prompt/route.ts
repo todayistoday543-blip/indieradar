@@ -147,7 +147,8 @@ Quality Standards:
 
   // Build the user-facing prompt in the correct language
   const userPromptJa = `以下の海外マネタイズ事例を再現するための「AI実現ガイド」を生成してください。
-合計2500〜3500文字で、超初心者にも丁寧に、かつ深い市場分析を含めて書いてください。簡潔さを重視し、冗長な説明は省いてください。
+超初心者にも丁寧に、かつ深い市場分析を含めて書いてください。簡潔さを重視し、冗長な説明は省いてください。
+重要：見出し（##）に「（○○文字）」のような文字数表記を絶対に含めないでください。
 
 ${marketContext}
 
@@ -287,8 +288,9 @@ ${profile ? `【${profile.name}市場向け最適化】\n- 言語: ${profile.nam
 ${profile ? `\n## ${profile.name}市場チェックリスト\n（${profile.name}でこの事業を始める際に確認すべき項目10個をチェックリスト形式で）` : ''}`;
 
   const userPromptIntl = `Generate an "AI Realization Guide" to reproduce the following monetization case.
-Write 2500-3500 words in ${targetLang}, step-by-step for beginners, with deep market analysis. Prioritize conciseness — cut verbose explanations.
+Write in ${targetLang}, step-by-step for beginners, with deep market analysis. Prioritize conciseness — cut verbose explanations.
 IMPORTANT: Your ENTIRE response must be in ${targetLang}. Do not include Japanese text.
+IMPORTANT: Do NOT include word/character counts like "(200 words)" or "(400文字)" in section headings.
 
 ${marketContext}
 
