@@ -31,8 +31,8 @@ export const metadata: Metadata = {
     icon: '/icon.svg',
   },
   title: {
-    default: 'NicheHunt — 海外インディーハッカーのマネタイズ事例',
-    template: '%s | NicheHunt',
+    default: 'IndieRadar JP — 海外インディーハッカーのマネタイズ事例',
+    template: '%s | IndieRadar JP',
   },
   description:
     '海外インディーハッカーのマネタイズ事例をAIが自動収集・翻訳。Hacker News, Product Hunt, Reddit, X から毎日更新。9言語対応。',
@@ -46,23 +46,22 @@ export const metadata: Metadata = {
     '個人開発',
     'Hacker News',
     'Product Hunt',
-    'NicheHunt',
   ],
-  authors: [{ name: 'NicheHunt' }],
-  creator: 'NicheHunt',
+  authors: [{ name: 'IndieRadar JP' }],
+  creator: 'IndieRadar JP',
   metadataBase: new URL(APP_URL),
   openGraph: {
     type: 'website',
     locale: 'ja_JP',
     url: APP_URL,
-    siteName: 'NicheHunt',
-    title: 'NicheHunt — 海外インディーハッカーのマネタイズ事例',
+    siteName: 'IndieRadar JP',
+    title: 'IndieRadar JP — 海外インディーハッカーのマネタイズ事例',
     description:
       '海外インディーハッカーのマネタイズ事例をAIが自動収集・翻訳。毎日更新、9言語対応。',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'NicheHunt',
+    title: 'IndieRadar JP',
     description:
       '海外インディーハッカーのマネタイズ事例をAIが自動収集・翻訳。',
   },

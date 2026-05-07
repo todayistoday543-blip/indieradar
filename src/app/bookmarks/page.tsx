@@ -60,7 +60,7 @@ export default function BookmarksPage() {
 
   // Set page title
   useEffect(() => {
-    document.title = `${t.bookmarks.heading} | NicheHunt`;
+    document.title = `${t.bookmarks.heading} | IndieRadar JP`;
   }, [t]);
 
   if (userLoading || loading) {

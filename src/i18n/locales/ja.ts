@@ -27,7 +27,7 @@ export default {
     cta_pricing: '料金プラン',
   },
   features: {
-    heading: 'NicheHunt の特徴',
+    heading: 'IndieRadar JP の特徴',
     auto_collect_title: '自動収集',
     auto_collect_desc:
       'Hacker News、Product Hunt、Reddit、Xから毎日自動で最新のインディーハッカー事例を収集します。',
@@ -192,9 +192,9 @@ export default {
   },
   auth: {
     login_title: 'ログイン',
-    login_subtitle: 'NicheHunt にログイン',
+    login_subtitle: 'IndieRadar JP にログイン',
     signup_title: '新規登録',
-    signup_subtitle: 'NicheHunt を始めましょう',
+    signup_subtitle: 'IndieRadar JP を始めましょう',
     google_login: 'Googleでログイン',
     google_signup: 'Googleで登録',
     or_email: 'またはメールで',
@@ -310,7 +310,7 @@ export default {
     daily_limit: '本日の生成上限に達しました（5回/日）',
   },
   footer: {
-    tagline: 'NicheHunt - 海外インディーハッカーのマネタイズ事例を毎日お届け',
+    tagline: 'IndieRadar JP - 海外インディーハッカーのマネタイズ事例を毎日お届け',
     sources: 'Hacker News / Product Hunt / Reddit / X から自動収集・AI翻訳',
   },
 } as const;
