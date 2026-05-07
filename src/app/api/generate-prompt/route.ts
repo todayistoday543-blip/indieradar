@@ -8,7 +8,7 @@ import {
 } from '@/lib/market-intelligence';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 function getAnthropic() {
   return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY || 'placeholder' });
@@ -147,7 +147,7 @@ Quality Standards:
 
   // Build the user-facing prompt in the correct language
   const userPromptJa = `以下の海外マネタイズ事例を再現するための「AI実現ガイド」を生成してください。
-合計3500〜5000文字で、超初心者にも丁寧に、かつPerplexity AIレベルの深い市場分析を含めて書いてください。
+合計2500〜3500文字で、超初心者にも丁寧に、かつ深い市場分析を含めて書いてください。簡潔さを重視し、冗長な説明は省いてください。
 
 ${marketContext}
 
@@ -287,7 +287,7 @@ ${profile ? `【${profile.name}市場向け最適化】\n- 言語: ${profile.nam
 ${profile ? `\n## ${profile.name}市場チェックリスト\n（${profile.name}でこの事業を始める際に確認すべき項目10個をチェックリスト形式で）` : ''}`;
 
   const userPromptIntl = `Generate an "AI Realization Guide" to reproduce the following monetization case.
-Write 3500-5000 words in ${targetLang}, step-by-step for beginners, with Perplexity AI-level market analysis.
+Write 2500-3500 words in ${targetLang}, step-by-step for beginners, with deep market analysis. Prioritize conciseness — cut verbose explanations.
 IMPORTANT: Your ENTIRE response must be in ${targetLang}. Do not include Japanese text.
 
 ${marketContext}
@@ -429,7 +429,7 @@ ${profile ? `\n## ${profile.name} Market Checklist\n(10-item checklist for launc
   try {
     const message = await getAnthropic().messages.create({
       model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 8000,
+      max_tokens: 5000,
       temperature: 0.3,
       system: isJa ? systemPromptJa : systemPromptIntl,
       messages: [
