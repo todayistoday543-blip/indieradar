@@ -1,15 +1,19 @@
+// TEMPORARY: all features unlocked for free plan (trial period)
+// To restore restrictions, revert show_full_translation to false,
+// show_ads to true, ai_prompt_model to null,
+// prompt_generation and custom_prompt_chat to false.
 export const PLANS = {
   free: {
     name: 'Free',
     price_jpy: 0,
     features: {
       articles_per_day: 999,
-      show_full_translation: false,
-      show_ads: true,
-      ai_prompt_model: null,
+      show_full_translation: true,
+      show_ads: false,
+      ai_prompt_model: 'sonnet' as const,
       can_post: true,
-      prompt_generation: false,
-      custom_prompt_chat: false,
+      prompt_generation: true,
+      custom_prompt_chat: true,
     },
   },
   basic: {

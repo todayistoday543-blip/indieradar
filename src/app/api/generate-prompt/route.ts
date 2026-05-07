@@ -42,16 +42,16 @@ export async function POST(req: NextRequest) {
 
   const supabase = createServiceClient();
 
-  // Verify Pro plan — this endpoint calls the Anthropic API and must be gated
-  const { data: userProfile } = await supabase
-    .from('profiles')
-    .select('subscription_plan')
-    .eq('id', user_id)
-    .single();
-
-  if (userProfile?.subscription_plan !== 'pro') {
-    return NextResponse.json({ error: 'Pro plan required' }, { status: 403 });
-  }
+  // TEMPORARY: Pro plan check disabled (trial period)
+  // To restore, uncomment the block below:
+  // const { data: userProfile } = await supabase
+  //   .from('profiles')
+  //   .select('subscription_plan')
+  //   .eq('id', user_id)
+  //   .single();
+  // if (userProfile?.subscription_plan !== 'pro') {
+  //   return NextResponse.json({ error: 'Pro plan required' }, { status: 403 });
+  // }
 
   const { data: article } = await supabase
     .from('articles')
