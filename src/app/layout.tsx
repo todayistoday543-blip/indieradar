@@ -27,6 +27,9 @@ const jetbrainsMono = JetBrains_Mono({
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://indieradar.jp';
 
 export const metadata: Metadata = {
+  icons: {
+    icon: '/icon.svg',
+  },
   title: {
     default: 'IndieRadar JP — 海外インディーハッカーのマネタイズ事例',
     template: '%s | IndieRadar JP',
