@@ -23,7 +23,7 @@ export async function fetchRedditPosts(): Promise<CollectedArticle[]> {
     try {
       const url = `https://www.reddit.com/r/${sub}/hot.json?limit=25`;
       const res = await fetch(url, {
-        headers: { 'User-Agent': 'IndieRadarJP/1.0' },
+        headers: { 'User-Agent': 'NicheHunt/1.0' },
       });
       if (!res.ok) continue;
       const data = await res.json();
