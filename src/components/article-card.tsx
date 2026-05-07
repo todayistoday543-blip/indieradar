@@ -89,6 +89,49 @@ const sourceLabel: Record<string, string> = {
   indiehackers: 'IH',
 };
 
+/* ── Article-type icons for non-case-study articles ─────────── */
+
+function MindsetIcon({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="var(--ink-5)" strokeWidth={1.5} className="shrink-0">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+    </svg>
+  );
+}
+
+function NewsIcon({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="var(--ink-5)" strokeWidth={1.5} className="shrink-0">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z" />
+    </svg>
+  );
+}
+
+function StoryIcon({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="var(--ink-5)" strokeWidth={1.5} className="shrink-0">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+    </svg>
+  );
+}
+
+/** Classify non-case-study articles into sub-types based on title heuristics */
+function getArticleTypeIcon(title: string): 'mindset' | 'news' | 'story' {
+  const t = title.toLowerCase();
+  // News / current events
+  if (/\b(warning|announced?|launch|update|released?|report|study|data|survey|industry)\b/.test(t) ||
+      /trump|政治|ニュース|速報|announcement/.test(t)) {
+    return 'news';
+  }
+  // Experience / personal story
+  if (/\b(i quit|i left|my journey|my experience|my story|tell hn|経験|体験|quit my job|bootstrapp?|i built|i made|i started|i failed|失敗|成功)\b/.test(t) ||
+      /ask hn.*losing|ask hn.*when do you/.test(t)) {
+    return 'story';
+  }
+  // Default: mindset / opinion
+  return 'mindset';
+}
+
 /* ── Heat calculation ────────────────────────────────────────── */
 
 function getHeat(upvotes: number): number {
@@ -202,14 +245,18 @@ export function ArticleCard({ article, bookmarkedInit }: { article: Article; boo
       : article.ja_difficulty
     : null;
 
-  // Localize article-type label
-  const articleTypeLabel = isCaseStudy
-    ? null // case-study type is implicit (has MRR / business_model tags)
-    : locale === 'ja'
-    ? 'マインド・経験談'
-    : locale === 'es'
-    ? 'Mentalidad'
-    : 'Mindset';
+  // Classify non-case-study articles and pick a label + icon
+  const articleTypeIcon = isCaseStudy
+    ? null
+    : getArticleTypeIcon(article.en_title || article.original_title || '');
+
+  const articleTypeLabel = !isCaseStudy
+    ? articleTypeIcon === 'news'
+      ? (locale === 'ja' ? 'ニュース' : locale === 'es' ? 'Noticias' : 'News')
+      : articleTypeIcon === 'story'
+      ? (locale === 'ja' ? '経験談' : locale === 'es' ? 'Experiencia' : 'Story')
+      : (locale === 'ja' ? 'マインド' : locale === 'es' ? 'Mentalidad' : 'Mindset')
+    : null;
 
   const tags: string[] = [];
   if (!isCaseStudy && articleTypeLabel) tags.push(articleTypeLabel);
@@ -259,8 +306,8 @@ export function ArticleCard({ article, bookmarkedInit }: { article: Article; boo
           </p>
         </div>
 
-        {/* 3 — MRR amount (case-study articles only) */}
-        <div className="text-right pr-3">
+        {/* 3 — MRR amount OR article-type icon */}
+        <div className="flex items-center justify-end pr-3">
           {isCaseStudy ? (
             hasMrr ? (
               <span className="font-display text-[26px] leading-none text-[var(--signal-gold)]">
@@ -271,7 +318,18 @@ export function ArticleCard({ article, bookmarkedInit }: { article: Article; boo
                 —
               </span>
             )
-          ) : null}
+          ) : (
+            <span className="flex items-center gap-1.5" title={articleTypeLabel || ''}>
+              {articleTypeIcon === 'news' ? <NewsIcon /> : articleTypeIcon === 'story' ? <StoryIcon /> : <MindsetIcon />}
+              <span className="text-[10px] text-[var(--ink-5)] font-mono tracking-wide">
+                {articleTypeIcon === 'news'
+                  ? (locale === 'ja' ? 'ニュース' : 'NEWS')
+                  : articleTypeIcon === 'story'
+                  ? (locale === 'ja' ? '経験談' : 'STORY')
+                  : (locale === 'ja' ? 'マインド' : 'MIND')}
+              </span>
+            </span>
+          )}
         </div>
 
         {/* 4 — Heat meter */}
@@ -325,7 +383,7 @@ export function ArticleCard({ article, bookmarkedInit }: { article: Article; boo
             )}
           </p>
         </div>
-        <div className="text-right pr-2">
+        <div className="flex items-center justify-end pr-2">
           {isCaseStudy ? (
             hasMrr ? (
               <span className="font-display text-[22px] leading-none text-[var(--signal-gold)]">
@@ -334,7 +392,18 @@ export function ArticleCard({ article, bookmarkedInit }: { article: Article; boo
             ) : (
               <span className="font-display text-[22px] leading-none text-[var(--ink-4)]">—</span>
             )
-          ) : null}
+          ) : (
+            <span className="flex items-center gap-1" title={articleTypeLabel || ''}>
+              {articleTypeIcon === 'news' ? <NewsIcon size={18} /> : articleTypeIcon === 'story' ? <StoryIcon size={18} /> : <MindsetIcon size={18} />}
+              <span className="text-[9px] text-[var(--ink-5)] font-mono">
+                {articleTypeIcon === 'news'
+                  ? (locale === 'ja' ? 'ニュース' : 'NEWS')
+                  : articleTypeIcon === 'story'
+                  ? (locale === 'ja' ? '経験談' : 'STORY')
+                  : (locale === 'ja' ? 'マインド' : 'MIND')}
+              </span>
+            </span>
+          )}
         </div>
         <div className="flex items-center justify-center gap-[2px]">
           {[1, 2, 3, 4, 5].map((level) => (
@@ -350,15 +419,26 @@ export function ArticleCard({ article, bookmarkedInit }: { article: Article; boo
       <div className="md:hidden py-3 px-3">
         <div className="flex items-center gap-2 mb-2">
           {Icon ? <Icon /> : <span className="text-[10px] text-[var(--ink-5)] font-mono">{srcLabel}</span>}
-          {isCaseStudy && hasMrr && (
+          {isCaseStudy && hasMrr ? (
             <span className="font-display text-[18px] text-[var(--signal-gold)] ml-auto mr-1">
               {formatMrr(article.mrr_mentioned!)}
             </span>
-          )}
+          ) : !isCaseStudy ? (
+            <span className="flex items-center gap-1 ml-auto mr-1" title={articleTypeLabel || ''}>
+              {articleTypeIcon === 'news' ? <NewsIcon size={16} /> : articleTypeIcon === 'story' ? <StoryIcon size={16} /> : <MindsetIcon size={16} />}
+              <span className="text-[9px] text-[var(--ink-5)] font-mono">
+                {articleTypeIcon === 'news'
+                  ? (locale === 'ja' ? 'ニュース' : 'NEWS')
+                  : articleTypeIcon === 'story'
+                  ? (locale === 'ja' ? '経験談' : 'STORY')
+                  : (locale === 'ja' ? 'マインド' : 'MIND')}
+              </span>
+            </span>
+          ) : null}
           {userId && (
             <button
               onClick={toggleBookmark}
-              className={`${!(isCaseStudy && hasMrr) ? 'ml-auto' : ''} transition-colors ${bookmarked ? 'text-[var(--signal-gold)]' : 'text-[var(--ink-4)]'}`}
+              className={`${!hasMrr && isCaseStudy ? 'ml-auto' : ''} transition-colors ${bookmarked ? 'text-[var(--signal-gold)]' : 'text-[var(--ink-4)]'}`}
             >
               <svg className="w-4 h-4" fill={bookmarked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
