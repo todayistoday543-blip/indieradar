@@ -110,7 +110,7 @@ function SectionIcon({ type }: { type: string }) {
   }
 }
 
-/* ── Parse structured sections from ja_summary ─────────────── */
+/* ── Parse structured sections ─────────────────────────────── */
 
 interface ContentSection {
   heading: string;
@@ -118,47 +118,81 @@ interface ContentSection {
   type: string;
 }
 
+/**
+ * Match a section type from any text snippet (heading or paragraph lead).
+ * Covers English, Japanese, and Spanish keywords.
+ */
+function guessType(text: string): string {
+  if (/key\s*takeaway|ポイント|事例のポイント|overview|概要|core\s*opportunity|puntos?\s*clave|conclusi[oó]n|resumen|destacado|lo\s*m[aá]s\s*importante/i.test(text)) return 'point';
+  if (/what\s*was\s*built|何を作った|プロダクト|product\s*(overview|detail|created)?|qu[eé]\s*se\s*construy|producto\s*(creado|desarrollado)?|lo\s*que\s*(se\s*)?construy|el\s*producto/i.test(text)) return 'product';
+  if (/how\s*(they\s*)?make\s*money|how.*earn|稼い|収益|どうやって|ingres|modelo\s*de\s*negocio|monetiz|revenue|pricing|subscription|mrr|arr/i.test(text)) return 'revenue';
+  if (/journey|the\s*story|ストーリー|story|成功|経緯|recorrido|trayectoria|camino|historia|el\s*camino|el\s*viaje|timeline|started|launched|founded/i.test(text)) return 'story';
+  if (/tech\s*stack|tools?\s*&?\s*stack|技術|ツール|herramienta|tecnolog[íi]|stack\s*t[eé]cnico|infrastructure/i.test(text)) return 'tech';
+  if (/market\s*applicability|aplicabilidad|地域|応用|global\s*market|mercado|viabilidad|market\s*fit|worldwide|regional/i.test(text)) return 'local';
+  if (/idea\s*seeds?|アイデア|semilla|idea\s*clave|apply\s*this|similar\s*idea|adjacent|spin.?off|inspiration/i.test(text)) return 'ideas';
+  return 'point';
+}
+
+/**
+ * Parse a summary into display sections.
+ *
+ * New articles (backfilled with the expanded prompt) have explicit
+ * "## Section Name" markers → each marker becomes a heading + icon.
+ *
+ * Old articles lack those markers and contain either:
+ *   • Raw scraped paragraphs  → split by blank lines, icon inferred per paragraph
+ *   • A single unbroken block → render as one "point" section
+ *
+ * Either way every locale (EN / JA / ES) goes through the same path,
+ * so the icon treatment is always identical regardless of locale.
+ */
 function parseSections(summary: string): ContentSection[] {
+  // ── Case 1: structured content (## headings present) ──────────
   const sectionRegex = /##\s+(.+)/g;
-  const parts: ContentSection[] = [];
-  let lastIndex = 0;
-  let lastHeading = '';
-  let lastType = 'point';
   const matches = [...summary.matchAll(sectionRegex)];
 
-  if (matches.length === 0) {
+  if (matches.length > 0) {
+    const parts: ContentSection[] = [];
+    let lastIndex = 0;
+    let lastHeading = '';
+    let lastType = 'point';
+
+    for (const match of matches) {
+      if (lastHeading) {
+        const body = summary.slice(lastIndex, match.index).trim();
+        if (body) parts.push({ heading: lastHeading, body, type: lastType });
+      } else if (match.index && match.index > 0) {
+        const preamble = summary.slice(0, match.index).trim();
+        if (preamble) parts.push({ heading: '', body: preamble, type: 'point' });
+      }
+      lastHeading = match[1].trim();
+      lastType = guessType(lastHeading);
+      lastIndex = (match.index ?? 0) + match[0].length;
+    }
+
+    const tail = summary.slice(lastIndex).trim();
+    if (tail) parts.push({ heading: lastHeading, body: tail, type: lastType });
+    return parts;
+  }
+
+  // ── Case 2: unstructured content — split by blank lines ───────
+  const paragraphs = summary
+    .split(/\n\s*\n/)
+    .map(p => p.trim())
+    .filter(p => p.length > 30);
+
+  if (paragraphs.length <= 1) {
     return [{ heading: '', body: summary.trim(), type: 'point' }];
   }
 
-  for (const match of matches) {
-    if (lastHeading) {
-      const body = summary.slice(lastIndex, match.index).trim();
-      if (body) parts.push({ heading: lastHeading, body, type: lastType });
-    } else if (match.index && match.index > 0) {
-      const preamble = summary.slice(0, match.index).trim();
-      if (preamble) parts.push({ heading: '', body: preamble, type: 'point' });
-    }
-    lastHeading = match[1].trim();
-    lastType = guessType(lastHeading);
-    lastIndex = (match.index ?? 0) + match[0].length;
-  }
-
-  const tail = summary.slice(lastIndex).trim();
-  if (tail) parts.push({ heading: lastHeading, body: tail, type: lastType });
-
-  return parts;
-}
-
-function guessType(heading: string): string {
-  // English + Japanese + Spanish keywords
-  if (/key takeaway|ポイント|point|overview|概要|core opportunity|puntos?\s*clave|conclusi[oó]n|resumen/i.test(heading)) return 'point';
-  if (/what was built|何を作った|product|作った|プロダクト|qu[eé]\s*se\s*construy|producto\s*creado|lo\s*que\s*construy/i.test(heading)) return 'product';
-  if (/how they make money|how.*mak.*money|稼い|revenue|収益|どうやって|c[oó]mo.*ingres|modelo\s*de\s*negocio|monetiz/i.test(heading)) return 'revenue';
-  if (/journey|ストーリー|story|成功|経緯|camino|historia|trayectoria|recorrido/i.test(heading)) return 'story';
-  if (/tech stack|技術|tech|stack|ツール|tool|herramienta|tecnolog[íi]/i.test(heading)) return 'tech';
-  if (/market applicability|地域|応用|local|country|あなた|aplicabilidad|mercado|viabilidad/i.test(heading)) return 'local';
-  if (/idea seeds|アイデア|ideas|ヒント|hint|semilla|idea\s*clave/i.test(heading)) return 'ideas';
-  return 'point';
+  // Assign an icon type per paragraph based on its opening words.
+  // This gives old articles a visual structure even without explicit headings.
+  return paragraphs.map((body, i) => {
+    // Inspect the first sentence / first ~120 chars for keyword matching.
+    const lead = body.slice(0, 120).replace(/\*+/g, '');
+    const type = i === 0 ? 'point' : guessType(lead);
+    return { heading: '', body, type };
+  });
 }
 
 /* ── HTML entity / tag cleaner ─────────────────────────────── */
@@ -532,15 +566,23 @@ export default function ArticleDetailPage() {
       <div className="space-y-6 mb-8">
         {sections.map((section, i) => (
           <div key={i}>
-            {section.heading && (
+            {/* Named heading (new-format articles with ## markers) */}
+            {section.heading ? (
               <div className="flex items-center gap-2 mb-2">
                 <SectionIcon type={section.type} />
                 <h2 className="text-lg font-bold text-[var(--paper-3)]" style={{ fontFamily: 'var(--font-display)' }}>
                   {section.heading}
                 </h2>
               </div>
+            ) : (
+              /* Icon-only row for paragraph-mode sections (old-format content) */
+              sections.length > 1 && (
+                <div className="flex items-center gap-2 mb-1.5">
+                  <SectionIcon type={section.type} />
+                </div>
+              )
             )}
-            <div className="text-[var(--paper-1)] leading-relaxed text-[15px] whitespace-pre-line pl-0 sm:pl-7">
+            <div className={`text-[var(--paper-1)] leading-relaxed text-[15px] whitespace-pre-line ${section.heading || sections.length > 1 ? 'pl-0 sm:pl-7' : 'pl-0'}`}>
               {section.body}
             </div>
           </div>
