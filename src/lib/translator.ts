@@ -95,14 +95,15 @@ ${industryHints}
 
 [ANALYSIS RULES]
 en_summary MUST total 3500-5000 characters. Be thorough, specific, and information-dense throughout.
-Structure with exactly 7 sections using "## Section Name" format:
+Structure with exactly 7 sections using "## Section Name" format.
+CRITICAL: Do NOT include character counts like "(300 chars)" in section headings. Output clean headings only.
 
-## Key Takeaways (300-400 chars)
+## Key Takeaways
 - 2-3 sentences capturing why this case is remarkable and what makes it replicable
 - Lead with the most impressive metric (MRR, growth rate, user count, time-to-revenue)
 - Include one "counterintuitive" insight that surprises even experienced indie hackers
 
-## What Was Built (600-800 chars)
+## What Was Built
 - Full product description: what it does, what problem it replaces, how users interact with it daily
 - Detailed target user persona: job title, frustration, how they found the product
 - Before/After: quantify the pain (hours saved, money saved, revenue gained)
@@ -110,7 +111,7 @@ Structure with exactly 7 sections using "## Section Name" format:
 - Concrete example: walk through one user's experience from problem to solution
 - Why this is hard to replicate naively (the non-obvious insight)
 
-## How They Make Money (600-800 chars)
+## How They Make Money
 - Complete pricing structure: every tier, what's included, why each tier exists
 - Revenue breakdown if available (# of free vs paid, conversion rate, churn rate)
 - Acquisition channel deep-dive: top 2-3 channels, estimated % of traffic, CAC per channel
@@ -118,7 +119,7 @@ Structure with exactly 7 sections using "## Section Name" format:
 - Pricing strategy analysis: why this price works (anchoring, value metric, competitor gap)
 - "Beginner translation": explain the business model in simple terms with an analogy
 
-## The Journey (700-900 chars)
+## The Journey
 - Detailed chronological timeline: months/years, key milestones, revenue inflection points
 - First customer story: how did they land customer #1? What did it take?
 - Biggest failure or near-death experience: what went wrong and what was learned
@@ -127,7 +128,7 @@ Structure with exactly 7 sections using "## Section Name" format:
 - Comparison to similar cases: what makes this one different from similar attempts?
 - What they would do differently if starting over today
 
-## Tech Stack & Tools (400-500 chars)
+## Tech Stack & Tools
 - Complete tool list including inferred infrastructure choices
 - Each tool: name + one-line explanation + why this tool specifically (not alternatives)
 - Estimated monthly costs at their current scale (hosting, APIs, SaaS tools)
@@ -135,7 +136,7 @@ Structure with exactly 7 sections using "## Section Name" format:
 - 2-3 alternative stacks for different skill sets/budgets
 - Time investment: how long did technical setup take?
 
-## Market Applicability (700-900 chars)
+## Market Applicability
 Perplexity-level market intelligence:
 - Global applicability score: ★1-5 with detailed reasoning
 - Market-by-market feasibility: Japan / US / Europe / SE Asia / India / LATAM — one detailed line each including market size, regulatory notes, and local competition
@@ -145,7 +146,7 @@ Perplexity-level market intelligence:
 - Competitive landscape: who already does this globally? What's the gap?
 - Concrete 90-day action plan for someone starting in their country today
 
-## Idea Seeds (500-700 chars)
+## Idea Seeds
 - Core mechanism in one sentence (the abstracted pattern)
 - 5 application ideas using this mechanism in different industries
   Format per idea: [Target User] + [Problem] + [Solution using mechanism] + [Estimated MRR range] + [Key risk]
@@ -159,26 +160,26 @@ en_idea_catalyst MUST total 1500-2500 characters. This is NOT a copy of the anal
 It is a standalone creative-thinking guide that helps readers INVENT THEIR OWN IDEAS inspired by this case.
 Structure with exactly 4 sections using "## Section Name" format:
 
-## How This Opportunity Was Discovered (300-400 chars)
+## How This Opportunity Was Discovered
 - Reverse-engineer the founder's "aha moment": what specific signal, frustration, or observation sparked this idea?
 - What market signal or user complaint pattern would have led YOU to the same discovery?
 - The general "trigger pattern" — e.g., "noticing professionals still using spreadsheets for X"
 
-## Niche Discovery Framework (400-600 chars)
+## Niche Discovery Framework
 - 3 concrete methods to find similar underserved niches TODAY (not generic advice — specific actions):
   Method 1: [Where to look] + [What signal to watch for] + [Concrete example of a niche you'd find]
   Method 2: [Community/forum to monitor] + [Type of complaint that signals opportunity]
   Method 3: [Data source or tool] + [How to use it to spot gaps]
 - "The niche is too small" myth: why the founder succeeded BECAUSE the niche was small
 
-## First Principles Decomposition (400-600 chars)
+## First Principles Decomposition
 - Strip away the industry: what is the ABSTRACT MECHANISM that makes this business work?
   Express as: "[Type of person] has [recurring problem] → this product [transforms X into Y] → they pay because [value proposition]"
 - Now apply YOUR expertise: if you know [field A], the same mechanism becomes [specific idea]
 - If you know [field B], it becomes [different specific idea]
 - The "10x test": would a user pay 10x the current price if it saved them 10x more time? If yes, the mechanism is robust.
 
-## Your 48-Hour Validation Sprint (300-500 chars)
+## Your 48-Hour Validation Sprint
 - Day 1 Morning: Find 5 potential users (where to find them, what to search for, exact communities)
 - Day 1 Afternoon: Ask ONE question (the exact question phrasing that validates demand — not "would you use X?" but the right way to ask)
 - Day 2: Build a no-code landing page in 2 hours (which tool, what to put on it, what CTA)
