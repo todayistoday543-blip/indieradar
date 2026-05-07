@@ -91,12 +91,18 @@ export async function POST(req: NextRequest) {
 専門用語を使う場合は必ず（）内に初心者向けの説明を入れてください。
 具体的な金額、URL、サービス名を積極的に含めてください。
 
+【思考プロセス】
+まず事例のビジネスモデルを分解し、収益構造・顧客セグメント・競合優位性を特定してから回答を組み立てること。
+表面的な模倣ではなく、なぜこのモデルが機能するのかの構造的理解に基づいて解説すること。
+
 【あなたの分析品質基準】
-- 市場規模は具体的な数字で示す（例：「$10B市場で年率15%成長」）
-- 競合分析は実名を挙げる（例：「Notion（$10B評価額）と同じ領域」）
-- 法規制の注意点は国ごとに具体的に記載
-- 成功確率の実データを引用（例：「SaaSの平均解約率は月5-7%」）
-- コストは月単位で具体的に試算（例：「初月$0→3ヶ月目$50/月→6ヶ月目$200/月」）`;
+- 市場規模はTAM→SAM→SOMの3層で具体的数字を示す
+- 競合分析は実名+資金調達額+ユーザー数を含める（例：「Notion（$10B評価額、3000万ユーザー）」）
+- 法規制の注意点は国ごとに具体的に記載（該当法律名を含む）
+- 成功確率の実データを引用（例：「SaaSの平均解約率は月5-7%、B2Bは2-3%」）
+- コストは月単位で具体的に試算、API従量課金も含める（例：「Claude API: $3/1M input tokens」）
+- 価格設定は競合の価格帯を3社以上比較した上で根拠を示す
+- 実装プロンプトは実際にClaudeやCursorにそのまま貼って動く完成度にする`;
 
   const systemPromptIntl = `You are an AI business-building expert with Perplexity AI-level precision.
 Respond ENTIRELY in ${targetLang}. Do NOT use Japanese or any other language.
@@ -104,12 +110,17 @@ Explain step-by-step so a complete beginner with zero programming experience can
 When using technical terms, include a beginner-friendly explanation in parentheses.
 Include specific dollar amounts, URLs, and service names wherever possible.
 
+Thinking Process:
+First decompose the business model — identify the revenue structure, customer segments, and competitive advantage. Then build your answer on structural understanding of WHY this model works, not surface-level imitation.
+
 Quality Standards:
-- Market size with specific numbers (e.g., "$10B market growing at 15% YoY")
-- Competitor analysis with real names (e.g., "Same space as Notion ($10B valuation)")
-- Regulatory notes specific to the user's country
-- Real success rate data (e.g., "Average SaaS churn is 5-7% monthly")
-- Monthly cost projections (e.g., "Month 1: $0 → Month 3: $50/mo → Month 6: $200/mo")`;
+- Market size in TAM → SAM → SOM layers with specific numbers
+- Competitor analysis with real names + funding + user counts (e.g., "Notion ($10B valuation, 30M users)")
+- Regulatory notes specific to the user's country (include law names where applicable)
+- Real success rate data (e.g., "Average SaaS churn is 5-7% monthly, B2B is 2-3%")
+- Monthly cost projections including API usage-based pricing (e.g., "Claude API: $3/1M input tokens")
+- Pricing strategy backed by comparison of 3+ competitor price points
+- Implementation prompts must be paste-ready — complete enough to use directly in Claude or Cursor`;
 
   // Build the user-facing prompt in the correct language
   const userPromptJa = `以下の海外マネタイズ事例を再現するための「AI実現ガイド」を生成してください。
@@ -135,8 +146,10 @@ ${industryContext}
 （市場機会のサマリー：この領域のTAM、成長率、なぜ今なのか）
 
 ## 市場分析：この事業は${profile ? profile.name : 'あなたの国'}で成功するか？
-- この事業モデルのグローバル市場規模と成長トレンド
-${profile ? `- ${profile.name}固有の市場環境分析\n- ${profile.name}での競合状況（実名を挙げる）\n- ${profile.name}特有の規制・法的要件\n- ${profile.name}での成功確率の推定（根拠付き）` : '- グローバル市場での機会分析\n- 主要5市場（米国/日本/EU/東南アジア/インド）での実現可能性比較'}
+- TAM（総市場規模）→ SAM（到達可能市場）→ SOM（獲得可能市場）を具体的数字で
+- この事業モデルのグローバル市場規模と成長トレンド（CAGR含む）
+- 主要競合3社以上の比較（名前、資金調達額、ユーザー数、価格帯）
+${profile ? `- ${profile.name}固有の市場環境分析（市場成熟度、インターネット普及率、決済インフラ）\n- ${profile.name}での競合状況（ローカル競合も含めて実名で）\n- ${profile.name}特有の規制・法的要件（法律名を含む）\n- ${profile.name}での成功確率の推定（根拠付き）\n- ${profile.name}のユーザー獲得コスト（CAC）の目安` : '- グローバル市場での機会分析\n- 主要5市場（米国/日本/EU/東南アジア/インド）での実現可能性比較'}
 
 ## ステップ1：まず理解する（1〜2日目）
 - この事業の本質は何か（1行で定義）
@@ -195,10 +208,55 @@ ${profile ? `  - ${profile.topPlatforms.join('、')}での投稿戦略` : `  - P
 [あなたのアイデア] の部分を自分のやりたいことに書き換えるだけで使えます。
 
 \`\`\`
-（この事例をベースにした、カスタマイズ可能な詳細実装プロンプト。
-技術スタック指定、機能要件、DB設計、API設計を含む。
-[あなたのアイデア]、[ターゲットユーザー]、[価格帯] などの置換箇所を明示。
-${profile ? `${profile.name}市場向けの最適化ポイントも含める。` : ''})
+以下の仕様でWebアプリケーションを構築してください。
+
+【プロジェクト概要】
+- アイデア: [あなたのアイデアをここに記入]
+- ターゲットユーザー: [ターゲットユーザーをここに記入]
+- 解決する課題: [解決したい具体的な課題]
+- 収益モデル: ${article.business_model || 'SaaS'}型
+- 目標価格帯: [無料プラン / $X/月 / $XX/月]
+
+【技術スタック】
+- フロントエンド: Next.js 14 (App Router) + TypeScript + Tailwind CSS
+- バックエンド: Next.js API Routes (Route Handlers)
+- データベース: Supabase (PostgreSQL + Auth + Storage)
+- 決済: ${profile ? profile.paymentPlatforms[0] : 'Stripe'} (サブスクリプション)
+- デプロイ: Vercel
+- メール: Resend
+- 分析: PostHog
+
+【必須機能（MVP）】
+この事例「${article.ja_title || article.en_title}」を参考に、以下を実装：
+1. ユーザー認証（Google OAuth + メール/パスワード）
+2. [コア機能1: この事例の主要価値提供機能]
+3. [コア機能2: ユーザーが繰り返し使う機能]
+4. [コア機能3: 差別化要素となる機能]
+5. 決済・サブスクリプション管理
+6. ランディングページ（コンバージョン最適化済み）
+
+【DB設計】
+以下のテーブルを設計してください：
+- users (Supabase Auth連携)
+- [メインデータテーブル]
+- subscriptions (プラン管理)
+- 必要に応じて追加テーブル
+
+【API設計】
+- POST /api/[メイン機能] — コア機能のCRUD
+- POST /api/webhooks/${profile ? profile.paymentPlatforms[0].toLowerCase() : 'stripe'} — 決済Webhook
+- GET /api/[データ取得] — ダッシュボード用
+
+【ページ構成】
+/ — ランディングページ
+/app — メインダッシュボード
+/pricing — 料金ページ
+/auth/login — ログイン
+/settings — アカウント設定
+
+${profile ? `【${profile.name}市場向け最適化】\n- 言語: ${profile.name}のデフォルト言語対応\n- 決済: ${profile.paymentPlatforms.join(', ')}\n- 法的要件: ${profile.taxInfo}\n` : ''}
+まずプロジェクトのセットアップから始めて、各機能を順番に実装してください。
+各ステップでファイル名とコード全文を出力してください。
 \`\`\`
 
 ## 必要なツール・サービスと月額コスト
@@ -227,9 +285,11 @@ Output in this structure:
 Include a market opportunity summary: TAM, growth rate, why now.)
 
 ## Market Analysis: Will this work in ${profile ? profile.name : 'your country'}?
-- Global market size and growth trend for this business model
+- TAM (Total Addressable Market) → SAM (Serviceable) → SOM (Obtainable) with specific numbers
+- Global market size and growth trend (include CAGR)
+- Compare 3+ key competitors (name, funding, user count, pricing)
 ${profile
-  ? `- ${profile.name}-specific market environment\n- Competitive landscape in ${profile.name} (name real competitors)\n- Regulations and legal requirements in ${profile.name}\n- Estimated success probability with justification`
+  ? `- ${profile.name}-specific market environment (maturity, internet penetration, payment infrastructure)\n- Competitive landscape in ${profile.name} (include local competitors by name)\n- Regulations and legal requirements in ${profile.name} (include law names)\n- Estimated success probability with justification\n- Estimated customer acquisition cost (CAC) in ${profile.name}`
   : '- Global market opportunity\n- Feasibility comparison across 5 major markets (US/Japan/EU/SE Asia/India)'}
 
 ## Step 1: Understand the Model (Days 1-2)
@@ -288,10 +348,55 @@ ${profile ? `  - Strategy for ${profile.topPlatforms.join(', ')}` : `  - Product
 Copy this into Claude (claude.ai) or Cursor. Replace [YOUR IDEA] with your own concept.
 
 \`\`\`
-(Detailed, customizable implementation prompt based on this case.
-Includes tech stack, feature requirements, DB design, API design.
-Placeholders: [YOUR IDEA], [TARGET USER], [PRICE POINT].
-${profile ? `Optimized for the ${profile.name} market.` : ''})
+Build a web application with the following specification.
+
+[PROJECT OVERVIEW]
+- Idea: [YOUR IDEA HERE]
+- Target User: [TARGET USER HERE]
+- Problem to Solve: [SPECIFIC PROBLEM]
+- Revenue Model: ${article.business_model || 'SaaS'}
+- Target Pricing: [Free tier / $X/mo / $XX/mo]
+
+[TECH STACK]
+- Frontend: Next.js 14 (App Router) + TypeScript + Tailwind CSS
+- Backend: Next.js API Routes (Route Handlers)
+- Database: Supabase (PostgreSQL + Auth + Storage)
+- Payments: ${profile ? profile.paymentPlatforms[0] : 'Stripe'} (subscriptions)
+- Deploy: Vercel
+- Email: Resend
+- Analytics: PostHog
+
+[MVP FEATURES]
+Based on the case "${article.en_title || article.ja_title}", implement:
+1. User authentication (Google OAuth + email/password)
+2. [Core Feature 1: main value delivery]
+3. [Core Feature 2: recurring engagement feature]
+4. [Core Feature 3: differentiation feature]
+5. Payment & subscription management
+6. Landing page (conversion-optimized)
+
+[DATABASE DESIGN]
+Design these tables:
+- users (linked to Supabase Auth)
+- [main data table]
+- subscriptions (plan management)
+- Additional tables as needed
+
+[API DESIGN]
+- POST /api/[main-feature] — core CRUD
+- POST /api/webhooks/${profile ? profile.paymentPlatforms[0].toLowerCase() : 'stripe'} — payment webhook
+- GET /api/[data-fetch] — dashboard data
+
+[PAGE STRUCTURE]
+/ — Landing page
+/app — Main dashboard
+/pricing — Pricing page
+/auth/login — Login
+/settings — Account settings
+
+${profile ? `[${profile.name.toUpperCase()} MARKET OPTIMIZATION]\n- Language: ${profile.name} default language support\n- Payments: ${profile.paymentPlatforms.join(', ')}\n- Legal: ${profile.taxInfo}\n` : ''}
+Start with project setup, then implement each feature in order.
+Output full file names and complete code for each step.
 \`\`\`
 
 ## Required Tools & Monthly Costs
