@@ -64,6 +64,28 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Article not found' }, { status: 404 });
   }
 
+  // ── Cache check: reuse guide if generated within 30 days ──
+  const cacheLocale = locale || 'ja';
+  const cacheCountry = country_code || null;
+  let cacheQuery = supabase
+    .from('guide_cache')
+    .select('guide_text, model_used')
+    .eq('article_id', article_id)
+    .eq('locale', cacheLocale)
+    .gt('expires_at', new Date().toISOString());
+  cacheQuery = cacheCountry
+    ? cacheQuery.eq('country_code', cacheCountry)
+    : cacheQuery.is('country_code', null);
+  const { data: cacheHit } = await cacheQuery.maybeSingle();
+
+  if (cacheHit) {
+    return NextResponse.json({
+      prompt: cacheHit.guide_text,
+      model_used: cacheHit.model_used || 'cached',
+      cached: true,
+    });
+  }
+
   // Perplexity-grade country context from market intelligence engine
   const marketContext = buildCountryContext(country_code || null);
 
@@ -420,6 +442,19 @@ ${profile ? `\n## ${profile.name} Market Checklist\n(10-item checklist for launc
 
     const textBlock = message.content.find((b) => b.type === 'text');
     const promptText = textBlock ? textBlock.text : '';
+
+    // ── Save to cache (30-day TTL) ──
+    if (promptText.length > 100) {
+      await supabase.from('guide_cache').upsert({
+        article_id,
+        locale: cacheLocale,
+        country_code: cacheCountry,
+        guide_text: promptText,
+        model_used: 'claude-sonnet-4-5-20250929',
+        created_at: new Date().toISOString(),
+        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      }, { onConflict: 'article_id,locale,country_code' });
+    }
 
     return NextResponse.json({
       prompt: promptText,
