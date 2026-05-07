@@ -27,7 +27,7 @@ export default {
     cta_pricing: 'Pricing',
   },
   features: {
-    heading: 'Why NicheHunt',
+    heading: 'Why IndieRadar',
     auto_collect_title: 'Auto-Collection',
     auto_collect_desc:
       'Daily automated collection of indie hacker case studies from Hacker News, Product Hunt, Reddit, and X.',
@@ -190,9 +190,9 @@ export default {
   },
   auth: {
     login_title: 'Log in',
-    login_subtitle: 'Log in to NicheHunt',
+    login_subtitle: 'Log in to IndieRadar',
     signup_title: 'Sign up',
-    signup_subtitle: 'Get started with NicheHunt',
+    signup_subtitle: 'Get started with IndieRadar',
     google_login: 'Log in with Google',
     google_signup: 'Sign up with Google',
     or_email: 'or with email',
@@ -308,7 +308,7 @@ export default {
     daily_limit: 'Daily limit reached (5/day)',
   },
   footer: {
-    tagline: 'NicheHunt — Daily indie hacker monetization case studies',
+    tagline: 'IndieRadar — Daily indie hacker monetization case studies',
     sources: 'Auto-collected from Hacker News / Product Hunt / Reddit / X with AI translation',
   },
 } as const;

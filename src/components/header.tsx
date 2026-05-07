@@ -12,25 +12,25 @@ import type { User } from '@supabase/supabase-js';
 /* ------------------------------------------------------------------ */
 /*  IR logo mark                                                       */
 /* ------------------------------------------------------------------ */
-function NHMark({ className }: { className?: string }) {
+function IRMark({ className }: { className?: string }) {
   return (
     <svg
-      width="27"
+      width="24"
       height="22"
-      viewBox="0 0 38 28"
+      viewBox="0 0 34 28"
       aria-hidden="true"
       className={className}
       fill="none"
     >
-      {/* ── Letter N ── */}
-      <rect x="0" y="0" width="3" height="28" rx="0.5" fill="currentColor" />
-      <line x1="1.5" y1="1" x2="14.5" y2="27" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-      <rect x="13" y="0" width="3" height="28" rx="0.5" fill="currentColor" />
+      {/* ── Letter I (slab-serif) ── */}
+      <rect x="0" y="0" width="10" height="3" rx="0.5" fill="currentColor" />
+      <rect x="3.5" y="0" width="3" height="28" rx="0.5" fill="currentColor" />
+      <rect x="0" y="25" width="10" height="3" rx="0.5" fill="currentColor" />
 
-      {/* ── Letter H ── */}
-      <rect x="20" y="0" width="3" height="28" rx="0.5" fill="currentColor" />
-      <rect x="20" y="12.5" width="15" height="3" rx="0.5" fill="#D4A24A" />
-      <rect x="32" y="0" width="3" height="28" rx="0.5" fill="currentColor" />
+      {/* ── Letter R ── */}
+      <rect x="14" y="0" width="3" height="28" rx="0.5" fill="currentColor" />
+      <path d="M14 1.5 h10 a6 6 0 0 1 0 12 H14" stroke="currentColor" strokeWidth="3" fill="none" />
+      <line x1="22" y1="14" x2="31" y2="27" stroke="#D4A24A" strokeWidth="3" strokeLinecap="round" />
     </svg>
   );
 }
@@ -91,15 +91,15 @@ export function Header() {
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 flex items-center justify-between">
         {/* ---- Logo ------------------------------------------------ */}
         <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-          <NHMark className="text-[var(--paper-2)] group-hover:text-[var(--paper-3)] transition-colors" />
+          <IRMark className="text-[var(--paper-2)] group-hover:text-[var(--paper-3)] transition-colors" />
           <span
             className="text-[19px] font-[400] tracking-tight"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            <span className="text-[var(--signal-gold)] group-hover:brightness-110 transition-all">N</span>
-            <span className="text-[var(--paper-3)]">iche</span>
-            <span className="text-[var(--signal-gold)] group-hover:brightness-110 transition-all">H</span>
-            <span className="text-[var(--paper-3)]">unt</span>
+            <span className="text-[var(--signal-gold)] group-hover:brightness-110 transition-all">I</span>
+            <span className="text-[var(--paper-3)]">ndie</span>
+            <span className="text-[var(--signal-gold)] group-hover:brightness-110 transition-all">R</span>
+            <span className="text-[var(--paper-3)]">adar</span>
           </span>
         </Link>
 

@@ -10,7 +10,7 @@ export async function fetchIHPosts(): Promise<CollectedArticle[]> {
     // The IH homepage lists top posts in a <script> JSON blob
     const res = await fetch('https://www.indiehackers.com/', {
       headers: {
-        'User-Agent': 'NicheHunt/1.0 (article aggregator)',
+        'User-Agent': 'IndieRadarJP/1.0 (article aggregator)',
         Accept: 'text/html',
       },
     });
