@@ -30,7 +30,6 @@ interface DashboardData {
   avg_mrr: number;
   median_mrr: number;
   by_source: Record<string, ByEntry>;
-  by_category: Record<string, ByEntry>;
   by_difficulty: Record<string, ByEntry>;
   mrr_distribution: DistBucket[];
   top_earners: TopEarner[];
@@ -83,20 +82,6 @@ const SOURCE_META: Record<string, { icon: typeof HNIcon; color: string; label: s
   reddit:       { icon: RedditIcon,  color: '#FF4500', label: 'Reddit' },
   producthunt:  { icon: PHIcon,      color: '#DA552F', label: 'Product Hunt' },
   indiehackers: { icon: IHIcon,      color: '#4F46E5', label: 'Indie Hackers' },
-};
-
-const CATEGORY_I18N_MAP: Record<string, string> = {
-  saas: 'cat_saas',
-  marketplace: 'cat_marketplace',
-  ecommerce: 'cat_ecommerce',
-  api: 'cat_api',
-  digital_products: 'cat_digital_products',
-  services: 'cat_services',
-  content: 'cat_content',
-  community: 'cat_community',
-  opensource: 'cat_opensource',
-  hardware: 'cat_hardware',
-  subscription: 'cat_subscription',
 };
 
 const DIFFICULTY_COLORS: Record<string, string> = {
@@ -175,11 +160,6 @@ export default function DashboardPage() {
   }
 
   const maxDist = Math.max(...data.mrr_distribution.map(b => b.count), 1);
-
-  /* Category entries sorted by count descending */
-  const categoryEntries = Object.entries(data.by_category)
-    .filter(([, v]) => v.count > 0)
-    .sort((a, b) => b[1].count - a[1].count);
 
   return (
     <div className="min-h-screen px-10 max-md:px-6 max-sm:px-4 py-12 animate-fade-in">
@@ -311,59 +291,6 @@ export default function DashboardPage() {
                 </div>
               );
             })}
-          </div>
-        </section>
-
-        {/* ── Section 4: By Category ───────────────────────── */}
-        <section className="mb-12">
-          <h2
-            className="text-lg text-[var(--paper-3)] mb-5"
-            style={{ fontFamily: 'var(--font-display)', fontWeight: 400 }}
-          >
-            {dt.by_category}
-          </h2>
-          <div className="flex flex-wrap gap-3">
-            {categoryEntries.map(([key, entry]) => {
-              const i18nKey = CATEGORY_I18N_MAP[key];
-              const label = i18nKey
-                ? (t.articles as Record<string, string>)[i18nKey] || key
-                : key;
-              return (
-                <div
-                  key={key}
-                  className="border border-[var(--ink-2)] bg-[var(--ink-1)] px-4 py-3 transition-colors hover:border-[var(--signal-gold)]/40"
-                >
-                  <span
-                    className="text-[12px] text-[var(--paper-2)] tracking-[0.04em]"
-                    style={{ fontFamily: 'var(--font-mono)' }}
-                  >
-                    {label}
-                  </span>
-                  <div className="flex items-baseline gap-3 mt-1">
-                    <span
-                      className="text-[16px] text-[var(--signal-gold)] tabular-nums"
-                      style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}
-                    >
-                      {entry.count}
-                    </span>
-                    <span
-                      className="text-[10px] text-[var(--ink-5)] tabular-nums"
-                      style={{ fontFamily: 'var(--font-mono)' }}
-                    >
-                      {dt.avg_mrr} {formatMrr(entry.avg_mrr)}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-            {categoryEntries.length === 0 && (
-              <p
-                className="text-[var(--ink-5)] text-[12px]"
-                style={{ fontFamily: 'var(--font-mono)' }}
-              >
-                --
-              </p>
-            )}
           </div>
         </section>
 
