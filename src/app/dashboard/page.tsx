@@ -90,6 +90,12 @@ const DIFFICULTY_COLORS: Record<string, string> = {
   Hard: '#C9695C',
 };
 
+const DIFFICULTY_LABEL_KEYS: Record<string, 'diff_easy' | 'diff_medium' | 'diff_hard'> = {
+  Easy: 'diff_easy',
+  Medium: 'diff_medium',
+  Hard: 'diff_hard',
+};
+
 /* ── Helpers ─────────────────────────────────────────────── */
 
 
@@ -306,6 +312,8 @@ export default function DashboardPage() {
             {['Easy', 'Medium', 'Hard'].map((diff) => {
               const entry = data.by_difficulty[diff] || { count: 0, avg_mrr: 0 };
               const color = DIFFICULTY_COLORS[diff];
+              const labelKey = DIFFICULTY_LABEL_KEYS[diff];
+              const diffLabel = t.articles[labelKey];
               return (
                 <div
                   key={diff}
@@ -321,7 +329,7 @@ export default function DashboardPage() {
                       className="text-[12px] tracking-[0.06em]"
                       style={{ fontFamily: 'var(--font-mono)', color }}
                     >
-                      {diff}
+                      {diffLabel}
                     </span>
                   </div>
                   <p

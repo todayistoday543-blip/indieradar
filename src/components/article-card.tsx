@@ -323,10 +323,10 @@ export function ArticleCard({ article, bookmarkedInit }: { article: Article; boo
               {articleTypeIcon === 'news' ? <NewsIcon /> : articleTypeIcon === 'story' ? <StoryIcon /> : <MindsetIcon />}
               <span className="text-[10px] text-[var(--ink-5)] font-mono tracking-wide">
                 {articleTypeIcon === 'news'
-                  ? (locale === 'ja' ? 'ニュース' : 'NEWS')
+                  ? (locale === 'ja' ? 'ニュース' : locale === 'es' ? 'NOTICIAS' : 'NEWS')
                   : articleTypeIcon === 'story'
-                  ? (locale === 'ja' ? '経験談' : 'STORY')
-                  : (locale === 'ja' ? 'マインド' : 'MIND')}
+                  ? (locale === 'ja' ? '経験談' : locale === 'es' ? 'HISTORIA' : 'STORY')
+                  : (locale === 'ja' ? 'マインド' : locale === 'es' ? 'MENTE' : 'MIND')}
               </span>
             </span>
           )}
@@ -397,10 +397,10 @@ export function ArticleCard({ article, bookmarkedInit }: { article: Article; boo
               {articleTypeIcon === 'news' ? <NewsIcon size={18} /> : articleTypeIcon === 'story' ? <StoryIcon size={18} /> : <MindsetIcon size={18} />}
               <span className="text-[9px] text-[var(--ink-5)] font-mono">
                 {articleTypeIcon === 'news'
-                  ? (locale === 'ja' ? 'ニュース' : 'NEWS')
+                  ? (locale === 'ja' ? 'ニュース' : locale === 'es' ? 'NOTICIAS' : 'NEWS')
                   : articleTypeIcon === 'story'
-                  ? (locale === 'ja' ? '経験談' : 'STORY')
-                  : (locale === 'ja' ? 'マインド' : 'MIND')}
+                  ? (locale === 'ja' ? '経験談' : locale === 'es' ? 'HISTORIA' : 'STORY')
+                  : (locale === 'ja' ? 'マインド' : locale === 'es' ? 'MENTE' : 'MIND')}
               </span>
             </span>
           )}
@@ -428,10 +428,10 @@ export function ArticleCard({ article, bookmarkedInit }: { article: Article; boo
               {articleTypeIcon === 'news' ? <NewsIcon size={16} /> : articleTypeIcon === 'story' ? <StoryIcon size={16} /> : <MindsetIcon size={16} />}
               <span className="text-[9px] text-[var(--ink-5)] font-mono">
                 {articleTypeIcon === 'news'
-                  ? (locale === 'ja' ? 'ニュース' : 'NEWS')
+                  ? (locale === 'ja' ? 'ニュース' : locale === 'es' ? 'NOTICIAS' : 'NEWS')
                   : articleTypeIcon === 'story'
-                  ? (locale === 'ja' ? '経験談' : 'STORY')
-                  : (locale === 'ja' ? 'マインド' : 'MIND')}
+                  ? (locale === 'ja' ? '経験談' : locale === 'es' ? 'HISTORIA' : 'STORY')
+                  : (locale === 'ja' ? 'マインド' : locale === 'es' ? 'MENTE' : 'MIND')}
               </span>
             </span>
           ) : null}

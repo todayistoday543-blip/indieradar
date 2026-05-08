@@ -206,7 +206,7 @@ export default {
     no_account: "Don't have an account?",
     has_account: 'Already have an account?',
     confirm_email_title: 'Confirmation email sent',
-    confirm_email_desc: 'We sent a confirmation email to . Click the link to complete registration.',
+    confirm_email_desc: '— we sent a confirmation email. Click the link to complete registration.',
     error_invalid_credentials: 'Invalid email or password',
     error_user_already_registered: 'This email is already registered',
     error_email_not_confirmed: 'Email not yet confirmed. Please check your inbox',

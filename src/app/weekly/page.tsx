@@ -484,7 +484,7 @@ export default function WeeklyPage() {
                       {' · '}
                       <span className="uppercase">{srcLabel}</span>
                       {' · '}
-                      {(article.view_count ?? 0).toLocaleString()} views
+                      {(article.view_count ?? 0).toLocaleString()} {t.articles.sort_views.toLowerCase()}
                     </p>
                   </div>
                 </Link>

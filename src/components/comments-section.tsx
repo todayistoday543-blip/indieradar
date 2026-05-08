@@ -189,7 +189,7 @@ export function CommentsSection({ articleId }: { articleId: string }) {
                   <button
                     onClick={() => handleDelete(comment.id)}
                     className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-[var(--ink-2)] transition-all text-[var(--ink-5)] hover:text-[var(--signal-warn)]"
-                    title={t.comments.delete_confirm}
+                    title={t.alerts.delete}
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

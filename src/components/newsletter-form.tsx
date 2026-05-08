@@ -86,7 +86,7 @@ export function NewsletterForm() {
       )}
       {status === 'error' && (
         <p className="text-[11px] text-[var(--signal-warn)] mt-1.5" style={{ fontFamily: 'var(--font-mono)' }}>
-          {t.newsletter.error_invalid}
+          {t.common.error_load}
         </p>
       )}
     </div>

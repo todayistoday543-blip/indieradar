@@ -264,7 +264,7 @@ export default function BusinessPlanModal({
                 onClick={generate}
                 className="text-sm text-[var(--signal-gold)] hover:opacity-80 transition"
               >
-                {locale === 'ja' ? '再試行' : 'Retry'}
+                {t.common.retry}
               </button>
             </div>
           )}
