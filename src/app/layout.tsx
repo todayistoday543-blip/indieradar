@@ -28,7 +28,10 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://indieradar.jp';
 
 export const metadata: Metadata = {
   icons: {
-    icon: '/icon.svg',
+    icon: [
+      { url: '/icon.png', type: 'image/png' },
+    ],
+    apple: '/icon.png',
   },
   title: {
     default: 'IndieRadar JP — 海外インディーハッカーのマネタイズ事例',
