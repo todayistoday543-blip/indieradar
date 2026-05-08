@@ -367,6 +367,78 @@ export default function ArticleDetailPage() {
     setMetaName('twitter:image', ogImageUrl);
   }, [article, locale]);
 
+  // Inject JSON-LD structured data (Article schema)
+  useEffect(() => {
+    if (!article) return;
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://indieradar.jp';
+    const enTitle = article.en_title || article.original_title || '';
+    const enDesc = (article.en_summary || article.en_insight || '')
+      .replace(/#{1,6}\s+/g, '')
+      .replace(/\*{1,2}([^*]+)\*{1,2}/g, '$1')
+      .replace(/\n+/g, ' ')
+      .trim()
+      .slice(0, 200);
+
+    const jsonLd: Record<string, unknown> = {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: enTitle,
+      description: enDesc,
+      datePublished: article.created_at,
+      url: `${appUrl}/articles/${article.id}`,
+      image: `${appUrl}/api/og?title=${encodeURIComponent(enTitle)}`,
+      author: {
+        '@type': 'Organization',
+        name: article.source
+          ? (article.source.charAt(0).toUpperCase() + article.source.slice(1))
+          : 'IndieRadar',
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: 'IndieRadar',
+        url: appUrl,
+        logo: {
+          '@type': 'ImageObject',
+          url: `${appUrl}/icon.png`,
+        },
+      },
+      inLanguage: 'en',
+    };
+
+    // Append MRR as additionalProperty when present
+    if (article.mrr_mentioned) {
+      jsonLd['additionalProperty'] = [
+        {
+          '@type': 'PropertyValue',
+          name: 'Monthly Recurring Revenue',
+          value: `$${article.mrr_mentioned}`,
+        },
+        ...(article.business_model
+          ? [{ '@type': 'PropertyValue', name: 'Business Model', value: article.business_model }]
+          : []),
+        ...(article.ja_difficulty
+          ? [{ '@type': 'PropertyValue', name: 'Implementation Difficulty', value: article.ja_difficulty }]
+          : []),
+      ];
+    }
+
+    // Remove previous script if any, then inject fresh one
+    const prevScript = document.getElementById('article-jsonld');
+    if (prevScript) prevScript.remove();
+
+    const script = document.createElement('script');
+    script.id = 'article-jsonld';
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify(jsonLd);
+    document.head.appendChild(script);
+
+    return () => {
+      const el = document.getElementById('article-jsonld');
+      if (el) el.remove();
+    };
+  }, [article]);
+
   // Check vote status
   useEffect(() => {
     if (!userId || !article?.id) return;

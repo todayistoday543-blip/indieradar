@@ -75,6 +75,23 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-snippet': -1,
+      'max-image-preview': 'large',
+      'max-video-preview': -1,
+    },
+  },
+  // hreflang: same URL serves all languages via client-side locale switching
+  alternates: {
+    canonical: APP_URL,
+    languages: {
+      'en': APP_URL,
+      'ja': APP_URL,
+      'es': APP_URL,
+      'x-default': APP_URL,
+    },
   },
 };
 
