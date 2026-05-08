@@ -1,59 +1,38 @@
-import type { MetadataRoute } from 'next'
-import { createServiceClient } from '@/lib/supabase'
+﻿import type { MetadataRoute } from 'next';
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://indieradar.jp'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://indieradar.jp';
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Static pages
-  const staticPages: MetadataRoute.Sitemap = [
+export default function sitemap(): MetadataRoute.Sitemap {
+  return [
     {
-      url: BASE_URL,
+      url: APP_URL,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1,
     },
     {
-      url: `${BASE_URL}/articles`,
+      url: `${APP_URL}/articles`,
       lastModified: new Date(),
       changeFrequency: 'hourly',
       priority: 0.9,
     },
     {
-      url: `${BASE_URL}/pricing`,
+      url: `${APP_URL}/weekly`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${APP_URL}/pricing`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
-      url: `${BASE_URL}/submit`,
+      url: `${APP_URL}/submit`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
-      priority: 0.6,
+      priority: 0.5,
     },
-  ]
-
-  // Dynamic article pages from Supabase
-  let articlePages: MetadataRoute.Sitemap = []
-
-  try {
-    const supabase = createServiceClient()
-    const { data: articles } = await supabase
-      .from('articles')
-      .select('id, created_at')
-      .eq('status', 'published')
-      .order('created_at', { ascending: false })
-
-    if (articles) {
-      articlePages = articles.map((article) => ({
-        url: `${BASE_URL}/articles/${article.id}`,
-        lastModified: new Date(article.created_at),
-        changeFrequency: 'weekly' as const,
-        priority: 0.8,
-      }))
-    }
-  } catch {
-    // If Supabase is unavailable, return only static pages
-  }
-
-  return [...staticPages, ...articlePages]
+  ];
 }
