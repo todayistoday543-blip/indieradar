@@ -34,40 +34,41 @@ export const metadata: Metadata = {
     apple: '/icon.png',
   },
   title: {
-    default: 'IndieRadar JP — 海外インディーハッカーのマネタイズ事例',
-    template: '%s | IndieRadar JP',
+    default: 'IndieRadar — Indie Hacker Monetization Case Studies',
+    template: '%s | IndieRadar',
   },
   description:
-    '海外インディーハッカーのマネタイズ事例をAIが自動収集・翻訳。Hacker News, Product Hunt, Reddit, X から毎日更新。9言語対応。',
+    'AI-curated monetization case studies from indie hackers worldwide. Updated daily from Hacker News, Product Hunt, Reddit, and X. Available in 9 languages.',
   keywords: [
-    'インディーハッカー',
     'indie hacker',
-    'マネタイズ',
+    'monetization',
     'SaaS',
     'MRR',
-    '副業',
-    '個人開発',
+    'side project',
+    'bootstrapped',
     'Hacker News',
     'Product Hunt',
     'IndieRadar',
+    'インディーハッカー',
+    'マネタイズ',
   ],
-  authors: [{ name: 'IndieRadar JP' }],
-  creator: 'IndieRadar JP',
+  authors: [{ name: 'IndieRadar' }],
+  creator: 'IndieRadar',
   metadataBase: new URL(APP_URL),
   openGraph: {
     type: 'website',
-    locale: 'ja_JP',
+    locale: 'en_US',
     url: APP_URL,
-    siteName: 'IndieRadar JP',
-    title: 'IndieRadar JP — 海外インディーハッカーのマネタイズ事例',
+    siteName: 'IndieRadar',
+    title: 'IndieRadar — Indie Hacker Monetization Case Studies',
     description:
-      '海外インディーハッカーのマネタイズ事例をAIが自動収集・翻訳。毎日更新、9言語対応。',
+      'AI-curated monetization case studies from indie hackers worldwide. Updated daily, available in 9 languages.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'IndieRadar JP',
+    title: 'IndieRadar',
     description:
-      '海外インディーハッカーのマネタイズ事例をAIが自動収集・翻訳。',
+      'AI-curated monetization case studies from indie hackers worldwide.',
   },
   robots: {
     index: true,
@@ -91,7 +92,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="ja"
+      lang="en"
       className={`${fraunces.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <head>

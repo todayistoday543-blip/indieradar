@@ -32,14 +32,32 @@ export function LanguageSelector() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 border border-[var(--ink-2)] bg-[var(--ink-1)] px-2.5 py-1.5 text-xs font-medium text-[var(--paper-3)] hover:bg-[var(--ink-2)] hover:border-[var(--ink-3)] transition-all"
-        aria-label="Language"
+        className={`
+          flex items-center gap-2 px-3 py-1.5
+          border text-xs font-medium tracking-wide transition-all
+          ${open
+            ? 'border-[var(--signal-gold)] bg-[var(--ink-2)] text-[var(--signal-gold)]'
+            : 'border-[var(--signal-gold)]/40 bg-[var(--ink-1)] text-[var(--paper-2)] hover:border-[var(--signal-gold)] hover:text-[var(--signal-gold)] hover:bg-[var(--ink-2)]'
+          }
+        `}
+        aria-label="Select language"
         aria-expanded={open}
       >
-        <span className="text-sm leading-none">{localeFlags[locale]}</span>
-        <span className="hidden sm:inline">{localeNames[locale]}</span>
+        {/* Globe icon */}
         <svg
-          className={`w-3 h-3 text-[var(--ink-5)] transition-transform ${open ? 'rotate-180' : ''}`}
+          className="w-3.5 h-3.5 shrink-0"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          strokeWidth={2}
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+        </svg>
+        <span className="text-sm leading-none">{localeFlags[locale]}</span>
+        <span style={{ fontFamily: 'var(--font-mono)' }}>{localeNames[locale]}</span>
+        <svg
+          className={`w-3 h-3 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -50,21 +68,30 @@ export function LanguageSelector() {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-1.5 w-44 border border-[var(--ink-2)] bg-[var(--ink-1)] py-1.5 z-50 animate-fade-in">
+        <div className="absolute right-0 mt-1.5 w-48 border border-[var(--signal-gold)]/30 bg-[var(--ink-1)] py-1.5 z-50 animate-fade-in shadow-lg shadow-black/20">
+          {/* Header */}
+          <div className="px-3.5 py-1.5 mb-1 border-b border-[var(--ink-2)]">
+            <span
+              className="text-[10px] tracking-widest text-[var(--ink-5)] uppercase"
+              style={{ fontFamily: 'var(--font-mono)' }}
+            >
+              Language
+            </span>
+          </div>
           {AI_LOCALES.map((l) => (
             <button
               key={l}
               onClick={() => { setLocale(l); setOpen(false); }}
-              className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-sm transition-colors ${
+              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm transition-colors ${
                 l === locale
                   ? 'bg-[var(--ink-2)] text-[var(--signal-gold)] font-medium'
-                  : 'text-[var(--paper-1)] hover:bg-[var(--ink-2)]'
+                  : 'text-[var(--paper-1)] hover:bg-[var(--ink-2)] hover:text-[var(--paper-3)]'
               }`}
             >
               <span className="text-base leading-none">{localeFlags[l]}</span>
-              <span>{localeNames[l]}</span>
+              <span style={{ fontFamily: 'var(--font-mono)' }}>{localeNames[l]}</span>
               {l === locale && (
-                <svg className="w-4 h-4 text-[var(--signal-gold)] ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                <svg className="w-3.5 h-3.5 text-[var(--signal-gold)] ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
               )}

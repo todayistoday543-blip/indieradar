@@ -5,7 +5,7 @@ export const runtime = 'edge';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const title = searchParams.get('title') || 'IndieRadar JP';
+    const title = searchParams.get('title') || 'IndieRadar';
 
     // Truncate title to ~80 chars for clean display
     const displayTitle =

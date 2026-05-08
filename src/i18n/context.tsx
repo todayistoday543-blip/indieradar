@@ -9,16 +9,16 @@ import {
   type ReactNode,
 } from 'react';
 import { type Locale, defaultLocale, locales } from './config';
-import type jaMessages from './locales/ja';
-// Eagerly import the default (ja) locale so the initial render never shows a
-// full-screen "Loading..." flash for Japanese users (the majority).
-import jaDefault from './locales/ja';
+import type enMessages from './locales/en';
+// Eagerly import the default (en) locale so the initial render never shows a
+// full-screen "Loading..." flash for English users (the global default).
+import enDefault from './locales/en';
 
 type DeepString<T> = {
   [K in keyof T]: T[K] extends string ? string : DeepString<T[K]>;
 };
 
-type Messages = DeepString<typeof jaMessages>;
+type Messages = DeepString<typeof enMessages>;
 
 const I18nContext = createContext<{
   locale: Locale;
@@ -27,12 +27,12 @@ const I18nContext = createContext<{
 }>({
   locale: defaultLocale,
   setLocale: () => {},
-  t: jaDefault as Messages,
+  t: enDefault as Messages,
 });
 
 const loaders: Record<Locale, () => Promise<{ default: Messages }>> = {
-  ja: () => Promise.resolve({ default: jaDefault as Messages }),
-  en: () => import('./locales/en'),
+  ja: () => import('./locales/ja'),
+  en: () => Promise.resolve({ default: enDefault as Messages }),
   es: () => import('./locales/es'),
 };
 
@@ -48,9 +48,9 @@ function getSavedLocale(): Locale {
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  // Start with ja messages so the first render never shows a spinner
+  // Start with en messages so the first render never shows a spinner
   const [locale, setLocaleState] = useState<Locale>(defaultLocale);
-  const [messages, setMessages] = useState<Messages>(jaDefault as Messages);
+  const [messages, setMessages] = useState<Messages>(enDefault as Messages);
 
   const loadMessages = useCallback(async (l: Locale) => {
     const mod = await loaders[l]();
@@ -70,7 +70,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const initial = getSavedLocale();
     // Only trigger a load (and state update) when the preferred locale differs
-    // from the default already rendered; avoids a spurious re-render for ja users.
+    // from the default already rendered; avoids a spurious re-render for en users.
     if (initial !== defaultLocale) {
       setLocaleState(initial);
       document.documentElement.lang = initial;

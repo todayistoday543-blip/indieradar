@@ -132,11 +132,11 @@ export function Header() {
 
         {/* ---- Right side ------------------------------------------ */}
         <div className="hidden md:flex items-center gap-3">
+          {/* Language selector — featured prominently */}
+          <LanguageSelector />
+
           {/* Theme toggle */}
           <ThemeToggle />
-
-          {/* Language selector */}
-          <LanguageSelector />
 
           {/* Auth */}
           {user ? (
@@ -227,8 +227,8 @@ export function Header() {
             })}
 
             <div className="pt-2 pb-1 px-3 flex items-center gap-3">
-              <ThemeToggle />
               <LanguageSelector />
+              <ThemeToggle />
             </div>
 
             {user ? (

@@ -17,4 +17,4 @@ export const localeToBCP47: Record<Locale, string> = {
   es: 'es-419',
 };
 
-export const defaultLocale: Locale = 'ja';
+export const defaultLocale: Locale = 'en';
