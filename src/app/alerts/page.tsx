@@ -76,8 +76,7 @@ export default function AlertsPage() {
   }, [userId]);
 
   useEffect(() => {
-    // TEMPORARY: plan check disabled (trial period). To restore: userId && plan === 'pro'
-    if (userId) {
+    if (userId && plan === 'pro') {
       fetchAlerts();
     } else {
       setLoading(false);
@@ -235,8 +234,7 @@ export default function AlertsPage() {
     );
   }
 
-  // TEMPORARY: plan gate disabled (trial period). To restore: plan !== 'pro'
-  if (false) {
+  if (plan !== 'pro') {
     return (
       <div className="mx-auto max-w-2xl px-4 py-16 text-center animate-fade-in">
         <div

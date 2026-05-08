@@ -56,16 +56,15 @@ export async function POST(req: NextRequest) {
 
   const supabase = createServiceClient();
 
-  // TEMPORARY: Pro plan check disabled (trial period)
-  // To restore, uncomment:
-  // const { data: profile } = await supabase
-  //   .from('profiles')
-  //   .select('subscription_plan')
-  //   .eq('id', user_id)
-  //   .single();
-  // if (!profile || profile.subscription_plan !== 'pro') {
-  //   return NextResponse.json({ error: 'Pro plan required' }, { status: 403 });
-  // }
+  // Pro plan gate
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('subscription_plan')
+    .eq('id', user_id)
+    .single();
+  if (!profile || profile.subscription_plan !== 'pro') {
+    return NextResponse.json({ error: 'Pro plan required' }, { status: 403 });
+  }
 
   // Rate limit check
   const rateCheck = checkRateLimit(user_id);

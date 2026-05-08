@@ -284,10 +284,8 @@ export default function ArticleDetailPage() {
   const [guideError, setGuideError] = useState<string | null>(null);
   const viewTracked = useRef(false);
 
-  // TEMPORARY: all features unlocked (trial period)
-  // To restore: canReadFull = plan === 'basic' || plan === 'pro';  canUseGuide = plan === 'pro';
-  const canReadFull = true;
-  const canUseGuide = true;
+  const canReadFull = plan === 'basic' || plan === 'pro';
+  const canUseGuide = plan === 'pro';
 
   // Fetch article
   useEffect(() => {

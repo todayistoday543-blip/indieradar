@@ -71,8 +71,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 });
   }
 
-  // TEMPORARY: Pro plan check disabled (trial period)
-  // To restore: if (profile.subscription_plan !== 'pro') { return NextResponse.json({ error: 'Pro plan required' }, { status: 403 }); }
+  // Pro plan gate
+  if (profile.subscription_plan !== 'pro') {
+    return NextResponse.json({ error: 'Pro plan required' }, { status: 403 });
+  }
 
   const alertData = {
     user_id,
