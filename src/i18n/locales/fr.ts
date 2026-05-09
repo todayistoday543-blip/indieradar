@@ -18,11 +18,11 @@ export default {
     error_network: 'Erreur réseau. Veuillez réessayer.',
   },
   hero: {
-    title_1: 'Insights quotidiens sur comment les',
-    title_2: 'indie hackers',
-    title_3: ' monétisent dans le monde',
+    title_1: "Pas d'affiliation. Pas de gourou.",
+    title_2: 'Pas d\'infoproduits.',
+    title_3: ' Que des vrais cas de monétisation.',
     subtitle:
-      "Études de cas de monétisation curatées par IA depuis Hacker News, Product Hunt, Reddit & X — traduites dans votre langue. Le seul service de curation de ce genre.",
+      'Uniquement des études de cas de revenus vérifiés — de vrais fondateurs, du vrai MRR, extraits chaque jour par IA depuis Hacker News, Product Hunt & Reddit. Zéro hype, zéro biais, source toujours visible.',
     cta_free: 'Lire les articles gratuitement',
     cta_pricing: 'Tarifs',
   },

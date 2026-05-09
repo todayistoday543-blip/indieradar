@@ -18,11 +18,11 @@ export default {
     error_network: 'Network error. Please try again.',
   },
   hero: {
-    title_1: 'Daily insights on how',
-    title_2: 'indie hackers',
-    title_3: ' monetize worldwide',
+    title_1: 'No affiliates. No gurus.',
+    title_2: 'No info products.',
+    title_3: ' Just real monetization cases.',
     subtitle:
-      'AI-curated monetization case studies from Hacker News, Product Hunt, Reddit & X — translated into your language. The only curation service of its kind.',
+      'Only verified revenue case studies — real founders, real MRR, sourced daily from Hacker News, Product Hunt & Reddit by AI. Zero hype, zero bias, source always shown.',
     cta_free: 'Read articles for free',
     cta_pricing: 'Pricing',
   },

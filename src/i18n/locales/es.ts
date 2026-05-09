@@ -18,11 +18,11 @@ export default {
     error_network: 'Error de red. Por favor, inténtelo de nuevo.',
   },
   hero: {
-    title_1: 'Información diaria sobre cómo',
-    title_2: 'los indie hackers',
-    title_3: ' monetizan en todo el mundo',
+    title_1: 'Sin afiliados. Sin gurús.',
+    title_2: 'Sin infoproductos.',
+    title_3: ' Solo casos reales de monetización.',
     subtitle:
-      'Casos de estudio de monetización curados por IA de Hacker News, Product Hunt, Reddit y X — traducidos a tu idioma. El único servicio de curación de su tipo.',
+      'Únicamente estudios de caso de ingresos verificados — fundadores reales, MRR real, extraídos cada día por IA desde Hacker News, Product Hunt y Reddit. Cero hype, cero sesgo, fuente siempre visible.',
     cta_free: 'Leer artículos gratis',
     cta_pricing: 'Precios',
   },

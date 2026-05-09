@@ -3,13 +3,13 @@
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://indieradar.jp';
 
 export const metadata: Metadata = {
-  title: 'Articles',
+  title: 'Real Monetization Cases — No Gurus, No Affiliates',
   description:
-    'Browse indie hacker monetization case studies. AI-curated daily from Hacker News, Product Hunt, Reddit, and X. Filter by SaaS, MRR, business model, and more.',
+    'Browse verified indie hacker revenue case studies. No gurus, no affiliate links, no info products. Real MRR sourced from Hacker News, Product Hunt & Reddit — AI-curated daily. Filter by SaaS, MRR range, business model, and difficulty.',
   openGraph: {
-    title: 'Indie Hacker Monetization Articles | IndieRadar',
+    title: 'Real Indie Hacker Revenue Cases | IndieRadar',
     description:
-      'Daily indie hacker case studies curated from HN, Product Hunt, Reddit & X — AI-translated into 9 languages.',
+      'Verified revenue case studies — no gurus, no affiliates, no info products. Real MRR from HN, PH & Reddit, AI-curated daily in 9 languages.',
     url: `${APP_URL}/articles`,
     type: 'website',
     siteName: 'IndieRadar',

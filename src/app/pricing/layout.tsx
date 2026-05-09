@@ -3,7 +3,13 @@ import type { Metadata } from 'next';
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://indieradar.jp';
 
 export const metadata: Metadata = {
-  title: 'Pricing',
+  title: 'Plans & Pricing',
+  robots: {
+    index: true,
+    follow: true,
+    // Prevent this page from being shown as the primary snippet in brand searches
+    'max-snippet': 50,
+  },
   description:
     'IndieRadar plans for indie hackers. Free, Basic, and Pro tiers — unlock full monetization case studies, AI-generated business guides, and country-specific market insights.',
   keywords: [

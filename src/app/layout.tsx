@@ -36,11 +36,11 @@ export const metadata: Metadata = {
     apple: '/icon.png',
   },
   title: {
-    default: 'IndieRadar — Indie Hacker Monetization Case Studies',
+    default: 'IndieRadar — Real Indie Hacker Revenue Cases. No Gurus. No Affiliates.',
     template: '%s | IndieRadar',
   },
   description:
-    'AI-curated monetization case studies from indie hackers worldwide. Updated daily from Hacker News, Product Hunt, Reddit, and X. Available in 9 languages.',
+    'Verified indie hacker revenue case studies — no gurus, no affiliate links, no info products. Real MRR from Hacker News, Product Hunt & Reddit, AI-curated daily in 9 languages. Filter by business model, difficulty, and revenue range.',
   keywords: [
     'indie hacker',
     'monetization',
@@ -72,9 +72,9 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: APP_URL,
     siteName: 'IndieRadar',
-    title: 'IndieRadar — Indie Hacker Monetization Case Studies',
+    title: 'IndieRadar — Real Indie Hacker Revenue Cases. No Gurus. No Affiliates.',
     description:
-      'AI-curated monetization case studies from indie hackers worldwide. Updated daily, available in 9 languages.',
+      'Verified indie hacker revenue case studies — no gurus, no affiliate links, no info products. Real MRR from Hacker News, Product Hunt & Reddit, AI-curated daily in 9 languages.',
     images: [
       {
         url: `${APP_URL}/api/og?title=${encodeURIComponent('IndieRadar — Indie Hacker Monetization Case Studies')}`,
@@ -135,7 +135,7 @@ const websiteJsonLd = {
   '@type': 'WebSite',
   name: 'IndieRadar',
   url: APP_URL,
-  description: 'AI-curated indie hacker monetization case studies. Updated daily in 9 languages.',
+  description: 'Verified indie hacker revenue case studies. No gurus, no affiliates, no info products. Real MRR from Hacker News, Product Hunt & Reddit, AI-curated daily.',
   potentialAction: {
     '@type': 'SearchAction',
     target: {
@@ -144,6 +144,17 @@ const websiteJsonLd = {
     },
     'query-input': 'required name=search_term_string',
   },
+};
+
+// Organization JSON-LD — helps Google associate the brand entity with the homepage
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'IndieRadar',
+  url: APP_URL,
+  logo: `${APP_URL}/icon.png`,
+  description: 'AI-powered curation of verified indie hacker revenue case studies. No gurus, no affiliates, no info products.',
+  sameAs: [],
 };
 
 export default function RootLayout({
@@ -161,6 +172,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
       </head>
       <body className="min-h-full flex flex-col">

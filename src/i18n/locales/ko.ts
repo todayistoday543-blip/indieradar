@@ -18,11 +18,11 @@ export default {
     error_network: '네트워크 오류. 다시 시도해주세요.',
   },
   hero: {
-    title_1: '인디 해커들이',
-    title_2: '전 세계에서',
-    title_3: ' 수익화하는 방법 - 매일 인사이트',
+    title_1: '어필리에이트 없음. Guru 없음.',
+    title_2: '정보상품 없음.',
+    title_3: ' 진짜 수익 사례만.',
     subtitle:
-      'Hacker News, Product Hunt, Reddit & X에서 AI가 큐레이션한 수익화 사례 — 당신의 언어로 번역됩니다. 이런 종류의 유일한 큐레이션 서비스.',
+      '검증된 수익 사례만 엄선 — 실제 창업자, 실제 MRR, AI가 매일 Hacker News·Product Hunt·Reddit에서 추출. 과장 없음, 편향 없음, 출처 항상 공개.',
     cta_free: '무료로 아티클 읽기',
     cta_pricing: '요금제',
   },

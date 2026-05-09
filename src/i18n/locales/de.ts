@@ -18,11 +18,11 @@ export default {
     error_network: 'Netzwerkfehler. Bitte erneut versuchen.',
   },
   hero: {
-    title_1: 'Tägliche Einblicke, wie',
-    title_2: 'Indie-Hacker',
-    title_3: ' weltweit Geld verdienen',
+    title_1: 'Kein Affiliate-Spam. Kein Guru.',
+    title_2: 'Keine Infoprodukte.',
+    title_3: ' Nur echte Monetarisierungs-Cases.',
     subtitle:
-      'KI-kuratierte Monetarisierungs-Fallstudien von Hacker News, Product Hunt, Reddit & X — in Ihre Sprache übersetzt. Der einzige Kurationsdienst dieser Art.',
+      'Ausschließlich verifizierte Einnahmen-Fallstudien — echte Gründer, echtes MRR, täglich von KI aus Hacker News, Product Hunt & Reddit extrahiert. Kein Hype, kein Bias, Quelle immer sichtbar.',
     cta_free: 'Kostenlos Artikel lesen',
     cta_pricing: 'Preise',
   },

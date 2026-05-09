@@ -18,11 +18,11 @@ export default {
     error_network: 'ネットワークエラーが発生しました。もう一度お試しください。',
   },
   hero: {
-    title_1: '海外インディーハッカーの',
-    title_2: '稼ぎ方',
-    title_3: 'を毎日お届け',
+    title_1: 'アフィリエイトなし、情報商材なし、',
+    title_2: 'Guruなし',
+    title_3: '。本物の稼げる事例だけ。',
     subtitle:
-      'Hacker News・Product Hunt・Reddit・X から、マネタイズに成功した個人開発者の事例をAIが自動収集。あなたの言語で読める唯一のキュレーションサービス。',
+      'HackerNews・ProductHunt・Redditに実際に投稿された証拠付きの収益事例のみをAIが毎日厳選。誇張なし・バイアスなし・ソース常時表示。純粋に再現できるビジネスモデルだけを届けます。',
     cta_free: '無料で記事を読む',
     cta_pricing: '料金プラン',
   },

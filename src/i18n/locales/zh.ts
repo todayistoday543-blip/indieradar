@@ -18,11 +18,11 @@ export default {
     error_network: '网络错误。请重试。',
   },
   hero: {
-    title_1: '每日洞察独立开发者如何',
-    title_2: '在全球',
-    title_3: '实现变现',
+    title_1: '没有联盟营销。没有导师课程。',
+    title_2: '没有信息产品。',
+    title_3: '只有真实的变现案例。',
     subtitle:
-      '由 AI 从 Hacker News、Product Hunt、Reddit & X 精选的变现案例研究 — 翻译成您的语言。同类中唯一的精选服务。',
+      '只精选经过验证的真实收益案例 — 真实创始人、真实 MRR，AI 每日从 Hacker News、Product Hunt、Reddit 提取。零夸大、零偏见、来源始终公开。',
     cta_free: '免费阅读文章',
     cta_pricing: '价格',
   },
