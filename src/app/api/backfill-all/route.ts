@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
-import { enrichInEnglish } from '@/lib/translator';
+import { enrichInEnglish, translateToJaAndEs } from '@/lib/translator';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
-// Phase 1: Re-generate English content only (claude-sonnet, ~120-180s/article).
-// BATCH_SIZE=1 ensures we stay well within the 300s Vercel Pro hard limit.
-// Phase 2: JA + ES translation is handled by /api/backfill-translations.
+// Re-generate English content AND translate to JA+ES in one pass.
+// 2 Claude calls per article (~120s enrich + ~120s translate = ~240s). BATCH_SIZE=1 stays under 300s.
 const BATCH_SIZE = 1;
 
 // Re-enrich EN content below this threshold.
@@ -99,6 +98,19 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
+      // Translate to JA + ES inline (instead of NULLing and waiting for backfill-translations)
+      let translated: Awaited<ReturnType<typeof translateToJaAndEs>> | null = null;
+      try {
+        translated = await translateToJaAndEs({
+          en_title:         enriched.en_title || '',
+          en_summary:       enriched.en_summary || '',
+          en_insight:       enriched.en_insight || '',
+          en_idea_catalyst: enriched.en_idea_catalyst || '',
+        });
+      } catch (txErr) {
+        results.push(`[TRANSLATE WARN] ${article.original_title?.slice(0, 40)}: ${txErr instanceof Error ? txErr.message : txErr}`);
+      }
+
       const { error: updateError } = await supabase
         .from('articles')
         .update({
@@ -109,15 +121,15 @@ export async function GET(request: NextRequest) {
           ja_difficulty:     enriched.ja_difficulty,
           business_model:    enriched.business_model || null,
           mrr_mentioned:     enriched.mrr_mentioned ?? null,
-          // Clear ja/es so backfill-translations picks them up next.
-          ja_title:          null,
-          ja_summary:        null,
-          ja_insight:        null,
-          ja_idea_catalyst:  null,
-          es_title:          null,
-          es_summary:        null,
-          es_insight:        null,
-          es_idea_catalyst:  null,
+          // Write JA + ES translations inline
+          ja_title:          translated?.ja_title   ?? null,
+          ja_summary:        translated?.ja_summary ?? null,
+          ja_insight:        translated?.ja_insight  ?? null,
+          ja_idea_catalyst:  translated?.ja_idea_catalyst ?? null,
+          es_title:          translated?.es_title   ?? null,
+          es_summary:        translated?.es_summary ?? null,
+          es_insight:        translated?.es_insight  ?? null,
+          es_idea_catalyst:  translated?.es_idea_catalyst ?? null,
         })
         .eq('id', article.id);
 
@@ -125,7 +137,8 @@ export async function GET(request: NextRequest) {
         results.push(`[UPDATE ERROR] ${article.id}: ${updateError.message}`);
       } else {
         updated++;
-        results.push(`[EN OK] ${enriched.en_title?.slice(0, 50)} — ${enriched.en_summary?.length ?? 0}c summary, ${enriched.en_idea_catalyst?.length ?? 0}c catalyst`);
+        const txStatus = translated ? 'JA+ES OK' : 'JA+ES MISSING';
+        results.push(`[EN+${txStatus}] ${enriched.en_title?.slice(0, 50)} — ${enriched.en_summary?.length ?? 0}c summary`);
       }
     } catch (e) {
       results.push(`[ERROR] ${article.original_title?.slice(0, 40)}: ${e instanceof Error ? e.message : e}`);
