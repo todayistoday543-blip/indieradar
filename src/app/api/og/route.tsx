@@ -224,7 +224,7 @@ export async function GET(request: Request) {
                 fontWeight: 400,
               }}
             >
-              indieradar.jp
+              indieradars.com
             </div>
           </div>
         </div>

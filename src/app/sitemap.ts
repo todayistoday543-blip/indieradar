@@ -1,7 +1,7 @@
 ﻿import type { MetadataRoute } from 'next';
 import { createClient } from '@supabase/supabase-js';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://indieradar.jp';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://indieradars.com';
 
 // Revalidate every hour so new articles appear in the sitemap quickly
 export const revalidate = 3600;
@@ -25,12 +25,7 @@ const STATIC_ROUTES: MetadataRoute.Sitemap = [
     changeFrequency: 'weekly',
     priority: 0.8,
   },
-  {
-    url: `${APP_URL}/pricing`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.7,
-  },
+  // /pricing is noindex — excluded from sitemap intentionally
   {
     url: `${APP_URL}/dashboard`,
     lastModified: new Date(),

@@ -24,7 +24,7 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 });
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://indieradar.jp';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://indieradars.com';
 
 export const metadata: Metadata = {
   icons: {
@@ -157,6 +157,46 @@ const organizationJsonLd = {
   sameAs: [],
 };
 
+// FAQPage JSON-LD — enables rich snippets and occupies more SERP space
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'What is IndieRadar?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'IndieRadar is an AI-curated platform that collects verified indie hacker revenue case studies daily from Hacker News, Product Hunt, Reddit, and X. No gurus, no affiliate links, no info products — only real monetization data.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How does IndieRadar work?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'IndieRadar automatically scans Hacker News, Product Hunt, Reddit, and X for posts containing real revenue data (MRR, ARR). AI translates and summarizes each case into 9 languages with actionable insights.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Is IndieRadar free?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes, IndieRadar offers a free tier with unlimited article previews. Paid plans (Basic and Pro) unlock full translations, AI insights, and implementation guides.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What languages does IndieRadar support?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'IndieRadar supports 9 languages: English, Japanese, Spanish, Korean, Chinese, Hindi, German, French, and Portuguese. All content is AI-translated with localized action points.',
+      },
+    },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -176,6 +216,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
       </head>
       <body className="min-h-full flex flex-col">

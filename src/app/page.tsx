@@ -156,6 +156,21 @@ export default function Home() {
 
   return (
     <div>
+      {/* Server-invisible SEO block — visible to crawlers that don't execute JS */}
+      <noscript>
+        <div>
+          <h2>IndieRadar — Real Indie Hacker Revenue Case Studies</h2>
+          <p>
+            Verified indie hacker monetization case studies. No gurus, no affiliate links, no info products.
+            Real MRR sourced daily from Hacker News, Product Hunt, Reddit and X.
+            AI-curated and translated into 9 languages: English, Japanese, Spanish, Korean, Chinese, Hindi, German, French, Portuguese.
+          </p>
+          <p>
+            IndieRadar（インディーレーダー）は、海外インディーハッカーの収益化事例を毎日AIがキュレーションするサービスです。
+            アフィリエイトなし・情報商材なし・guruなし。HackerNews・ProductHunt・Redditから実際の収益データ付き事例のみを厳選。
+          </p>
+        </div>
+      </noscript>
       {/* ============================================================ */}
       {/*  HERO                                                        */}
       {/* ============================================================ */}

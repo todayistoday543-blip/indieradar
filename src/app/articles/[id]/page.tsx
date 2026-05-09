@@ -330,7 +330,7 @@ export default function ArticleDetailPage() {
       document.title = `${title} | IndieRadar`;
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://indieradar.jp';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://indieradars.com';
     const ogImageUrl = `${appUrl}/api/og?title=${encodeURIComponent(title)}`;
     const pageUrl = `${appUrl}/articles/${article.id}`;
     const description = (summaryContent || '').slice(0, 150);

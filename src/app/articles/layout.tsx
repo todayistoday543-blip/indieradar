@@ -1,6 +1,6 @@
 ﻿import type { Metadata } from 'next';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://indieradar.jp';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://indieradars.com';
 
 export const metadata: Metadata = {
   title: 'Real Monetization Cases — No Gurus, No Affiliates',
