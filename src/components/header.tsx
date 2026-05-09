@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -8,32 +9,6 @@ import { useI18n } from '@/i18n/context';
 import { LanguageSelector } from './language-selector';
 import { ThemeToggle } from './theme-toggle';
 import type { User } from '@supabase/supabase-js';
-
-/* ------------------------------------------------------------------ */
-/*  IR logo mark                                                       */
-/* ------------------------------------------------------------------ */
-function IRMark({ className }: { className?: string }) {
-  return (
-    <svg
-      width="24"
-      height="22"
-      viewBox="0 0 34 28"
-      aria-hidden="true"
-      className={className}
-      fill="none"
-    >
-      {/* ── Letter I (slab-serif) ── */}
-      <rect x="0" y="0" width="10" height="3" rx="0.5" fill="currentColor" />
-      <rect x="3.5" y="0" width="3" height="28" rx="0.5" fill="currentColor" />
-      <rect x="0" y="25" width="10" height="3" rx="0.5" fill="currentColor" />
-
-      {/* ── Letter R ── */}
-      <rect x="14" y="0" width="3" height="28" rx="0.5" fill="currentColor" />
-      <path d="M14 1.5 h10 a6 6 0 0 1 0 12 H14" stroke="currentColor" strokeWidth="3" fill="none" />
-      <line x1="22" y1="14" x2="31" y2="27" stroke="#D4A24A" strokeWidth="3" strokeLinecap="round" />
-    </svg>
-  );
-}
 
 /* ------------------------------------------------------------------ */
 /*  Nav items                                                          */
@@ -91,7 +66,14 @@ export function Header() {
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 flex items-center justify-between">
         {/* ---- Logo ------------------------------------------------ */}
         <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-          <IRMark className="text-[var(--paper-2)] group-hover:text-[var(--paper-3)] transition-colors" />
+          <Image
+            src="/icon.png"
+            alt="IndieRadar"
+            width={28}
+            height={28}
+            className="rounded-[4px] group-hover:brightness-110 transition-all"
+            priority
+          />
           <span
             className="text-[19px] font-[400] tracking-tight"
             style={{ fontFamily: 'var(--font-display)' }}
