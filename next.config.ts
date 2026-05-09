@@ -2,6 +2,16 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   compress: true,
+  async redirects() {
+    return [
+      {
+        // Browsers always request /favicon.ico — redirect to the IR logo PNG
+        source: '/favicon.ico',
+        destination: '/icon.png',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

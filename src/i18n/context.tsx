@@ -40,10 +40,8 @@ function getSavedLocale(): Locale {
   if (typeof window === 'undefined') return defaultLocale;
   const saved = localStorage.getItem('ir-locale') as Locale | null;
   if (saved && locales.includes(saved)) return saved;
-
-  const browserLang = navigator.language.split('-')[0] as Locale;
-  if (locales.includes(browserLang)) return browserLang;
-
+  // Default to English regardless of browser language.
+  // Users can switch manually via the language selector.
   return defaultLocale;
 }
 
