@@ -73,9 +73,7 @@ export default function PricingPage() {
           </div>
           <ul className="space-y-3 mb-8 text-sm">
             <PlanFeature checked>{t.pricing.free_f1}</PlanFeature>
-            <PlanFeature checked>{t.pricing.free_f2}</PlanFeature>
             <PlanFeature checked>{t.pricing.free_f3}</PlanFeature>
-            <PlanFeature checked>{t.pricing.free_f4}</PlanFeature>
             <PlanFeature>{t.pricing.basic_f1}</PlanFeature>
             <PlanFeature>{t.pricing.pro_f3}</PlanFeature>
           </ul>
@@ -100,10 +98,8 @@ export default function PricingPage() {
           </div>
           <ul className="space-y-3 mb-8 text-sm">
             <PlanFeature checked>{t.pricing.basic_f1}</PlanFeature>
-            <PlanFeature checked>{t.pricing.basic_f2}</PlanFeature>
             <PlanFeature checked>{t.pricing.basic_f3}</PlanFeature>
             <PlanFeature checked>{t.pricing.basic_f4}</PlanFeature>
-            <PlanFeature checked>{t.pricing.basic_f5}</PlanFeature>
             <PlanFeature>{t.pricing.pro_f3}</PlanFeature>
           </ul>
           {isLoggedIn ? (
@@ -137,11 +133,9 @@ export default function PricingPage() {
           </div>
           <ul className="space-y-3 mb-8 text-sm">
             <PlanFeature checked>{t.pricing.pro_f1}</PlanFeature>
-            <PlanFeature checked highlight>{t.pricing.pro_f2}</PlanFeature>
             <PlanFeature checked highlight>{t.pricing.pro_f3}</PlanFeature>
             <PlanFeature checked highlight>{t.pricing.pro_f4}</PlanFeature>
             <PlanFeature checked>{t.pricing.pro_f5}</PlanFeature>
-            <PlanFeature checked>{t.pricing.pro_f6}</PlanFeature>
           </ul>
           {isLoggedIn ? (
             <button
@@ -176,11 +170,9 @@ export default function PricingPage() {
             </thead>
             <tbody className="text-[var(--paper-1)]">
               <TR label={t.pricing.table_articles} f={t.pricing.table_free_articles} b={t.pricing.table_basic_articles} p={t.pricing.table_pro_articles} />
-              <TR label={t.pricing.table_ads} f={t.pricing.table_free_ads} b={t.pricing.table_basic_ads} p={t.pricing.table_pro_ads} />
-              <TR label={t.pricing.table_prompt} f={t.pricing.table_none} b={t.pricing.table_none} p={t.pricing.table_sonnet} />
+<TR label={t.pricing.table_prompt} f={t.pricing.table_none} b={t.pricing.table_none} p={t.pricing.table_sonnet} />
               <TR label={t.pricing.table_chat} f={t.pricing.table_none} b={t.pricing.table_none} p={t.pricing.table_available} />
               <TR label={t.pricing.table_post} f={t.pricing.table_available} b={t.pricing.table_available} p={t.pricing.table_available} />
-              <TR label={t.pricing.table_revenue} f="70%" b="70%" p="70%" />
             </tbody>
           </table>
         </div>

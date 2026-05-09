@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useI18n } from '@/i18n/context';
-import { DisplayAd } from '@/components/ad-slot';
 
 /* ------------------------------------------------------------------ */
 /*  Radar SVG — concentric circles in gold, top-right decoration       */
@@ -228,15 +227,6 @@ export default function Home() {
       {/*  INFO BAND                                                    */}
       {/* ============================================================ */}
       <InfoBand />
-
-      {/* ============================================================ */}
-      {/*  AD BETWEEN SECTIONS                                          */}
-      {/* ============================================================ */}
-      <section className="border-b border-[var(--ink-2)]">
-        <div className="mx-auto max-w-6xl px-10">
-          <DisplayAd />
-        </div>
-      </section>
 
       {/* ============================================================ */}
       {/*  CTA                                                          */}

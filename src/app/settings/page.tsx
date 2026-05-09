@@ -234,6 +234,24 @@ export default function SettingsPage() {
         <p className="text-sm text-emerald-400 mt-3 animate-fade-in">{t.settings.saved}</p>
       )}
 
+      {/* Cancel subscription section */}
+      <div className="mt-10 pt-6 border-t border-[var(--ink-2)]">
+        <h2
+          className="text-sm font-semibold text-[var(--paper-2)] mb-1 uppercase tracking-wider"
+          style={{ fontFamily: 'var(--font-mono)' }}
+        >
+          {t.settings.cancel_section}
+        </h2>
+        <p className="text-xs text-[var(--ink-5)] mb-3">{t.settings.cancel_section_desc}</p>
+        <Link
+          href="/settings/cancel"
+          className="inline-block rounded-lg border border-red-500/40 text-red-400 px-5 py-2.5 text-sm font-medium hover:bg-red-500/10 transition-all"
+          style={{ fontFamily: 'var(--font-mono)' }}
+        >
+          {t.settings.cancel_section}
+        </Link>
+      </div>
+
       {/* Back link */}
       <div className="mt-10 pt-6 border-t border-[var(--ink-2)]">
         <Link

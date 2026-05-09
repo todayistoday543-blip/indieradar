@@ -103,6 +103,30 @@ export function Header() {
           </span>
         </Link>
 
+        {/* ---- Mobile quick nav (HOME + ARTICLES) -------------------- */}
+        <nav className="flex md:hidden items-center gap-2 ml-3">
+          {[
+            { href: '/', label: (t.common as Record<string, string>).home?.toUpperCase() || 'HOME' },
+            { href: '/articles', label: t.common.articles.toUpperCase() },
+          ].map((item) => {
+            const isActive = item.href === '/' ? pathname === '/' : pathname === item.href || pathname.startsWith(item.href + '/');
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`text-[11px] tracking-[0.06em] transition-colors ${
+                  isActive
+                    ? 'text-[var(--signal-gold)]'
+                    : 'text-[var(--ink-5)] hover:text-[var(--paper-2)]'
+                }`}
+                style={{ fontFamily: 'var(--font-mono)' }}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
         {/* ---- Center nav (desktop) -------------------------------- */}
         <nav className="hidden md:flex items-center gap-0">
           {navItems.map((item, i) => {

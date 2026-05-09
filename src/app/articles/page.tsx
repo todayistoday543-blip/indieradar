@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { ArticleCard } from '@/components/article-card';
-import { InFeedAd } from '@/components/ad-slot';
+
 import { useI18n } from '@/i18n/context';
 import { useUser } from '@/components/user-context';
 
@@ -382,10 +382,6 @@ export default function ArticlesPage() {
             {articles.map((article, index) => (
               <div key={article.id}>
                 <ArticleCard article={article} bookmarkedInit={bookmarkedIds.has(article.id)} />
-                {/* Insert ad after every 3rd article */}
-                {(index + 1) % 3 === 0 && index < articles.length - 1 && (
-                  <InFeedAd reducedForBasic={(index + 1) % 6 !== 0} />
-                )}
               </div>
             ))}
           </div>

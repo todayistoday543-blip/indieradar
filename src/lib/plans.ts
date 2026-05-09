@@ -5,7 +5,6 @@ export const PLANS = {
     features: {
       articles_per_day: 999,
       show_full_translation: false,
-      show_ads: true,
       ai_prompt_model: null,
       can_post: true,
       prompt_generation: false,
@@ -19,7 +18,6 @@ export const PLANS = {
     features: {
       articles_per_day: 999,
       show_full_translation: true,
-      show_ads: true,
       ai_prompt_model: null,
       can_post: true,
       prompt_generation: false,
@@ -33,7 +31,6 @@ export const PLANS = {
     features: {
       articles_per_day: 999,
       show_full_translation: true,
-      show_ads: false,
       ai_prompt_model: 'sonnet' as const,
       can_post: true,
       prompt_generation: true,
