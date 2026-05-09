@@ -46,13 +46,23 @@ export const metadata: Metadata = {
     'monetization',
     'SaaS',
     'MRR',
+    'ARR',
     'side project',
     'bootstrapped',
+    'startup revenue',
     'Hacker News',
     'Product Hunt',
+    'Reddit',
+    'Indie Hackers',
     'IndieRadar',
+    'case study',
     'インディーハッカー',
     'マネタイズ',
+    'サイドプロジェクト',
+    'スタートアップ',
+    '収益化',
+    'monetización',
+    'proyecto independiente',
   ],
   authors: [{ name: 'IndieRadar' }],
   creator: 'IndieRadar',
@@ -65,12 +75,21 @@ export const metadata: Metadata = {
     title: 'IndieRadar — Indie Hacker Monetization Case Studies',
     description:
       'AI-curated monetization case studies from indie hackers worldwide. Updated daily, available in 9 languages.',
+    images: [
+      {
+        url: `${APP_URL}/api/og?title=${encodeURIComponent('IndieRadar — Indie Hacker Monetization Case Studies')}`,
+        width: 1200,
+        height: 630,
+        alt: 'IndieRadar — Indie Hacker Monetization Case Studies',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'IndieRadar',
     description:
       'AI-curated monetization case studies from indie hackers worldwide.',
+    images: [`${APP_URL}/api/og?title=${encodeURIComponent('IndieRadar — Indie Hacker Monetization Case Studies')}`],
   },
   robots: {
     index: true,
@@ -104,6 +123,23 @@ export const viewport: Viewport = {
 // Inline script to prevent flash of wrong theme on load
 const themeScript = `(function(){try{var t=localStorage.getItem('ir-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light')}else if(!t&&window.matchMedia('(prefers-color-scheme:light)').matches){document.documentElement.setAttribute('data-theme','light')}}catch(e){}})()`;
 
+// WebSite JSON-LD for sitelinks searchbox and entity recognition
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'IndieRadar',
+  url: APP_URL,
+  description: 'AI-curated indie hacker monetization case studies. Updated daily in 9 languages.',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: `${APP_URL}/articles?q={search_term_string}`,
+    },
+    'query-input': 'required name=search_term_string',
+  },
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -116,6 +152,10 @@ export default function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
       </head>
       <body className="min-h-full flex flex-col">
         <ClientLayout>{children}</ClientLayout>

@@ -32,6 +32,12 @@ const STATIC_ROUTES: MetadataRoute.Sitemap = [
     priority: 0.7,
   },
   {
+    url: `${APP_URL}/dashboard`,
+    lastModified: new Date(),
+    changeFrequency: 'daily',
+    priority: 0.8,
+  },
+  {
     url: `${APP_URL}/submit`,
     lastModified: new Date(),
     changeFrequency: 'monthly',
