@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { enrichInEnglish, translateToJaAndEs } from '@/lib/translator';
+import { logAgentRun } from '@/lib/agents/logger';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -19,15 +20,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  let supabase: ReturnType<typeof createServiceClient>;
-  try {
-    supabase = createServiceClient();
-  } catch (e) {
-    return NextResponse.json(
-      { error: `Supabase not configured: ${e instanceof Error ? e.message : e}` },
-      { status: 500 }
-    );
-  }
+  const { log, result } = await logAgentRun('backfill-all', async () => {
+
+  const supabase = createServiceClient();
 
   // Scan up to 1000 articles to find those needing EN re-enrichment:
   // - Short en_summary (old content)
@@ -39,12 +34,10 @@ export async function GET(request: NextRequest) {
     .order('created_at', { ascending: true })
     .limit(1000);
 
-  if (indexError) {
-    return NextResponse.json({ error: indexError.message }, { status: 500 });
-  }
+  if (indexError) throw new Error(indexError.message);
 
   if (!summaryIndex || summaryIndex.length === 0) {
-    return NextResponse.json({ success: true, message: 'No articles found in DB.' });
+    return { items_processed: 0, items_failed: 0, output: { message: 'No articles found in DB.' } };
   }
 
   const allNeedsWork = summaryIndex.filter(
@@ -52,10 +45,7 @@ export async function GET(request: NextRequest) {
   );
 
   if (allNeedsWork.length === 0) {
-    return NextResponse.json({
-      success: true,
-      message: `Phase 1 complete: all ${summaryIndex.length} articles have EN content ≥${SHORT_THRESHOLD} chars + idea_catalyst.`,
-    });
+    return { items_processed: 0, items_failed: 0, output: { message: `Phase 1 complete: all ${summaryIndex.length} articles OK.` } };
   }
 
   const batchIds = allNeedsWork.slice(0, BATCH_SIZE).map(a => a.id);
@@ -66,12 +56,10 @@ export async function GET(request: NextRequest) {
     .select('id, original_title, original_content, source')
     .in('id', batchIds);
 
-  if (fetchError) {
-    return NextResponse.json({ error: fetchError.message }, { status: 500 });
-  }
+  if (fetchError) throw new Error(fetchError.message);
 
   if (!articles || articles.length === 0) {
-    return NextResponse.json({ success: true, message: 'Batch fetch returned empty.' });
+    return { items_processed: 0, items_failed: 0, output: { message: 'Batch fetch returned empty.' } };
   }
 
   const results: string[] = [];
@@ -149,5 +137,13 @@ export async function GET(request: NextRequest) {
     `--- Phase 1 done: ${updated}/${articles.length} EN re-enriched. Remaining: ~${allNeedsWork.length - updated} ---`
   );
 
-  return NextResponse.json({ success: true, results });
+  return {
+    items_processed: updated,
+    items_failed: articles.length - updated,
+    output: { results, remaining: allNeedsWork.length - updated },
+  };
+
+  }); // end logAgentRun
+
+  return NextResponse.json({ success: log.status === 'completed', log, result });
 }

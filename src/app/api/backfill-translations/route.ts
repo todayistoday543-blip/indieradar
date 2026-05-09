@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { translateToJaAndEs } from '@/lib/translator';
+import { logAgentRun } from '@/lib/agents/logger';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
-// Phase 2: Translate EN → JA + ES for articles that have expanded EN content
-// but are missing JA or ES translations (including idea_catalyst).
-// claude-sonnet translation: ~120-180s/article. BATCH_SIZE=1 stays under 300s.
-const BATCH_SIZE = 1;
+// Phase 2: Translate EN → JA + ES for articles missing translations.
+// claude-sonnet translation: ~60-120s/article. BATCH_SIZE=2 for ~240s total, under 300s.
+const BATCH_SIZE = 2;
 
-// Minimum EN length to qualify for translation (matches Phase 1 threshold).
-const EN_THRESHOLD = 3200;
+// Minimum EN length to qualify for translation — lowered to catch all articles with any EN content.
+const EN_THRESHOLD = 100;
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
@@ -19,15 +19,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  let supabase: ReturnType<typeof createServiceClient>;
-  try {
-    supabase = createServiceClient();
-  } catch (e) {
-    return NextResponse.json(
-      { error: `Supabase not configured: ${e instanceof Error ? e.message : e}` },
-      { status: 500 }
-    );
-  }
+  const { log, result } = await logAgentRun('backfill-translations', async () => {
+
+  const supabase = createServiceClient();
 
   // Find articles that have long EN content but missing JA or ES translations.
   const { data: index, error: indexError } = await supabase
@@ -37,29 +31,22 @@ export async function GET(request: NextRequest) {
     .order('created_at', { ascending: true })
     .limit(1000);
 
-  if (indexError) {
-    return NextResponse.json({ error: indexError.message }, { status: 500 });
-  }
+  if (indexError) throw new Error(indexError.message);
 
   if (!index || index.length === 0) {
-    return NextResponse.json({ success: true, message: 'No articles found.' });
+    return { items_processed: 0, items_failed: 0, output: { message: 'No articles found.' } };
   }
 
-  // Qualify: EN is long (Phase 1 done) but JA or ES is missing/short,
-  // OR idea_catalyst exists in EN but not yet translated.
+  // Qualify: has EN content but JA or ES is missing.
   const needsTranslation = index.filter(a =>
     a.en_summary && a.en_summary.length >= EN_THRESHOLD && (
-      !a.ja_summary || a.ja_summary.length < 2500 ||
-      !a.es_summary || a.es_summary.length < 2500 ||
-      (a.en_idea_catalyst && a.en_idea_catalyst.length > 100 && (!a.ja_idea_catalyst || !a.es_idea_catalyst))
+      !a.ja_summary || !a.es_summary ||
+      (a.en_idea_catalyst && a.en_idea_catalyst.length > 50 && (!a.ja_idea_catalyst || !a.es_idea_catalyst))
     )
   );
 
   if (needsTranslation.length === 0) {
-    return NextResponse.json({
-      success: true,
-      message: `Phase 2 complete: all ${index.length} articles with long EN content have JA+ES translations.`,
-    });
+    return { items_processed: 0, items_failed: 0, output: { message: `Phase 2 complete: all ${index.length} articles have JA+ES translations.` } };
   }
 
   const batch = needsTranslation.slice(0, BATCH_SIZE);
@@ -111,5 +98,13 @@ export async function GET(request: NextRequest) {
     `--- Phase 2 done: ${updated}/${batch.length} translated. Still needs JA+ES: ~${needsTranslation.length - updated} ---`
   );
 
-  return NextResponse.json({ success: true, results });
+  return {
+    items_processed: updated,
+    items_failed: batch.length - updated,
+    output: { results, remaining: needsTranslation.length - updated },
+  };
+
+  }); // end logAgentRun
+
+  return NextResponse.json({ success: log.status === 'completed', log, result });
 }

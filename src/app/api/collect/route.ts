@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
 import { fetchHNStories, fetchRedditPosts, fetchPHPosts, fetchIHPosts } from '@/lib/collectors';
 import { translateAndEnrich } from '@/lib/translator';
+import { logAgentRun } from '@/lib/agents/logger';
 import type { CollectedArticle } from '@/lib/collectors';
 
 export const dynamic = 'force-dynamic';
@@ -17,15 +18,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  let supabase: ReturnType<typeof createServiceClient>;
-  try {
-    supabase = createServiceClient();
-  } catch (e) {
-    return NextResponse.json(
-      { error: `Supabase not configured: ${e instanceof Error ? e.message : e}` },
-      { status: 500 }
-    );
-  }
+  // Wrap entire collect run in agent logger
+  const { log, result } = await logAgentRun('collect', async (supabase) => {
 
   const results: string[] = [];
 
@@ -50,7 +44,7 @@ export async function GET(request: NextRequest) {
   });
 
   if (allArticles.length === 0) {
-    return NextResponse.json({ success: true, results: [...results, 'No articles collected'] });
+    return { items_processed: 0, items_failed: 0, output: { results: [...results, 'No articles collected'], total_fetched: 0 } };
   }
 
   // --- 重複チェック（original_url で判定） ---
@@ -61,10 +55,7 @@ export async function GET(request: NextRequest) {
     .in('original_url', urls);
 
   if (fetchError) {
-    return NextResponse.json(
-      { error: `Duplicate check failed: ${fetchError.message}` },
-      { status: 500 }
-    );
+    throw new Error(`Duplicate check failed: ${fetchError.message}`);
   }
 
   const existingUrls = new Set((existingRows ?? []).map((r) => r.original_url));
@@ -148,5 +139,13 @@ export async function GET(request: NextRequest) {
 
   results.push(`--- Done: ${processed} saved / ${toProcess.length} attempted ---`);
 
-  return NextResponse.json({ success: true, results });
+  return {
+    items_processed: processed,
+    items_failed: toProcess.length - processed,
+    output: { results, total_fetched: allArticles.length, new_found: newArticles.length, processed },
+  };
+
+  }); // end logAgentRun
+
+  return NextResponse.json({ success: log.status === 'completed', log, result });
 }
