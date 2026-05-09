@@ -1,7 +1,7 @@
 ﻿import type { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://indieradars.com';
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'https://indieradars.com').trim();
 
 type Props = {
   params: Promise<{ id: string }>;

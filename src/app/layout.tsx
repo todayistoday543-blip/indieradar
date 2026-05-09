@@ -24,7 +24,7 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 });
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://indieradars.com';
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'https://indieradars.com').trim();
 
 export const metadata: Metadata = {
   icons: {

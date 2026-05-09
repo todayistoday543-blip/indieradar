@@ -1,7 +1,7 @@
 ﻿import type { MetadataRoute } from 'next';
 import { createClient } from '@supabase/supabase-js';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://indieradars.com';
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'https://indieradars.com').trim();
 
 // Revalidate every hour so new articles appear in the sitemap quickly
 export const revalidate = 3600;
