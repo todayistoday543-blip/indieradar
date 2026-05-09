@@ -8,10 +8,15 @@ const localeFlags: Record<Locale, string> = {
   ja: '🇯🇵',
   en: '🇺🇸',
   es: '🇲🇽',
+  ko: '🇰🇷',
+  zh: '🇨🇳',
+  hi: '🇮🇳',
+  de: '🇩🇪',
+  fr: '🇫🇷',
+  pt: '🇧🇷',
 };
 
-// All 3 supported locales have AI-generated translations
-const AI_LOCALES: Locale[] = ['ja', 'en', 'es'];
+const ALL_LOCALES: Locale[] = ['en', 'ja', 'ko', 'zh', 'hi', 'de', 'fr', 'es', 'pt'];
 
 export function LanguageSelector() {
   const { locale, setLocale } = useI18n();
@@ -68,9 +73,9 @@ export function LanguageSelector() {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-1.5 w-48 border border-[var(--signal-gold)]/30 bg-[var(--ink-1)] py-1.5 z-50 animate-fade-in shadow-lg shadow-black/20">
+        <div className="absolute right-0 mt-1.5 w-48 border border-[var(--signal-gold)]/30 bg-[var(--ink-1)] py-1.5 z-50 animate-fade-in shadow-lg shadow-black/20 max-h-[340px] overflow-y-auto">
           {/* Header */}
-          <div className="px-3.5 py-1.5 mb-1 border-b border-[var(--ink-2)]">
+          <div className="px-3.5 py-1.5 mb-1 border-b border-[var(--ink-2)] sticky top-0 bg-[var(--ink-1)]">
             <span
               className="text-[10px] tracking-widest text-[var(--ink-5)] uppercase"
               style={{ fontFamily: 'var(--font-mono)' }}
@@ -78,7 +83,7 @@ export function LanguageSelector() {
               Language
             </span>
           </div>
-          {AI_LOCALES.map((l) => (
+          {ALL_LOCALES.map((l) => (
             <button
               key={l}
               onClick={() => { setLocale(l); setOpen(false); }}

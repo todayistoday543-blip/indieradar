@@ -102,13 +102,19 @@ export const metadata: Metadata = {
       'max-video-preview': -1,
     },
   },
-  // hreflang: same URL serves all languages via client-side locale switching
+  // hreflang: same URL serves all 9 languages via client-side locale switching
   alternates: {
     canonical: APP_URL,
     languages: {
       'en': APP_URL,
       'ja': APP_URL,
       'es': APP_URL,
+      'ko': APP_URL,
+      'zh': APP_URL,
+      'hi': APP_URL,
+      'de': APP_URL,
+      'fr': APP_URL,
+      'pt': APP_URL,
       'x-default': APP_URL,
     },
   },

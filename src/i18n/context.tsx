@@ -34,14 +34,23 @@ const loaders: Record<Locale, () => Promise<{ default: Messages }>> = {
   ja: () => import('./locales/ja'),
   en: () => Promise.resolve({ default: enDefault as Messages }),
   es: () => import('./locales/es'),
+  ko: () => import('./locales/ko'),
+  zh: () => import('./locales/zh'),
+  hi: () => import('./locales/hi'),
+  de: () => import('./locales/de'),
+  fr: () => import('./locales/fr'),
+  pt: () => import('./locales/pt'),
 };
 
 function getSavedLocale(): Locale {
   if (typeof window === 'undefined') return defaultLocale;
   const saved = localStorage.getItem('ir-locale') as Locale | null;
   if (saved && locales.includes(saved)) return saved;
-  // Default to English regardless of browser language.
-  // Users can switch manually via the language selector.
+
+  // Auto-detect from browser language
+  const browserLang = navigator.language.split('-')[0] as Locale;
+  if (locales.includes(browserLang)) return browserLang;
+
   return defaultLocale;
 }
 
