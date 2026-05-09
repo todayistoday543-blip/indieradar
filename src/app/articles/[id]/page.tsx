@@ -9,6 +9,7 @@ import { CommentsSection } from '@/components/comments-section';
 import { BookmarkButton } from '@/components/bookmark-button';
 import { localeToBCP47 } from '@/i18n/config';
 import { formatMrr } from '@/lib/format-mrr';
+import { DisplayAd } from '@/components/ad-slot';
 import Link from 'next/link';
 
 interface Article {
@@ -651,6 +652,9 @@ export default function ArticleDetailPage() {
         ))}
       </div>
 
+      {/* ── Ad after article body ──────────────────────────── */}
+      <DisplayAd />
+
       {/* ── Paywall Gate (Free users — content truncated at ~35%) ── */}
       {isContentTruncated && (
         <div className="relative mb-8">
@@ -831,6 +835,9 @@ export default function ArticleDetailPage() {
           </div>
         )}
       </div>
+
+      {/* ── Ad before comments ─────────────────────────────── */}
+      <DisplayAd reducedForBasic />
 
       {/* ── Comments Section ─────────────────────────────────── */}
       <CommentsSection articleId={article.id} />
