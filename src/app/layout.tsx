@@ -29,11 +29,12 @@ const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || 'https://indieradars.com').t
 export const metadata: Metadata = {
   icons: {
     icon: [
+      { url: '/favicon.ico', sizes: '48x48' },
       { url: '/icon.svg', type: 'image/svg+xml' },
       { url: '/icon.png', type: 'image/png', sizes: '512x512' },
     ],
-    shortcut: '/icon.png',
-    apple: '/icon.png',
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
   },
   title: {
     default: 'IndieRadar — Real Indie Hacker Revenue Cases. No Gurus. No Affiliates.',
