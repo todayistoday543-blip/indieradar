@@ -582,7 +582,7 @@ export default function ArticleDetailPage() {
         )}
         {article.mrr_mentioned != null && article.mrr_mentioned > 0 && (
           <span className="text-xs font-bold text-emerald-400 bg-transparent border border-emerald-400/30 px-2.5 py-1 rounded-full">
-            {formatMrr(article.mrr_mentioned)}/mo
+            {formatMrr(article.mrr_mentioned)}
           </span>
         )}
 
