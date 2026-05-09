@@ -9,12 +9,8 @@
       "schedule": "*/2 * * * *"
     },
     {
-      "path": "/api/backfill-all",
-      "schedule": "1,11,21,31,41,51 * * * *"
-    },
-    {
       "path": "/api/backfill-translations",
-      "schedule": "5,15,25,35,45,55 * * * *"
+      "schedule": "5,35 * * * *"
     },
     {
       "path": "/api/agents/content-quality",

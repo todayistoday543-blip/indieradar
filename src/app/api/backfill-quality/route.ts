@@ -25,14 +25,17 @@ export async function GET(request: NextRequest) {
   const { log, result } = await logAgentRun('backfill-quality', async () => {
     const supabase = createServiceClient();
 
-    // Find articles needing quality upgrade — prioritize worst first
+    // Find articles needing quality upgrade — scan full table in pages
+    // Use a simple approach: fetch articles that clearly lack quality markers directly via SQL-like filter
+    // This avoids scanning all 700+ articles every 2 minutes
     const { data: candidates, error: fetchErr } = await supabase
       .from('articles')
       .select('id, en_summary, en_idea_catalyst, original_title, original_content, source')
       .eq('status', 'published')
       .not('original_content', 'is', null)
+      .or('en_summary.is.null,en_idea_catalyst.is.null,en_summary.not.like.*## Key Takeaways*')
       .order('created_at', { ascending: true })
-      .limit(500);
+      .limit(200);
 
     if (fetchErr) throw new Error(fetchErr.message);
     if (!candidates || candidates.length === 0) {
