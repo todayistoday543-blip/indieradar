@@ -11,6 +11,30 @@
     {
       "path": "/api/backfill-translations",
       "schedule": "5,15,25,35,45,55 * * * *"
+    },
+    {
+      "path": "/api/agents/content-quality",
+      "schedule": "30 */6 * * *"
+    },
+    {
+      "path": "/api/agents/health-monitor",
+      "schedule": "0 */3 * * *"
+    },
+    {
+      "path": "/api/agents/alert-notify",
+      "schedule": "15 */6 * * *"
+    },
+    {
+      "path": "/api/agents/newsletter-digest",
+      "schedule": "0 9 * * 1"
+    },
+    {
+      "path": "/api/agents/analytics-summary",
+      "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/agents/cleanup",
+      "schedule": "0 4 * * *"
     }
   ]
 }
