@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { logAgentRun } from '@/lib/agents/logger';
+import { hasQualitySections } from '@/lib/translator';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -78,6 +79,11 @@ export async function GET(request: NextRequest) {
         issues.push('missing_summary');
       }
 
+      // Check 2b: Summary exists but lacks 7-section structure (old-format content)
+      if (article.en_summary && article.en_summary.length >= 200 && !hasQualitySections(article.en_summary)) {
+        issues.push('missing_sections');
+      }
+
       // Check 3: Duplicate title
       for (const other of allTitles) {
         if (other.id === article.id) continue;
@@ -91,19 +97,23 @@ export async function GET(request: NextRequest) {
       }
 
       if (issues.length > 0) {
-        // Flag the article
-        const { error: updateErr } = await supabase
-          .from('articles')
-          .update({ status: 'flagged' })
-          .eq('id', article.id);
+        // Only flag articles with critical issues (not just missing_sections which backfill-all will fix)
+        const criticalIssues = issues.filter(i => i !== 'missing_sections');
+        if (criticalIssues.length > 0) {
+          const { error: updateErr } = await supabase
+            .from('articles')
+            .update({ status: 'flagged' })
+            .eq('id', article.id);
 
-        if (updateErr) {
-          failed++;
-        } else {
-          flagged.push(`${article.id}: ${issues.join(', ')}`);
-          if (issues.some(i => i === 'short_content' || i === 'missing_summary')) {
-            lowQuality.push(article.id);
+          if (updateErr) {
+            failed++;
+          } else {
+            flagged.push(`${article.id}: ${criticalIssues.join(', ')}`);
           }
+        }
+
+        if (issues.some(i => i === 'short_content' || i === 'missing_summary' || i === 'missing_sections')) {
+          lowQuality.push(article.id);
         }
       }
     }

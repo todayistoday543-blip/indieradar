@@ -51,9 +51,122 @@ function buildIndustryHints(): string {
   return top6.map(v => `- ${v.name}: ${v.examples.join(', ')}`).join('\n');
 }
 
+/* ------------------------------------------------------------------ */
+/*  Quality validation helpers                                         */
+/* ------------------------------------------------------------------ */
+
+const REQUIRED_SUMMARY_SECTIONS = [
+  '## Key Takeaways',
+  '## What Was Built',
+  '## How They Make Money',
+  '## The Journey',
+  '## Tech Stack & Tools',
+  '## Market Applicability',
+  '## Idea Seeds',
+] as const;
+
+const REQUIRED_CATALYST_SECTIONS = [
+  '## How This Opportunity Was Discovered',
+  '## Niche Discovery Framework',
+  '## First Principles Decomposition',
+  "## Your 48-Hour Validation Sprint",
+] as const;
+
+/** Minimum character thresholds — relaxed for short source articles */
+function getMinThresholds(sourceLength: number) {
+  // Short source (<800 chars): lower expectations
+  if (sourceLength < 800) {
+    return { summaryMin: 1500, catalystMin: 600 };
+  }
+  // Medium source (800-2000): moderate expectations
+  if (sourceLength < 2000) {
+    return { summaryMin: 2500, catalystMin: 800 };
+  }
+  // Full source: full expectations
+  return { summaryMin: 3000, catalystMin: 1000 };
+}
+
+export interface QualityReport {
+  passed: boolean;
+  missingSummarySections: string[];
+  missingCatalystSections: string[];
+  summaryLength: number;
+  catalystLength: number;
+  issues: string[];
+}
+
+/**
+ * Validate enrichment output meets quality standards.
+ * Returns a report indicating pass/fail and specific issues.
+ */
+export function validateEnrichmentQuality(
+  result: { en_summary: string; en_idea_catalyst: string; is_business_case: boolean },
+  sourceLength: number,
+): QualityReport {
+  // Non-business cases skip validation
+  if (!result.is_business_case) {
+    return { passed: true, missingSummarySections: [], missingCatalystSections: [], summaryLength: 0, catalystLength: 0, issues: [] };
+  }
+
+  const issues: string[] = [];
+  const thresholds = getMinThresholds(sourceLength);
+
+  // Check summary sections
+  const missingSummarySections = REQUIRED_SUMMARY_SECTIONS.filter(
+    (s) => !result.en_summary.includes(s),
+  );
+  if (missingSummarySections.length > 0) {
+    issues.push(`Missing ${missingSummarySections.length}/7 summary sections: ${missingSummarySections.join(', ')}`);
+  }
+
+  // Check catalyst sections
+  const missingCatalystSections = REQUIRED_CATALYST_SECTIONS.filter(
+    (s) => !result.en_idea_catalyst?.includes(s),
+  );
+  if (missingCatalystSections.length > 0) {
+    issues.push(`Missing ${missingCatalystSections.length}/4 catalyst sections: ${missingCatalystSections.join(', ')}`);
+  }
+
+  // Check lengths
+  const summaryLength = result.en_summary?.length ?? 0;
+  const catalystLength = result.en_idea_catalyst?.length ?? 0;
+
+  if (summaryLength < thresholds.summaryMin) {
+    issues.push(`en_summary too short: ${summaryLength} < ${thresholds.summaryMin}`);
+  }
+  if (catalystLength < thresholds.catalystMin) {
+    issues.push(`en_idea_catalyst too short: ${catalystLength} < ${thresholds.catalystMin}`);
+  }
+
+  // Pass = no missing sections AND lengths OK
+  const passed = missingSummarySections.length === 0
+    && missingCatalystSections.length === 0
+    && summaryLength >= thresholds.summaryMin
+    && catalystLength >= thresholds.catalystMin;
+
+  return { passed, missingSummarySections, missingCatalystSections, summaryLength, catalystLength, issues };
+}
+
+/**
+ * Quick check if an existing article has the expected 7-section structure.
+ * Used by backfill to prioritize re-enrichment of low-quality articles.
+ */
+export function hasQualitySections(enSummary: string | null): boolean {
+  if (!enSummary) return false;
+  const present = REQUIRED_SUMMARY_SECTIONS.filter((s) => enSummary.includes(s));
+  return present.length >= 6; // allow 1 missing section as acceptable
+}
+
+/* ------------------------------------------------------------------ */
+/*  CALL 1: Enrich article in English                                  */
+/* ------------------------------------------------------------------ */
+
+const MAX_ENRICH_RETRIES = 2;
+
 /**
  * CALL 1: Enrich article in English.
  * Returns all metadata + English content fields.
+ * Includes automatic quality validation and retry (up to 2 retries).
  * Exported so backfill routes can call it independently of the translation step.
  */
 export async function enrichInEnglish(article: {
@@ -72,7 +185,59 @@ export async function enrichInEnglish(article: {
 }> {
   const globalContext = buildGlobalMarketContext();
   const industryHints = buildIndustryHints();
+  const sourceLength = article.original_content.length;
 
+  let lastResult: Awaited<ReturnType<typeof enrichInEnglish>> | null = null;
+  let lastReport: QualityReport | null = null;
+
+  for (let attempt = 0; attempt <= MAX_ENRICH_RETRIES; attempt++) {
+    // Build retry hint for subsequent attempts
+    const retryHint = attempt > 0 && lastReport
+      ? `\n\n[QUALITY RETRY — attempt ${attempt + 1}]\nPrevious output FAILED validation. Fix these issues:\n${lastReport.issues.map(i => `- ${i}`).join('\n')}\nEnsure ALL 7 summary sections and ALL 4 idea_catalyst sections are present with proper "## Section Name" headings.\n`
+      : '';
+
+    const result = await callEnrichAPI(article, globalContext, industryHints, retryHint);
+
+    // Non-business cases pass immediately
+    if (!result.is_business_case) return result;
+
+    const report = validateEnrichmentQuality(result, sourceLength);
+    if (report.passed) return result;
+
+    // Log the quality failure
+    console.warn(
+      `[enrichInEnglish] Quality check failed (attempt ${attempt + 1}/${MAX_ENRICH_RETRIES + 1}) for "${article.original_title.slice(0, 50)}": ${report.issues.join('; ')}`,
+    );
+
+    lastResult = result;
+    lastReport = report;
+  }
+
+  // All retries exhausted — return best attempt with a warning
+  console.warn(
+    `[enrichInEnglish] All ${MAX_ENRICH_RETRIES + 1} attempts failed quality check for "${article.original_title.slice(0, 50)}". Using last result.`,
+  );
+  return lastResult!;
+}
+
+/**
+ * Internal: single Claude API call for enrichment.
+ */
+async function callEnrichAPI(
+  article: { original_title: string; original_content: string; source: string },
+  globalContext: string,
+  industryHints: string,
+  retryHint: string,
+): Promise<{
+  is_business_case: boolean;
+  en_title: string;
+  en_summary: string;
+  en_insight: string;
+  en_idea_catalyst: string;
+  ja_difficulty: 'Easy' | 'Medium' | 'Hard';
+  business_model: string;
+  mrr_mentioned: number | null;
+}> {
   const message = await getClient().messages.create({
     model: 'claude-sonnet-4-5-20250929',
     max_tokens: 10000,
@@ -210,7 +375,7 @@ false: political news, celebrity topics, major game company updates, satire/paro
   "ja_difficulty": "Easy or Medium or Hard",
   "business_model": "Business model name (e.g., SaaS, Marketplace, Chrome Extension, API)",
   "mrr_mentioned": MRR amount as integer in USD (null if no revenue mentioned in article)
-}`,
+}${retryHint}`,
       },
     ],
   });

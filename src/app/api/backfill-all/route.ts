@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase';
-import { enrichInEnglish, translateToJaAndEs } from '@/lib/translator';
+import { enrichInEnglish, translateToJaAndEs, hasQualitySections } from '@/lib/translator';
 import { logAgentRun } from '@/lib/agents/logger';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
-// Re-generate English content AND translate to JA+ES in one pass.
-// 2 Claude calls per article (~120s enrich + ~120s translate = ~240s). BATCH_SIZE=1 stays under 300s.
+// With quality validation + retry, a single article may take up to 3 enrichment attempts + 1 translation.
+// Worst case: 3 × ~40s + ~40s = ~160s. BATCH_SIZE=1 stays safely under 300s.
 const BATCH_SIZE = 1;
 
 // Re-enrich EN content below this threshold.
@@ -41,12 +41,26 @@ export async function GET(request: NextRequest) {
   }
 
   const allNeedsWork = summaryIndex.filter(
-    a => !a.en_summary || a.en_summary.length < SHORT_THRESHOLD || !a.en_idea_catalyst
+    a => !a.en_summary
+      || a.en_summary.length < SHORT_THRESHOLD
+      || !a.en_idea_catalyst
+      || !hasQualitySections(a.en_summary) // Missing 7-section structure
   );
 
   if (allNeedsWork.length === 0) {
     return { items_processed: 0, items_failed: 0, output: { message: `Phase 1 complete: all ${summaryIndex.length} articles OK.` } };
   }
+
+  // Prioritize worst-quality articles first:
+  // 1. No en_summary at all
+  // 2. Missing section structure (old format)
+  // 3. Too short
+  // 4. Missing idea_catalyst only
+  allNeedsWork.sort((a, b) => {
+    const scoreA = (!a.en_summary ? 0 : !hasQualitySections(a.en_summary) ? 1 : (a.en_summary.length < SHORT_THRESHOLD ? 2 : 3));
+    const scoreB = (!b.en_summary ? 0 : !hasQualitySections(b.en_summary) ? 1 : (b.en_summary.length < SHORT_THRESHOLD ? 2 : 3));
+    return scoreA - scoreB;
+  });
 
   const batchIds = allNeedsWork.slice(0, BATCH_SIZE).map(a => a.id);
 
