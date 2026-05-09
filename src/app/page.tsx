@@ -121,8 +121,8 @@ function InfoBand() {
     },
     {
       symbol: '◐',
-      heading: 'USER FIELD NOTES',
-      body: 'Submit your own case. Reviewed within 48h. Verified MRR earns the green source-mark.',
+      heading: 'DAILY AUTO-SCAN',
+      body: 'AI scans HN, Reddit, Product Hunt & X every 6 hours. New revenue signals delivered automatically.',
     },
   ];
 

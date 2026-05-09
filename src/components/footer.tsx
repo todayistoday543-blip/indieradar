@@ -29,7 +29,6 @@ function IRLogoMark() {
 
 const productLinks = [
   { href: '/articles', labelKey: 'signals' as const },
-  { href: '/submit', labelKey: 'submit' as const },
   { href: '/pricing', labelKey: 'pricing' as const },
 ];
 
@@ -37,7 +36,6 @@ const productLinks = [
 const languages = Object.values(localeNames);
 
 const companyLinks = [
-  { href: '/submit', label: 'Submit a case' },
   { href: '/pricing', label: 'Pricing' },
 ];
 
@@ -46,7 +44,6 @@ export function Footer() {
 
   const productLabelMap: Record<string, string> = {
     signals: t.common.articles,
-    submit: t.common.submit,
     pricing: t.common.pricing,
   };
 
